@@ -1,0 +1,63 @@
+# ----------------------------
+# STAGE 1: Build
+# ----------------------------
+FROM node:current-alpine AS builder
+ARG BUILD_VERSION=0.0.0
+ARG BUILD_NUMBER=0
+ARG BUILD_DATE
+ARG GIT_COMMIT
+RUN apk update && apk upgrade --no-cache
+WORKDIR /app
+
+COPY code/package*.json ./
+RUN npm install
+
+COPY code ./
+RUN npm run build
+
+RUN npx drizzle-kit generate
+
+# ----------------------------
+# STAGE 2: Runtime
+# ----------------------------
+FROM node:current-alpine
+
+ARG BUILD_VERSION=0.0.0
+ARG BUILD_NUMBER=0
+ARG BUILD_DATE
+ARG GIT_COMMIT
+
+LABEL com.backup-hub.image.version="${BUILD_VERSION}" \
+      com.backup-hub.image.created="${BUILD_DATE}" \
+      com.backup-hub.image.revision="${GIT_COMMIT}" \
+      build.number="${BUILD_NUMBER}"
+
+WORKDIR /app
+
+RUN apk update && apk upgrade --no-cache && apk add --no-cache mariadb-client mariadb-connector-c postgresql-client
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copy standalone build
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/db ./db
+
+# Copy generated migrations
+COPY --from=builder /app/db/migrations ./db/migrations
+
+# Install ws dependencies
+COPY --from=builder /app/package.json ./package.json
+
+
+COPY docker/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh && sed -i 's/\r$//' ./entrypoint.sh
+
+RUN echo "VERSION=${BUILD_VERSION}" > /app/version.txt && \
+    echo "BUILD_NUMBER=${BUILD_NUMBER}" >> /app/version.txt && \
+    echo "BUILD_DATE=${BUILD_DATE}" >> /app/version.txt && \
+    echo "GIT_COMMIT=${GIT_COMMIT}" >> /app/version.txt
+
+EXPOSE 3000
+CMD ["./entrypoint.sh"]

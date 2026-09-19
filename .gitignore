@@ -1,0 +1,19 @@
+# env files (can opt-in for committing if needed)
+.env*
+
+# folders
+/Branding
+/docker/data
+# dependencies
+/code/node_modules
+
+# next.js
+/code/.next/
+/code/out/
+
+# production
+/code/build
+
+# misc
+.DS_Store
+*.pem

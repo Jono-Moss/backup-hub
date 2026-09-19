@@ -1,0 +1,49 @@
+{
+  "name": "backup-hub",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx db/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "build:migrate": "esbuild db/migrate.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/migrate.cjs"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.2.1",
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.0.2",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.45.2",
+    "mysql2": "^3.11.0",
+    "next": "^16.3.4",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^10.0.3",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.7.0",
+    "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^8.0.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.0",
+    "drizzle-kit": "^0.31.10",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "overrides": {
+    "esbuild": "^0.25.0"
+  }
+}
