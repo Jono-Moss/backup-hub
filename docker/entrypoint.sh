@@ -7,7 +7,7 @@ RETRY_COUNT=0
 
 until mariadb-admin \
     ping \
-    -h"db" \
+    -h"$BH_DATABASE_HOST" \
     -u"root" \
     -p"$BH_DATABASE_ROOT_PASSWORD" \
     --skip-ssl \
