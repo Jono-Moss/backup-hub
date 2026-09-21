@@ -9,7 +9,7 @@ until mariadb-admin \
     ping \
     -h"db" \
     -u"root" \
-    -p"$MYSQL_ROOT_PASSWORD" \
+    -p"$BH_DATABASE_ROOT_PASSWORD" \
     --skip-ssl \
     --silent
 do
@@ -29,17 +29,17 @@ echo "Ensuring database and user exist..."
 mariadb \
     -h"db" \
     -u"root" \
-    -p"$MYSQL_ROOT_PASSWORD" \
+    -p"$BH_DATABASE_ROOT_PASSWORD" \
     --skip-ssl <<EOF
-CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\`;
+CREATE DATABASE IF NOT EXISTS \`$BH_DATABASE_NAME\`;
 
-CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%'
-  IDENTIFIED WITH caching_sha2_password BY '$MYSQL_PASSWORD';
+CREATE USER IF NOT EXISTS '$BH_DATABASE_USER'@'%'
+  IDENTIFIED WITH caching_sha2_password BY '$BH_DATABASE_PASSWORD';
 
-ALTER USER '$MYSQL_USER'@'%'
-  IDENTIFIED WITH caching_sha2_password BY '$MYSQL_PASSWORD';
+ALTER USER '$BH_DATABASE_USER'@'%'
+  IDENTIFIED WITH caching_sha2_password BY '$BH_DATABASE_PASSWORD';
 
-GRANT ALL PRIVILEGES ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%';
+GRANT ALL PRIVILEGES ON \`$BH_DATABASE_NAME\`.* TO '$BH_DATABASE_USER'@'%';
 
 FLUSH PRIVILEGES;
 EOF
@@ -51,9 +51,9 @@ for migration in /app/db/migrations/*.sql; do
         echo "Applying $(basename "$migration")..."
         mariadb \
             -h"db" \
-            -u"$MYSQL_USER" \
-            -p"$MYSQL_PASSWORD" \
-            "$MYSQL_DATABASE" \
+            -u"$BH_DATABASE_USER" \
+            -p"$BH_DATABASE_PASSWORD" \
+            "$BH_DATABASE_NAME" \
             --skip-ssl \
             --force < "$migration"
     fi

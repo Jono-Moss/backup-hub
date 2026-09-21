@@ -74,44 +74,67 @@ services:
     ports:
       - "3000:3000"
     environment:
-      APP_DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}"
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      BACKUP_MASTER_KEY: "${BACKUP_MASTER_KEY}"
+      APP_DATABASE_URL: "mysql://${BH_DATABASE_USER}:${BH_DATABASE_PASSWORD}@db:3306/${BH_DATABASE_NAME}"
+
+      MYSQL_DATABASE: "${BH_DATABASE_NAME}"
+      MYSQL_USER: "${BH_DATABASE_USER}"
+      MYSQL_PASSWORD: "${BH_DATABASE_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${BH_DATABASE_ROOT_PASSWORD}"
+
+      BACKUP_MASTER_KEY: "${BH_BACKUP_MASTER_KEY}"
       BACKUP_DIR: "/var/backups/backup-hub"
-      SMTP_HOST: "${SMTP_HOST}"
-      SMTP_PORT: "${SMTP_PORT}"
-      SMTP_SECURE: "${SMTP_SECURE}"
-      SMTP_USER: "${SMTP_USER}"
-      SMTP_PASS: "${SMTP_PASS}"
-      SMTP_FROM: "${SMTP_FROM}"
-      WEBAUTHN_RP_NAME: "${WEBAUTHN_RP_NAME}"
-      WEBAUTHN_RP_ID: "${WEBAUTHN_RP_ID}"
-      WEBAUTHN_ORIGIN: "${WEBAUTHN_ORIGIN}"
+
+      SMTP_HOST: "${BH_SMTP_HOST}"
+      SMTP_PORT: "${BH_SMTP_PORT}"
+      SMTP_SECURE: "${BH_SMTP_SECURE}"
+      SMTP_USER: "${BH_SMTP_USER}"
+      SMTP_PASS: "${BH_SMTP_PASS}"
+      SMTP_FROM: "${BH_SMTP_FROM}"
+
+      WEBAUTHN_RP_NAME: "${BH_WEBAUTHN_RP_NAME}"
+      WEBAUTHN_RP_ID: "${BH_WEBAUTHN_RP_ID}"
+      WEBAUTHN_ORIGIN: "${BH_WEBAUTHN_ORIGIN}"
+
     volumes:
       - ./data/backups:/var/backups/backup-hub
+
     depends_on:
-      db:
+      backup-hub-db:
         condition: service_healthy
 
-  db:
+    networks:
+      - backup-hub-frontend
+      - backup-hub-backend
+
+  backup-hub-db:
     image: mysql:latest
     container_name: backup-hub-db
     restart: always
     environment:
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${BH_DATABASE_NAME}"
+      MYSQL_USER: "${BH_DATABASE_USER}"
+      MYSQL_PASSWORD: "${BH_DATABASE_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${BH_DATABASE_ROOT_PASSWORD}"
+
     volumes:
       - ./data/mysql:/var/lib/mysql
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${BH_DATABASE_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+    networks:
+      - backup-hub-backend
+
+networks:
+  backup-hub-frontend:
+    driver: bridge
+
+  backup-hub-backend:
+    driver: bridge
+    internal: true
 ```
 
 A few things worth knowing about this setup:
