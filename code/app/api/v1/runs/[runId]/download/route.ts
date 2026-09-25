@@ -1,4 +1,5 @@
 import fs from "fs";
+import { Readable } from "stream";
 import { db } from "@/db";
 import { backupRun } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -24,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
     if (!stat) return Response.json({ error: "Backup file missing on disk" }, { status: 410 });
 
     const stream = fs.createReadStream(filePath);
-    return new Response(stream as any, {
+    return new Response(Readable.toWeb(stream) as ReadableStream, {
       headers: {
         "Content-Type": "application/octet-stream",
         "Content-Disposition": `attachment; filename="${run.filename}"`,
