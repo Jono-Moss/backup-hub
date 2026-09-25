@@ -10,6 +10,7 @@ import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { LocalTime } from "@/components/ui/LocalTime";
+import { CronSchedulePicker } from "@/components/ui/CronSchedulePicker";
 
 export const dynamic = "force-dynamic";
 
@@ -58,49 +59,49 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           <p className="text-sm text-muted">No backups yet — run one now, or wait for the next scheduled run.</p>
         ) : (
           <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-muted border-b border-line">
-                <th className="py-2 font-medium">File</th>
-                <th className="py-2 font-medium">Started</th>
-                <th className="py-2 font-medium">Size</th>
-                <th className="py-2 font-medium">Trigger</th>
-                <th className="py-2 font-medium">Status</th>
-                <th className="py-2 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.map((run) => (
-                <tr key={run.id} className="border-b border-line last:border-0">
-                  <td className="py-2.5 font-mono text-xs text-ink">{run.filename ?? "—"}</td>
-                  <td className="py-2.5 text-muted"><LocalTime value={run.startedAt} /></td>
-                  <td className="py-2.5 text-muted">{formatBytes(run.sizeBytes)}</td>
-                  <td className="py-2.5 text-muted capitalize">{run.triggeredBy}</td>
-                  <td className={`py-2.5 font-medium capitalize ${statusStyle[run.status]}`}>
-                    {run.status}
-                    {run.status === "failed" && run.errorMessage && (
-                      <span className="block text-xs text-muted font-normal normal-case mt-0.5 max-w-xs truncate" title={run.errorMessage}>
-                        {run.errorMessage}
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-2.5 text-right space-x-3 whitespace-nowrap">
-                    {run.status === "completed" && (
-                      <>
-                        <StandardLinkButton
-                          href={`/tasks/${task.id}/runs/${run.id}/download`}
-                          title="Download"
-                          compact
-                        />
-                        <RestoreRunButton taskId={task.id} runId={run.id} encrypted={run.encrypted} />
-                      </>
-                    )}
-                    <DeleteRunButton taskId={task.id} runId={run.id} />
-                  </td>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted border-b border-line">
+                  <th className="py-2 font-medium">File</th>
+                  <th className="py-2 font-medium">Started</th>
+                  <th className="py-2 font-medium">Size</th>
+                  <th className="py-2 font-medium">Trigger</th>
+                  <th className="py-2 font-medium">Status</th>
+                  <th className="py-2 font-medium"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {runs.map((run) => (
+                  <tr key={run.id} className="border-b border-line last:border-0">
+                    <td className="py-2.5 font-mono text-xs text-ink">{run.filename ?? "—"}</td>
+                    <td className="py-2.5 text-muted"><LocalTime value={run.startedAt} /></td>
+                    <td className="py-2.5 text-muted">{formatBytes(run.sizeBytes)}</td>
+                    <td className="py-2.5 text-muted capitalize">{run.triggeredBy}</td>
+                    <td className={`py-2.5 font-medium capitalize ${statusStyle[run.status]}`}>
+                      {run.status}
+                      {run.status === "failed" && run.errorMessage && (
+                        <span className="block text-xs text-muted font-normal normal-case mt-0.5 max-w-xs truncate" title={run.errorMessage}>
+                          {run.errorMessage}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2.5 text-right space-x-3 whitespace-nowrap">
+                      {run.status === "completed" && (
+                        <>
+                          <StandardLinkButton
+                            href={`/tasks/${task.id}/runs/${run.id}/download`}
+                            title="Download"
+                            compact
+                          />
+                          <RestoreRunButton taskId={task.id} runId={run.id} encrypted={run.encrypted} />
+                        </>
+                      )}
+                      <DeleteRunButton taskId={task.id} runId={run.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </StandardSection>
@@ -150,14 +151,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-ink mb-1" htmlFor="cronExpression">
-                Schedule (cron expression)
-              </label>
-              <input
-                id="cronExpression"
+              <CronSchedulePicker
                 name="cronExpression"
                 defaultValue={task.cronExpression}
-                className="w-full border border-line px-3 py-2 text-sm font-mono"
               />
             </div>
             <div>
