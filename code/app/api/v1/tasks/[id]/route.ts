@@ -3,7 +3,8 @@ import { backupTask } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateRequest, jsonError } from "@/lib/auth/api-key";
 import { wrapConnection, wrapSecret } from "@/lib/backup/crypto";
-import { resyncTask, unscheduleTask } from "@/lib/backup/scheduler";
+import { resyncTask } from "@/lib/backup/scheduler";
+import { purgeTask } from "@/lib/backup/purge";
 import { notifySystemEvent } from "@/lib/notifications/notify";
 
 type Params = Promise<{ id: string }>;
@@ -55,8 +56,10 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
     await authenticateRequest(req, "tasks:write", id);
     const [task] = await db.select().from(backupTask).where(eq(backupTask.id, id)).limit(1);
 
-    unscheduleTask(id);
-    await db.delete(backupTask).where(eq(backupTask.id, id));
+    // Removes the task with its run history, recipients and shares. Backup
+    // files stay on disk unless the caller passes ?purgeFiles=true.
+    const purgeFiles = new URL(req.url).searchParams.get("purgeFiles") === "true";
+    await purgeTask(id, { deleteFiles: purgeFiles });
 
     if (task) {
       notifySystemEvent("task_deleted", `Task "${task.name}" was deleted via the API.`).catch((err) =>
@@ -64,9 +67,6 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
       );
     }
 
-    // Note: this does NOT delete existing backup_run rows or files on disk —
-    // callers that want that should delete runs explicitly first. This keeps
-    // "delete task" from silently destroying backup history/files.
     return Response.json({ ok: true });
   } catch (e) {
     return jsonError(e);

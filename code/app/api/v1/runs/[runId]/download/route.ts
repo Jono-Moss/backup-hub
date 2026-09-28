@@ -3,7 +3,7 @@ import { Readable } from "stream";
 import { db } from "@/db";
 import { backupRun } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { authenticateRequest, jsonError } from "@/lib/auth/api-key";
+import { authenticateKey, assertKeyTaskAccess, jsonError } from "@/lib/auth/api-key";
 import { getRunFilePath } from "@/lib/backup/runner";
 
 type Params = Promise<{ runId: string }>;
@@ -15,10 +15,11 @@ type Params = Promise<{ runId: string }>;
 export async function GET(req: Request, { params }: { params: Params }) {
   try {
     const { runId } = await params;
+    const key = await authenticateKey(req, "runs:download");
     const [run] = await db.select().from(backupRun).where(eq(backupRun.id, runId)).limit(1);
-    if (!run || !run.filename) return Response.json({ error: "Run not found" }, { status: 404 });
+    if (!run || !run.filename) return Response.json({ error: "Not found" }, { status: 404 });
 
-    await authenticateRequest(req, "runs:download", run.taskId);
+    await assertKeyTaskAccess(key, "runs:download", run.taskId);
 
     const filePath = getRunFilePath(run.taskId, run.filename);
     const stat = await fs.promises.stat(filePath).catch(() => null);

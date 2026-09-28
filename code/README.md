@@ -5,7 +5,7 @@ Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a mul
 ## What's here
 
 - **Backup tasks** — each task owns one database connection, a cron schedule, a retention count, and an optional encryption password. Connection details and passwords are encrypted at rest with `BACKUP_MASTER_KEY`.
-- **Multi-user accounts** with two roles: `admin` (full access, including user management) and `user` (can manage tasks, API keys, and task notification recipients, but not other users). Passwords are hashed with Argon2id.
+- **Multi-user accounts** with two roles: `admin` (manages users and system notifications) and `user`. Backup tasks are **private to the user who created them** — even admins can't see them unless the owner shares them. Passwords are hashed with Argon2id.
 - **Two-factor authentication & passkeys** — users can enable TOTP (any authenticator app) with recovery codes, and/or register WebAuthn passkeys (Touch ID, Face ID, Windows Hello, security keys). A passkey login counts as its own second factor. Admins can reset a user's 2FA/passkeys for account recovery.
 - **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password.
 - **Email notifications** — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured, everything else keeps working and emails are silently skipped.
@@ -21,8 +21,8 @@ cp example.env-file .env
 openssl rand -hex 32   # → BACKUP_MASTER_KEY
 
 npm install
-npm run db:generate    # generates SQL migration from db/schema.ts
-npm run db:migrate     # applies it to APP_DATABASE_URL
+npm run db:migrate     # applies the checked-in migration to APP_DATABASE_URL
+# after editing db/schema.ts: npm run db:generate first
 npm run dev
 ```
 
@@ -30,18 +30,46 @@ You'll also need `mysqldump` and/or `pg_dump` + `pg_isready` installed wherever 
 
 Visit `http://localhost:3000` — since there are no users yet, you'll land on `/setup` to create the first admin account interactively. Every user after that is created from the **Users** page by an admin.
 
-## Users & permissions
+## Users, ownership & sharing
+
+Every task belongs to the user who created it. The owner can do everything with it. Nobody else can see it — **admins included** — until the owner shares it.
 
 | | `admin` | `user` |
 |---|---|---|
-| Manage backup tasks (create/edit/delete/run/download) | Yes | Yes |
-| Manage API keys | Yes | Yes |
-| Manage a task's own notification recipients | Yes | Yes |
-| Change their own name/password | Yes | Yes |
-| See/manage other users (`/users`) | Yes | No |
+| Create tasks, and fully manage the ones they own | Yes | Yes |
+| See other users' tasks | No (only a per-user task *count*) | No |
+| Manage their own API keys | Yes | Yes |
+| See/manage users (`/users`) | Yes | No |
 | Manage system-wide notification recipients (`/notifications`) | Yes | No |
 
-This is deliberately a two-role system, not granular per-task permissions — if you need per-task access control between non-admin users, that's a reasonable place to extend `lib/auth/session.ts` and `proxy.ts` further.
+### Sharing a task
+
+On a task's page, the owner can share it with another user by email and pick exactly what they may do. These are the same permissions API keys use:
+
+| Permission | Allows |
+|---|---|
+| View tasks | See the task and its run history (always included) |
+| Manage tasks | Edit settings, enable/disable, manage notification recipients, delete the task |
+| Trigger backups | Start a manual backup |
+| Download backups | Download backup files |
+| Delete backups | Delete backup files / clear failed runs |
+
+**Restoring** a backup into the source database is owner-only and can't be shared. Only the owner can share a task or change who it's shared with. To give an admin access to a task, share it with them like any other user.
+
+### API keys
+
+A key belongs to the user who created it and acts as that user: on any task, it can only do what **both** its scopes and its owner's own permission on that task allow. `GET /api/v1/tasks` lists only tasks its owner can see, and tasks created through the API are owned by the key's owner. If a share is removed or reduced, keys made by that user lose the same access immediately. A key pinned to a single task can't create new tasks.
+
+### Deleting (and keeping the files)
+
+Deleting a task removes it from the app: its run history, notification recipients, shares, and any API keys pinned to it. Deleting a **user** does that for every task they own, plus their shares on other people's tasks and their API keys.
+
+Both dialogs ask **"Also permanently delete the backup files from disk?"**, unchecked by default:
+
+- **Unchecked (keep files):** the files stay in `BACKUP_DIR/<taskId>/` on the server, so a mistaken delete can still be recovered by hand. A `_deleted-task.json` is written in that folder listing the task name, engine and which file belongs to which run (never connection details or passwords). Encrypted backups still need the password they were encrypted with.
+- **Checked:** the folder is erased too.
+
+Via the API, `DELETE /api/v1/tasks/:id` keeps the files by default; add `?purgeFiles=true` to erase them.
 
 ## Email notifications
 

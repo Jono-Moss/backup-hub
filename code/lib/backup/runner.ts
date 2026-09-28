@@ -11,7 +11,7 @@ import { notifyTaskSuccess, notifyTaskFailure } from "@/lib/notifications/notify
 
 const BACKUP_DIR = process.env.BACKUP_DIR || "/var/backups";
 
-function taskDir(taskId: string) {
+export function taskDir(taskId: string) {
   // BACKUP_DIR comes from an env var, so Turbopack can't statically prove
   // this path stays scoped — without the ignore comment it conservatively
   // traces the entire project into the server bundle. This directory is

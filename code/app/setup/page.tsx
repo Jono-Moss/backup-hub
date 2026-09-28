@@ -10,7 +10,7 @@ export default async function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper">
+    <div className="flex items-center justify-center bg-paper">
       <div className="w-full max-w-sm border border-line bg-white p-8">
         <h1 className="text-lg font-semibold text-ink mb-1">Welcome to Backup Hub</h1>
         <p className="text-sm text-muted mb-6">Create the first admin account to get started.</p>

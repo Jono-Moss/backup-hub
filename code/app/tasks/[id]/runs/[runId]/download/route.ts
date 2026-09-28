@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { backupRun } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getTaskAccess, canDo } from "@/lib/auth/task-access";
 import { getRunFilePath } from "@/lib/backup/runner";
 
 type Params = Promise<{ id: string; runId: string }>;
@@ -11,7 +12,8 @@ type Params = Promise<{ id: string; runId: string }>;
 // First-party UI download — gated by the logged-in session rather than an
 // API key. External callers should use /api/v1/runs/:runId/download instead.
 export async function GET(_req: Request, { params }: { params: Params }) {
-  if (!(await getCurrentUser())) {
+  const user = await getCurrentUser();
+  if (!user) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -20,6 +22,12 @@ export async function GET(_req: Request, { params }: { params: Params }) {
   if (!run || !run.filename || run.taskId !== id) {
     return new Response("Not found", { status: 404 });
   }
+
+  // Needs the "Download backups" permission on this run's task. No access
+  // at all is reported as 404, same as a missing run.
+  const access = await getTaskAccess(user.id, run.taskId);
+  if (!access) return new Response("Not found", { status: 404 });
+  if (!canDo(access, "runs:download")) return new Response("Forbidden", { status: 403 });
 
   const filePath = getRunFilePath(run.taskId, run.filename);
   const stat = await fs.promises.stat(filePath).catch(() => null);

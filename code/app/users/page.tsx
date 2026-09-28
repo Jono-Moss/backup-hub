@@ -17,8 +17,9 @@ export default async function UsersPage() {
       <div>
         <h1 className="text-xl font-semibold text-ink mb-1">Users</h1>
         <p className="text-sm text-muted">
-          Admins have full access to everything, including user management. Regular users can manage tasks, API
-          keys, and task notifications, but not other users.
+          Admins manage users and system notifications. Backup tasks are private to their owner: admins can see how
+          many tasks a user has, but not the tasks themselves unless the owner shares them. Deleting a user also
+          deletes all of their tasks and backups.
         </p>
       </div>
 
@@ -29,7 +30,9 @@ export default async function UsersPage() {
               <p className="text-sm font-medium text-ink">
                 {user.name} {user.id === me?.id && <span className="text-muted font-normal">(you)</span>}
               </p>
-              <p className="text-xs text-muted mt-0.5">{user.email}</p>
+              <p className="text-xs text-muted mt-0.5">
+                {user.email} · {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <span

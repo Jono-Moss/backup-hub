@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getTask, listRuns, updateTaskSettings, listTaskRecipients } from "../actions";
+import { getTask, listRuns, updateTaskSettings, listTaskRecipients, listTaskShares } from "../actions";
 import { RunNowButton } from "@/components/ui/RunNowButton";
 import { ToggleEnabledButton } from "@/components/ui/ToggleEnabledButton";
 import { DeleteTaskButton } from "@/components/ui/DeleteTaskButton";
@@ -11,6 +11,10 @@ import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton"
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { LocalTime } from "@/components/ui/LocalTime";
 import { CronSchedulePicker } from "@/components/ui/CronSchedulePicker";
+import { ShareTaskForm } from "@/components/ui/ShareTaskForm";
+import { RevokeTaskShareButton } from "@/components/ui/RevokeTaskShareButton";
+import { scopeLabel } from "@/components/ui/scopeOptions";
+import { canDo } from "@/lib/auth/task-access";
 
 export const dynamic = "force-dynamic";
 
@@ -32,8 +36,22 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const task = await getTask(id);
   if (!task) notFound();
-  const [runs, recipients] = await Promise.all([listRuns(id), listTaskRecipients(id)]);
+  const [runs, recipients, shares] = await Promise.all([
+    listRuns(id),
+    listTaskRecipients(id),
+    task.access.isOwner ? listTaskShares(id) : Promise.resolve([]),
+  ]);
   const updateSettings = updateTaskSettings.bind(null, task.id);
+
+  // What this user may do here. Hiding a control is only for tidiness — every
+  // server action re-checks the same permission itself.
+  const can = {
+    manage: canDo(task.access, "tasks:write"),
+    trigger: canDo(task.access, "runs:trigger"),
+    download: canDo(task.access, "runs:download"),
+    deleteRuns: canDo(task.access, "runs:delete"),
+    restore: task.access.isOwner,
+  };
 
   return (
     <div className="space-y-8">
@@ -42,18 +60,19 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           <h1 className="text-xl font-semibold text-ink">{task.name}</h1>
           <p className="text-sm text-muted mt-1">
             {engineLabel[task.engine]} · {task.enabled ? "Schedule active" : "Schedule disabled"}
+            {!task.access.isOwner && ` · shared by ${task.ownerName}`}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ToggleEnabledButton taskId={task.id} enabled={task.enabled} />
-          <RunNowButton taskId={task.id} />
+          {can.manage && <ToggleEnabledButton taskId={task.id} enabled={task.enabled} />}
+          {can.trigger && <RunNowButton taskId={task.id} />}
         </div>
       </div>
 
       <StandardSection>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-ink">Backup history</h2>
-          {runs.some((r) => r.status === "failed") && <ClearFailedRunsButton taskId={task.id} />}
+          {can.deleteRuns && runs.some((r) => r.status === "failed") && <ClearFailedRunsButton taskId={task.id} />}
         </div>
         {runs.length === 0 ? (
           <p className="text-sm text-muted">No backups yet — run one now, or wait for the next scheduled run.</p>
@@ -88,15 +107,19 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                     <td className="py-2.5 text-right space-x-3 whitespace-nowrap">
                       {run.status === "completed" && (
                         <>
-                          <StandardLinkButton
-                            href={`/tasks/${task.id}/runs/${run.id}/download`}
-                            title="Download"
-                            compact
-                          />
-                          <RestoreRunButton taskId={task.id} runId={run.id} encrypted={run.encrypted} />
+                          {can.download && (
+                            <StandardLinkButton
+                              href={`/tasks/${task.id}/runs/${run.id}/download`}
+                              title="Download"
+                              compact
+                            />
+                          )}
+                          {can.restore && (
+                            <RestoreRunButton taskId={task.id} runId={run.id} encrypted={run.encrypted} />
+                          )}
                         </>
                       )}
-                      <DeleteRunButton taskId={task.id} runId={run.id} />
+                      {can.deleteRuns && <DeleteRunButton taskId={task.id} runId={run.id} />}
                     </td>
                   </tr>
                 ))}
@@ -124,15 +147,43 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                       .join(", ") || "no events selected"}
                   </p>
                 </div>
-                <RemoveTaskRecipientButton taskId={task.id} recipientId={r.id} />
+                {can.manage && <RemoveTaskRecipientButton taskId={task.id} recipientId={r.id} />}
               </div>
             ))}
           </div>
         )}
 
-        <AddTaskRecipientForm taskId={task.id} />
+        {can.manage && <AddTaskRecipientForm taskId={task.id} />}
       </StandardSection>
 
+      {task.access.isOwner && (
+        <StandardSection WidthVariant="half">
+          <h2 className="text-sm font-semibold text-ink mb-1">Sharing</h2>
+          <p className="text-sm text-muted mb-4">
+            You own this task. Only you and the people below can see it — not even admins can.
+          </p>
+
+          {shares.length > 0 && (
+            <div className="divide-y divide-line mb-6">
+              {shares.map((share) => (
+                <div key={share.id} className="flex items-center justify-between py-2.5">
+                  <div>
+                    <p className="text-sm text-ink">
+                      {share.name} <span className="text-muted">({share.email})</span>
+                    </p>
+                    <p className="text-xs text-muted">{share.scopes.map(scopeLabel).join(", ")}</p>
+                  </div>
+                  <RevokeTaskShareButton taskId={task.id} shareId={share.id} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <ShareTaskForm taskId={task.id} />
+        </StandardSection>
+      )}
+
+      {can.manage && (
       <StandardSection WidthVariant="half">
         <h2 className="text-sm font-semibold text-ink mb-4">Settings</h2>
         <form action={updateSettings} className="space-y-6">
@@ -206,6 +257,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           </div>
         </form>
       </StandardSection>
+      )}
     </div>
   );
 }

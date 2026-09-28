@@ -1,5 +1,6 @@
 CREATE TABLE `api_key` (
 	`id` varchar(36) NOT NULL,
+	`user_id` varchar(36) NOT NULL,
 	`name` varchar(255) NOT NULL,
 	`hashed_key` varchar(64) NOT NULL,
 	`key_prefix` varchar(16) NOT NULL,
@@ -39,6 +40,7 @@ CREATE TABLE `backup_run` (
 --> statement-breakpoint
 CREATE TABLE `backup_task` (
 	`id` varchar(36) NOT NULL,
+	`owner_id` varchar(36) NOT NULL,
 	`name` varchar(255) NOT NULL,
 	`engine` enum('mysql','postgres') NOT NULL,
 	`encrypted_connection` varchar(4096) NOT NULL,
@@ -80,6 +82,16 @@ CREATE TABLE `task_notification_recipient` (
 	CONSTRAINT `task_notification_recipient_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
+CREATE TABLE `task_share` (
+	`id` varchar(36) NOT NULL,
+	`task_id` varchar(36) NOT NULL,
+	`user_id` varchar(36) NOT NULL,
+	`scopes` json NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `task_share_id` PRIMARY KEY(`id`),
+	CONSTRAINT `task_share_task_user_idx` UNIQUE(`task_id`,`user_id`)
+);
+--> statement-breakpoint
 CREATE TABLE `user_passkey` (
 	`id` varchar(36) NOT NULL,
 	`user_id` varchar(36) NOT NULL,
@@ -116,8 +128,11 @@ CREATE TABLE `user_totp` (
 	CONSTRAINT `user_totp_user_id_unique` UNIQUE(`user_id`)
 );
 --> statement-breakpoint
+CREATE INDEX `api_key_user_idx` ON `api_key` (`user_id`);--> statement-breakpoint
 CREATE INDEX `backup_run_task_idx` ON `backup_run` (`task_id`);--> statement-breakpoint
+CREATE INDEX `backup_task_owner_idx` ON `backup_task` (`owner_id`);--> statement-breakpoint
 CREATE INDEX `session_user_idx` ON `session` (`user_id`);--> statement-breakpoint
 CREATE INDEX `task_notification_recipient_task_idx` ON `task_notification_recipient` (`task_id`);--> statement-breakpoint
+CREATE INDEX `task_share_user_idx` ON `task_share` (`user_id`);--> statement-breakpoint
 CREATE INDEX `user_passkey_user_idx` ON `user_passkey` (`user_id`);--> statement-breakpoint
 CREATE INDEX `user_recovery_code_user_idx` ON `user_recovery_code` (`user_id`);

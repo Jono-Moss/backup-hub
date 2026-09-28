@@ -19,7 +19,9 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   return (
     <div className="max-w-md">
       <h1 className="text-xl font-semibold text-ink mb-1">{user.name}</h1>
-      <p className="text-sm text-muted mb-6">{user.email}</p>
+      <p className="text-sm text-muted mb-6">
+        {user.email} · owns {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
+      </p>
 
       <StandardSection>
         <form action={save} className="space-y-5">

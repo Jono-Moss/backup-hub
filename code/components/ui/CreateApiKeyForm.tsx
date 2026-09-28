@@ -2,17 +2,10 @@
 
 import { useState } from "react";
 import { createApiKey } from "@/app/api-keys/actions";
-import type { Scope } from "@/db/schema";
+import { SCOPE_OPTIONS } from "./scopeOptions";
 import { StandardActionButton } from "./standard/StandardActionButton";
 import { StandardSubmitButton } from "./standard/StandardSubmitButton";
 
-const SCOPE_OPTIONS: { value: Scope; label: string; hint: string }[] = [
-  { value: "tasks:read", label: "View tasks", hint: "List tasks and run history" },
-  { value: "tasks:write", label: "Manage tasks", hint: "Create, update, delete tasks" },
-  { value: "runs:trigger", label: "Trigger backups", hint: "Start a manual backup" },
-  { value: "runs:download", label: "Download backups", hint: "Download backup files" },
-  { value: "runs:delete", label: "Delete backups", hint: "Delete backup files" },
-];
 
 export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string }[] }) {
   const [issuedKey, setIssuedKey] = useState<string | null>(null);

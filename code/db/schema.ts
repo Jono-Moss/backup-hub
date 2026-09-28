@@ -9,6 +9,7 @@ import {
   text,
   mysqlEnum,
   index,
+  uniqueIndex,
 } from "drizzle-orm/mysql-core";
 
 export const ENGINES = ["mysql", "postgres"] as const;
@@ -31,8 +32,15 @@ export type Scope = (typeof SCOPES)[number];
 
 // A backup task owns everything needed to back up one database:
 // connection details, schedule, retention, and optional encryption.
-export const backupTask = mysqlTable("backup_task", {
+//
+// Every task belongs to exactly one user (ownerId). The owner has every
+// permission on it; anyone else only has what the owner granted them in
+// `task_share` below. Admins get no special access to tasks.
+export const backupTask = mysqlTable(
+  "backup_task",
+  {
   id: varchar("id", { length: 36 }).primaryKey(),
+  ownerId: varchar("owner_id", { length: 36 }).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   engine: mysqlEnum("engine", ENGINES).notNull(),
 
@@ -50,7 +58,31 @@ export const backupTask = mysqlTable("backup_task", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-});
+  },
+  (table) => ({
+    ownerIdx: index("backup_task_owner_idx").on(table.ownerId),
+  })
+);
+
+// Grants another user a subset of permissions on someone else's task. The
+// permissions are the same scopes API keys use, so the UI and the API speak
+// one vocabulary. The owner is never listed here — ownership implies all
+// scopes. Restoring a backup into the source database is deliberately not a
+// scope: it is owner-only.
+export const taskShare = mysqlTable(
+  "task_share",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    taskId: varchar("task_id", { length: 36 }).notNull(),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    scopes: json("scopes").$type<Scope[]>().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    taskUserIdx: uniqueIndex("task_share_task_user_idx").on(table.taskId, table.userId),
+    userIdx: index("task_share_user_idx").on(table.userId),
+  })
+);
 
 // One row per backup attempt (successful or not) for a task.
 export const backupRun = mysqlTable(
@@ -79,8 +111,15 @@ export const backupRun = mysqlTable(
 // the raw key is shown once at creation time, same pattern as
 // Stripe/GitHub tokens. Scopes gate which endpoints the key can hit.
 // An optional taskId pins the key to a single task.
-export const apiKey = mysqlTable("api_key", {
+//
+// A key acts as the user who created it (userId): its effective permission
+// on a task is the key's scopes intersected with that user's own permission
+// on the task. Sharing removed or reduced => the key loses that access too.
+export const apiKey = mysqlTable(
+  "api_key",
+  {
   id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   hashedKey: varchar("hashed_key", { length: 64 }).notNull(),
   keyPrefix: varchar("key_prefix", { length: 16 }).notNull(),
@@ -90,16 +129,21 @@ export const apiKey = mysqlTable("api_key", {
   lastUsedAt: timestamp("last_used_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   revokedAt: timestamp("revoked_at"),
-});
+  },
+  (table) => ({
+    userIdx: index("api_key_user_idx").on(table.userId),
+  })
+);
 
 // --- Users & sessions ---
 
 export const ROLES = ["admin", "user"] as const;
 export type Role = (typeof ROLES)[number];
 
-// `admin` has full permissions everywhere, including user management.
-// `user` can manage tasks, API keys, and task notification recipients, but
-// cannot see /users and can only change their own password.
+// `admin` manages users and system notifications. Admins have NO access to
+// other users' tasks (they can only see how many tasks a user owns); a user
+// must share a task with an admin for the admin to see it.
+// `user` manages their own tasks and API keys, and can't see /users.
 export const appUser = mysqlTable("app_user", {
   id: varchar("id", { length: 36 }).primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),

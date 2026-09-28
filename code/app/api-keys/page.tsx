@@ -14,7 +14,8 @@ export default async function ApiKeysPage() {
         <h1 className="text-xl font-semibold text-ink mb-1">API keys</h1>
         <p className="text-sm text-muted">
           Used by external apps to call the REST API at <code className="font-mono text-xs">/api/v1/*</code>. Each
-          key carries its own scopes and can be pinned to a single task.
+          key carries its own scopes and can be pinned to a single task. A key acts as you: it can never do more on
+          a task than you can, and it stops working on a task if that task is unshared from you.
         </p>
       </div>
 

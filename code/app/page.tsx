@@ -3,8 +3,6 @@ import { listTasks } from "./tasks/actions";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { describeCron } from "@/lib/cron/cronUtils";
 
-// Reads live data on every request rather than being statically generated —
-// this also means `next build` never needs a reachable database.
 export const dynamic = "force-dynamic";
 
 const engineLabel: Record<string, string> = { mysql: "MySQL", postgres: "Postgres" };
@@ -20,8 +18,11 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted mt-1">
             Each task owns one database connection, its own schedule, and retention.
           </p>
+          <p className="text-sm text-muted mt-1">
+            You see the tasks you created and the ones shared with you.
+          </p>
         </div>
-        <StandardLinkButton href="/tasks/new" title="New task" variant="standard"/>
+        <StandardLinkButton href="/tasks/new" title="New task" variant="standard" />
       </div>
 
       {tasks.length === 0 ? (
@@ -47,6 +48,7 @@ export default async function DashboardPage() {
                     {engineLabel[task.engine]} · <span className="font-mono">{describeCron(task.cronExpression)}</span> · keep{" "}
                     {task.retentionCount}
                     {task.encryptionEnabled ? " · encrypted" : ""}
+                    {!task.isOwner ? ` · shared by ${task.ownerName}` : ""}
                   </p>
                 </div>
               </div>
