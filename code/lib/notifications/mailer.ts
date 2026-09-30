@@ -25,6 +25,9 @@ function getTransporter(): Transporter | null {
   return transporter;
 }
 
+// Best-effort send for notifications: never throws, silently no-ops if SMTP
+// isn't configured. Do NOT use this for anything the user is relying on to
+// actually deliver — see sendMailStrict below.
 export async function sendMail(to: string, subject: string, text: string) {
   const t = getTransporter();
   if (!t) return; // notifications are best-effort; silently no-op if unconfigured
@@ -41,4 +44,24 @@ export async function sendMail(to: string, subject: string, text: string) {
     // flow that triggered it — log and move on.
     console.error(`[mailer] failed to send "${subject}" to ${to}:`, err);
   }
+}
+
+export interface MailAttachment {
+  filename: string;
+  path: string; // local filesystem path — nodemailer streams it rather than loading it all into memory
+}
+
+// Same transport, but errors propagate. Used by the "email" backup
+// destination, where a silent failure would mean the user thinks a backup
+// was delivered when it wasn't.
+export async function sendMailStrict(to: string, subject: string, text: string, attachments?: MailAttachment[]) {
+  const t = getTransporter();
+  if (!t) throw new Error("SMTP isn't configured on this server (SMTP_HOST / SMTP_PORT).");
+  await t.sendMail({
+    from: process.env.SMTP_FROM || "Backup Hub <backup-hub@localhost>",
+    to,
+    subject,
+    text,
+    attachments,
+  });
 }

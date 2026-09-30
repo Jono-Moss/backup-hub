@@ -21,6 +21,20 @@ export type RunStatus = (typeof RUN_STATUSES)[number];
 export const RUN_TRIGGERS = ["cron", "manual", "api"] as const;
 export type RunTrigger = (typeof RUN_TRIGGERS)[number];
 
+// Remote storage destinations a completed backup file can be copied to, in
+// addition to the local copy on BACKUP_DIR (local storage is always kept —
+// a destination is an *extra* off-site copy, never a replacement). Adding a
+// new provider means implementing BackupDestination (lib/backup/destinations/types.ts)
+// and registering it in lib/backup/destinations/index.ts; nothing else here
+// needs to change since the config form is generated from configFields.
+export const DESTINATION_TYPES = ["s3", "google_drive", "onedrive", "email"] as const;
+export type DestinationType = (typeof DESTINATION_TYPES)[number];
+
+// "skipped" = the destination deliberately did nothing (e.g. the email
+// destination when the file is over its size limit) — not an error.
+export const DESTINATION_UPLOAD_STATUSES = ["uploading", "completed", "failed", "skipped"] as const;
+export type DestinationUploadStatus = (typeof DESTINATION_UPLOAD_STATUSES)[number];
+
 export const SCOPES = [
   "tasks:read",
   "tasks:write",
@@ -104,6 +118,59 @@ export const backupRun = mysqlTable(
   },
   (table) => ({
     taskIdx: index("backup_run_task_idx").on(table.taskId),
+  })
+);
+
+// A remote save location attached to a task. A task can have zero or more
+// of these — each completed run gets copied to every enabled destination,
+// on top of the local copy that's always kept under BACKUP_DIR. Managing
+// destinations requires the same `tasks:write` scope as notification
+// recipients — anyone the owner shares "Manage tasks" with can add and
+// remove them too.
+export const backupDestination = mysqlTable(
+  "backup_destination",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    taskId: varchar("task_id", { length: 36 }).notNull(),
+    type: mysqlEnum("type", DESTINATION_TYPES).notNull(),
+    // User-given label ("Backblaze — offsite", "Shared Drive") so a task
+    // with several destinations of the same type stays legible in the UI.
+    label: varchar("label", { length: 255 }).notNull(),
+    // AES-256-GCM encrypted JSON, shape defined per-type by that
+    // destination's configFields (lib/backup/destinations/types.ts) —
+    // access keys, refresh tokens, bucket/folder names, etc. Wrapped with
+    // BACKUP_MASTER_KEY, same as DB connection credentials.
+    encryptedConfig: varchar("encrypted_config", { length: 4096 }).notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    taskIdx: index("backup_destination_task_idx").on(table.taskId),
+  })
+);
+
+// One row per (run, destination) upload attempt — a run with 2 enabled
+// destinations gets 2 rows here. Kept separate from backupRun so a
+// destination being slow/down never blocks marking the run itself
+// "completed" (the local file is the source of truth for that), and so
+// the UI can show per-destination status independently.
+export const backupRunUpload = mysqlTable(
+  "backup_run_upload",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    runId: varchar("run_id", { length: 36 }).notNull(),
+    destinationId: varchar("destination_id", { length: 36 }).notNull(),
+    status: mysqlEnum("status", DESTINATION_UPLOAD_STATUSES).notNull().default("uploading"),
+    // Human-readable location the file ended up at (e.g. "s3://bucket/key",
+    // a Drive file id, or a Graph item path) — shown in the UI, not parsed.
+    remotePath: varchar("remote_path", { length: 1024 }),
+    errorMessage: varchar("error_message", { length: 2048 }),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    finishedAt: timestamp("finished_at"),
+  },
+  (table) => ({
+    runIdx: index("backup_run_upload_run_idx").on(table.runId),
+    destinationIdx: index("backup_run_upload_destination_idx").on(table.destinationId),
   })
 );
 

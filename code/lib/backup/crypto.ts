@@ -100,6 +100,19 @@ export async function decryptFile(srcPath: string, destPath: string, password: s
   await fs.promises.writeFile(destPath, plaintext);
 }
 
+// --- Destination config (S3/Drive/OneDrive credentials, etc.) ---
+// Same wrap/unwrap-as-JSON shape as wrapConnection/unwrapConnection above,
+// just not tied to the fixed ConnectionConfig shape — each destination
+// type defines its own config fields (see lib/backup/destinations/types.ts).
+
+export function wrapDestinationConfig(config: Record<string, string>): string {
+  return wrapSecret(JSON.stringify(config));
+}
+
+export function unwrapDestinationConfig(wrapped: string): Record<string, string> {
+  return JSON.parse(unwrapSecret(wrapped));
+}
+
 // --- API keys ---
 
 export function generateApiKey(): { raw: string; hashed: string; prefix: string } {

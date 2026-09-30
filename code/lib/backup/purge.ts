@@ -1,8 +1,16 @@
 import fs from "fs";
 import path from "path";
 import { db } from "@/db";
-import { backupTask, backupRun, taskNotificationRecipient, taskShare, apiKey } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import {
+  backupTask,
+  backupRun,
+  backupRunUpload,
+  backupDestination,
+  taskNotificationRecipient,
+  taskShare,
+  apiKey,
+} from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 import { taskDir } from "@/lib/backup/runner";
 import { unscheduleTask } from "@/lib/backup/scheduler";
 
@@ -10,7 +18,8 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export const DELETED_TASK_MANIFEST = "_deleted-task.json";
 
-// Removes a task and everything in the database hanging off it: run history,
+// Removes a task and everything in the database hanging off it: run history
+// (and any per-destination upload records for those runs), destinations,
 // notification recipients, shares, and any API keys pinned to it.
 //
 // `deleteFiles` decides what happens to the backup files on disk:
@@ -35,7 +44,17 @@ export async function purgeTask(taskId: string, opts: { deleteFiles: boolean }) 
 
   unscheduleTask(taskId);
 
+  const runs = await db.select({ id: backupRun.id }).from(backupRun).where(eq(backupRun.taskId, taskId));
+  if (runs.length > 0) {
+    await db.delete(backupRunUpload).where(
+      inArray(
+        backupRunUpload.runId,
+        runs.map((r) => r.id)
+      )
+    );
+  }
   await db.delete(backupRun).where(eq(backupRun.taskId, taskId));
+  await db.delete(backupDestination).where(eq(backupDestination.taskId, taskId));
   await db.delete(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId));
   await db.delete(taskShare).where(eq(taskShare.taskId, taskId));
   await db.update(apiKey).set({ revokedAt: new Date() }).where(eq(apiKey.taskId, taskId));

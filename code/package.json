@@ -1,6 +1,6 @@
 {
   "name": "backup-hub",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "argon2": "^0.44.0",
+    "@aws-sdk/client-s3": "^3.1140.0",
+    "googleapis": "^182.0.0",
     "@simplewebauthn/browser": "^14.0.0",
     "@simplewebauthn/server": "^14.0.2",
     "clsx": "^2.1.1",

@@ -1,11 +1,26 @@
 import { notFound } from "next/navigation";
-import { getTask, listRuns, updateTaskSettings, listTaskRecipients, listTaskShares } from "../actions";
+import {
+  getTask,
+  listRuns,
+  listRunUploads,
+  updateTaskSettings,
+  listTaskRecipients,
+  listTaskShares,
+  listTaskDestinations,
+  listDestinationProviders,
+} from "../actions";
 import { RunNowButton } from "@/components/ui/RunNowButton";
 import { ToggleEnabledButton } from "@/components/ui/ToggleEnabledButton";
 import { DeleteTaskButton } from "@/components/ui/DeleteTaskButton";
 import { DeleteRunButton, RestoreRunButton, ClearFailedRunsButton } from "@/components/ui/RunActions";
 import { AddTaskRecipientForm } from "@/components/ui/AddTaskRecipientForm";
 import { RemoveTaskRecipientButton } from "@/components/ui/RemoveTaskRecipientButton";
+import { AddTaskDestinationForm } from "@/components/ui/AddTaskDestinationForm";
+import {
+  ToggleTaskDestinationButton,
+  RemoveTaskDestinationButton,
+  TestTaskDestinationButton,
+} from "@/components/ui/TaskDestinationActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
@@ -36,11 +51,19 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const task = await getTask(id);
   if (!task) notFound();
-  const [runs, recipients, shares] = await Promise.all([
+  const [runs, recipients, shares, destinations, destinationProviders] = await Promise.all([
     listRuns(id),
     listTaskRecipients(id),
     task.access.isOwner ? listTaskShares(id) : Promise.resolve([]),
+    listTaskDestinations(id),
+    listDestinationProviders(),
   ]);
+  const uploads = await listRunUploads(id, runs.map((r) => r.id));
+  const uploadsByRun = new Map<string, typeof uploads>();
+  for (const u of uploads) {
+    uploadsByRun.set(u.runId, [...(uploadsByRun.get(u.runId) ?? []), u]);
+  }
+  const destinationById = new Map(destinations.map((d) => [d.id, d]));
   const updateSettings = updateTaskSettings.bind(null, task.id);
 
   // What this user may do here. Hiding a control is only for tidiness — every
@@ -92,7 +115,37 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id} className="border-b border-line last:border-0">
-                    <td className="py-2.5 font-mono text-xs text-ink">{run.filename ?? "—"}</td>
+                    <td className="py-2.5 font-mono text-xs text-ink">
+                      {run.filename ?? "—"}
+                      {(uploadsByRun.get(run.id) ?? []).length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          {(uploadsByRun.get(run.id) ?? []).map((u) => {
+                            const dest = destinationById.get(u.destinationId);
+                            const style =
+                              u.status === "completed"
+                                ? "text-primary"
+                                : u.status === "failed"
+                                  ? "text-danger"
+                                  : u.status === "skipped"
+                                    ? "text-muted"
+                                    : "text-warn";
+                            const text =
+                              u.status === "completed"
+                                ? "uploaded"
+                                : u.status === "failed"
+                                  ? "failed"
+                                  : u.status === "skipped"
+                                    ? `skipped — ${u.errorMessage ?? ""}`
+                                    : "uploading…";
+                            return (
+                              <div key={u.id} className={`font-sans normal-case ${style}`} title={u.errorMessage ?? u.remotePath ?? undefined}>
+                                {dest?.label ?? "destination"}: {text}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </td>
                     <td className="py-2.5 text-muted"><LocalTime value={run.startedAt} /></td>
                     <td className="py-2.5 text-muted">{formatBytes(run.sizeBytes)}</td>
                     <td className="py-2.5 text-muted capitalize">{run.triggeredBy}</td>
@@ -156,8 +209,44 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         {can.manage && <AddTaskRecipientForm taskId={task.id} />}
       </StandardSection>
 
+      {can.manage && (
+        <StandardSection>
+          <h2 className="text-sm font-semibold text-ink mb-1">Remote Save locations</h2>
+          <p className="text-sm text-muted mb-4">
+            Every completed backup is always kept locally. Add a destination below to also copy each file off-site —
+            a task can have any number of destinations, and each is tried independently, so one being down never
+            affects the others or the local copy.
+          </p>
+
+          {destinations.length > 0 && (
+            <div className="divide-y divide-line mb-4">
+              {destinations.map((d) => (
+                <div key={d.id} className="flex items-center justify-between py-2.5 gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm text-ink truncate">
+                      {d.label}
+                      {!d.enabled && <span className="text-muted font-normal"> (disabled)</span>}
+                    </p>
+                    <p className="text-xs text-muted">
+                      {destinationProviders.find((p) => p.type === d.type)?.label ?? d.type}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <TestTaskDestinationButton taskId={task.id} destinationId={d.id} />
+                    <ToggleTaskDestinationButton taskId={task.id} destinationId={d.id} enabled={d.enabled} />
+                    <RemoveTaskDestinationButton taskId={task.id} destinationId={d.id} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <AddTaskDestinationForm taskId={task.id} providers={destinationProviders} />
+        </StandardSection>
+      )}
+
       {task.access.isOwner && (
-        <StandardSection WidthVariant="half">
+        <StandardSection>
           <h2 className="text-sm font-semibold text-ink mb-1">Sharing</h2>
           <p className="text-sm text-muted mb-4">
             You own this task. Only you and the people below can see it — not even admins can.
@@ -184,7 +273,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       )}
 
       {can.manage && (
-      <StandardSection WidthVariant="half">
+      <StandardSection>
         <h2 className="text-sm font-semibold text-ink mb-4">Settings</h2>
         <form action={updateSettings} className="space-y-6">
           <div>

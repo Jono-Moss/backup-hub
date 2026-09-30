@@ -7,6 +7,7 @@ import {
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { sendMail } from "./mailer";
+import { formatBytes } from "./notifyUtils";
 
 export async function notifyTaskSuccess(taskId: string, filename: string, sizeBytes: number) {
   const [task, recipients] = await Promise.all([
@@ -14,7 +15,7 @@ export async function notifyTaskSuccess(taskId: string, filename: string, sizeBy
     db.select().from(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId)),
   ]);
   const taskName = task[0]?.name ?? taskId;
-  const mb = (sizeBytes / 1024 / 1024).toFixed(1);
+  const mb = formatBytes(sizeBytes)
 
   await Promise.all(
     recipients

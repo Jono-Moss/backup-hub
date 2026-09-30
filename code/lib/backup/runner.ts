@@ -3,10 +3,11 @@ import os from "os";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { db } from "@/db";
-import { backupTask, backupRun, type RunTrigger } from "@/db/schema";
+import { backupTask, backupRun, backupDestination, backupRunUpload, type RunTrigger } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { unwrapConnection, unwrapSecret, encryptFile, decryptFile } from "@/lib/backup/crypto";
+import { unwrapConnection, unwrapSecret, wrapDestinationConfig, unwrapDestinationConfig, encryptFile, decryptFile } from "@/lib/backup/crypto";
 import { getEngine } from "@/lib/backup/engines";
+import { getDestination } from "@/lib/backup/destinations";
 import { notifyTaskSuccess, notifyTaskFailure } from "@/lib/notifications/notify";
 
 const BACKUP_DIR = process.env.BACKUP_DIR || "/var/backups";
@@ -76,6 +77,13 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
 
     await pruneOldRuns(task.id, task.retentionCount);
 
+    // Off-site copies. Best-effort per destination, same spirit as email
+    // notifications: a destination being down or misconfigured must never
+    // turn an otherwise-successful backup (the local file is already safe
+    // on disk) into a "failed" run — it's recorded per-destination instead
+    // so the UI can surface it.
+    await uploadToDestinations(task.id, task.name, runId, finalPath, finalName);
+
     notifyTaskSuccess(task.id, finalName, stat.size).catch((err) =>
       console.error("[notify] task success email failed:", err)
     );
@@ -110,6 +118,51 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
   }
 }
 
+async function uploadToDestinations(taskId: string, taskName: string, runId: string, filePath: string, remoteFileName: string) {
+  const destinations = await db
+    .select()
+    .from(backupDestination)
+    .where(and(eq(backupDestination.taskId, taskId), eq(backupDestination.enabled, true)));
+
+  await Promise.all(
+    destinations.map(async (dest) => {
+      const uploadId = uuid();
+      await db.insert(backupRunUpload).values({ id: uploadId, runId, destinationId: dest.id, status: "uploading" });
+
+      try {
+        const config = unwrapDestinationConfig(dest.encryptedConfig);
+        const result = await getDestination(dest.type).upload(config, filePath, remoteFileName, {
+          taskName,
+          // Lets a destination persist changes to its own config mid-upload
+          // (e.g. OneDrive's rotating refresh token).
+          updateConfig: async (patch) => {
+            Object.assign(config, patch);
+            await db
+              .update(backupDestination)
+              .set({ encryptedConfig: wrapDestinationConfig(config) })
+              .where(eq(backupDestination.id, dest.id));
+          },
+        });
+        await db
+          .update(backupRunUpload)
+          .set(
+            result.skipped
+              ? { status: "skipped", remotePath: null, errorMessage: result.skipped, finishedAt: new Date() }
+              : { status: "completed", remotePath: result.remotePath, finishedAt: new Date() }
+          )
+          .where(eq(backupRunUpload.id, uploadId));
+      } catch (err: any) {
+        const message = String(err.message ?? err).slice(0, 2048);
+        console.error(`[destinations] upload to "${dest.label}" (${dest.type}) failed for run ${runId}:`, err);
+        await db
+          .update(backupRunUpload)
+          .set({ status: "failed", errorMessage: message, finishedAt: new Date() })
+          .where(eq(backupRunUpload.id, uploadId));
+      }
+    })
+  );
+}
+
 async function pruneOldRuns(taskId: string, keep: number) {
   const completed = await db
     .select()
@@ -122,6 +175,7 @@ async function pruneOldRuns(taskId: string, keep: number) {
     if (run.filename) {
       await fs.promises.unlink(path.join(taskDir(taskId), run.filename)).catch(() => {});
     }
+    await db.delete(backupRunUpload).where(eq(backupRunUpload.runId, run.id));
     await db.delete(backupRun).where(eq(backupRun.id, run.id));
   }
 }
@@ -158,6 +212,7 @@ export async function deleteRun(runId: string) {
   if (run.filename) {
     await fs.promises.unlink(path.join(taskDir(run.taskId), run.filename)).catch(() => {});
   }
+  await db.delete(backupRunUpload).where(eq(backupRunUpload.runId, runId));
   await db.delete(backupRun).where(eq(backupRun.id, runId));
 }
 

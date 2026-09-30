@@ -9,6 +9,7 @@ Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a mul
 - **Two-factor authentication & passkeys** — users can enable TOTP (any authenticator app) with recovery codes, and/or register WebAuthn passkeys (Touch ID, Face ID, Windows Hello, security keys). A passkey login counts as its own second factor. Admins can reset a user's 2FA/passkeys for account recovery.
 - **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password.
 - **Email notifications** — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured, everything else keeps working and emails are silently skipped.
+- **Off-site save locations** — a task can copy each completed backup to any number of remote destinations (S3-compatible storage, Google Drive, OneDrive) on top of the always-kept local copy. Google Drive and OneDrive connect with a one-click sign-in, and small enough backups can be emailed to any address as an attachment. Pluggable like the DB engines: implement `BackupDestination` in `lib/backup/destinations/` to add a new provider.
 - **REST API** at `/api/v1/*`, authenticated with scoped API keys (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`), optionally pinned to a single task. This is separate from user accounts — API keys are their own credential type.
 - **In-process cron scheduler** (`node-cron`, booted via `instrumentation.ts`) — one job per enabled task.
 - **`proxy.ts`** (Next.js 16's replacement for `middleware.ts`) does real DB session validation on every request — not just a signed-cookie check — and enforces admin-only access to `/users` and `/notifications`.
@@ -49,7 +50,7 @@ On a task's page, the owner can share it with another user by email and pick exa
 | Permission | Allows |
 |---|---|
 | View tasks | See the task and its run history (always included) |
-| Manage tasks | Edit settings, enable/disable, manage notification recipients, delete the task |
+| Manage tasks | Edit settings, enable/disable, manage notification recipients and save locations, delete the task |
 | Trigger backups | Start a manual backup |
 | Download backups | Download backup files |
 | Delete backups | Delete backup files / clear failed runs |
@@ -62,7 +63,7 @@ A key belongs to the user who created it and acts as that user: on any task, it 
 
 ### Deleting (and keeping the files)
 
-Deleting a task removes it from the app: its run history, notification recipients, shares, and any API keys pinned to it. Deleting a **user** does that for every task they own, plus their shares on other people's tasks and their API keys.
+Deleting a task removes it from the app: its run history, notification recipients, save locations, shares, and any API keys pinned to it. Deleting a **user** does that for every task they own, plus their shares on other people's tasks and their API keys.
 
 Both dialogs ask **"Also permanently delete the backup files from disk?"**, unchecked by default:
 
@@ -70,6 +71,44 @@ Both dialogs ask **"Also permanently delete the backup files from disk?"**, unch
 - **Checked:** the folder is erased too.
 
 Via the API, `DELETE /api/v1/tasks/:id` keeps the files by default; add `?purgeFiles=true` to erase them.
+
+## Save locations (off-site destinations)
+
+Every completed backup is always kept locally under `BACKUP_DIR`. On top of that, a task can have any number of **destinations** (task detail page → Save locations) that each completed run also gets copied to. Managing destinations requires the same `tasks:write` ("Manage tasks") permission as notification recipients — see the sharing table above. Destinations are independent — one being unreachable never fails the run itself (the local copy already succeeded) or blocks the others. Each upload attempt is recorded per-destination and shown in the run history as `uploaded`, `failed`, or `skipped`.
+
+Built-in destinations:
+
+- **S3** — real AWS S3 or any S3-compatible provider (Backblaze B2, Wasabi, Cloudflare R2, DigitalOcean Spaces, MinIO, ...). Set a custom endpoint URL and enable "force path-style addressing" for most non-AWS providers.
+- **Google Drive** and **OneDrive** — the user clicks **Connect**, is shown a short code, enters it on Google's/Microsoft's own sign-in page, and approves. No passwords or tokens are ever pasted, and users never touch a cloud console. (Uses the OAuth *device flow*, which needs no redirect URL, so it works on any self-hosted domain.) Requires the one-time admin setup below.
+- **Email** — emails the backup file as an attachment to any address you choose, if it's under a size limit you set (larger files are recorded as `skipped`, not failed). This is separate from notification recipients on purpose: notifications say "it worked/failed", this delivers the data, and it can go to a different mailbox. Sent through the server's `SMTP_*` settings — unlike notifications, missing SMTP config is a real failure here, so a backup is never reported as delivered when it wasn't.
+
+### One-time admin setup for "Connect" (Google Drive / OneDrive)
+
+Google and Microsoft only hand out access to registered apps, so *someone* has to register Backup Hub once. That's you, the person running the server — not each user. Both registrations are free. Put the resulting IDs in `.env`, restart, and the Connect button appears for everyone.
+
+**Google Drive**
+1. In [Google Cloud Console](https://console.cloud.google.com/) create a project and enable the **Google Drive API**.
+2. **OAuth consent screen**: user type External. Add the scopes `drive.file`, `openid` and `email` (all non-sensitive, so no Google verification review is needed). **Publish the app to "In production"** — while it's in "Testing", Google expires refresh tokens after 7 days and backups would silently stop working.
+3. **Credentials → Create credentials → OAuth client ID → Application type: "TVs and Limited Input devices"**. That's the type that supports the device flow.
+4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. (Google doesn't treat a device-flow client secret as confidential.)
+
+The app only requests the `drive.file` scope: access to files Backup Hub itself creates, never the rest of the user's Drive.
+
+**OneDrive / Microsoft**
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com/) → App registrations → **New registration**. A free tenant is enough; no paid Azure subscription. Supported account types: **"Accounts in any organizational directory and personal Microsoft accounts"**.
+2. **Authentication → Advanced settings → Allow public client flows: Yes.**
+3. **API permissions**: Microsoft Graph, delegated: `Files.ReadWrite` (plus `openid`, `email`, `offline_access`).
+4. Set `MICROSOFT_CLIENT_ID` to the Application (client) ID. It's a public client, so there is no secret.
+
+Some locked-down work/school tenants block users from consenting to third-party apps; their admin will need to approve Backup Hub once. Personal Microsoft accounts are unaffected.
+
+**Token lifetime.** Google refresh tokens last until revoked (or unused for 6 months). Microsoft refresh tokens expire 90 days after issue but are reissued on every use, and Backup Hub saves each new one — so any task that runs at least once every 90 days stays connected.
+
+**Prefer not to use the shared app?** Under **Advanced: use my own credentials** when adding a Google Drive/OneDrive destination, you can paste your own OAuth client ID/secret and refresh token instead. Those destinations don't depend on the `.env` values at all.
+
+### Adding another provider
+
+Implement `BackupDestination` in `lib/backup/destinations/` and register it in `lib/backup/destinations/index.ts`. The add-destination form is generated from your implementation's `configFields`, so no UI code changes. If the provider has an OAuth device flow, also implement the optional `connect` (`start()` / `poll()`) and the Connect button appears automatically. If the provider rotates refresh tokens, persist the new one with `updateConfig()` (see `onedrive.ts`).
 
 ## Email notifications
 
@@ -84,7 +123,7 @@ If SMTP isn't configured, `sendMail()` logs a warning once and no-ops — it wil
 
 The scheduler is an **in-process cron job** — it only fires reliably on a long-running Node server (Docker, a VM, PM2, etc., as in the provided `docker-compose.yml`). On serverless platforms like Vercel, the process doesn't stay warm between requests, so `node-cron` won't reliably fire. If you deploy serverless, point an external cron (e.g. Vercel Cron, or a system crontab hitting a protected endpoint) at each due task instead of relying on `instrumentation.ts`.
 
-`argon2` ships prebuilt native binaries for common platforms (including the `node:20-bookworm-slim` base image used in the provided `Dockerfile`) — no build toolchain needed in the container.
+`argon2` ships prebuilt native binaries for common platforms — no build toolchain needed in the container.
 
 ## Using the REST API from another app
 
@@ -179,6 +218,8 @@ If a task has encryption enabled, downloaded files are `.sql.gz.enc` — Backup 
 - **Key rotation**: no built-in `BACKUP_MASTER_KEY` versioning — rotating it means decrypting all stored secrets with the old key and re-encrypting with the new one in a one-off script.
 - **Task connection edits**: the UI doesn't yet support editing a task's DB connection after creation (only schedule/retention/encryption) — delete and recreate, or use `PATCH /api/v1/tasks/:id`.
 - **Engines**: MySQL and Postgres only. Adding another engine means implementing `BackupEngine` in `lib/backup/engines/` and registering it in `lib/backup/engines/index.ts`.
+- **Destinations**: S3-compatible, Google Drive, OneDrive, and email only. Same pluggable pattern as engines — see `lib/backup/destinations/`.
+- **Destination secrets aren't re-validated on save**: "Test connection" is a manual step in the add-destination form, not an automatic check before saving — a destination with bad credentials will save successfully and only surface the failure on the next real upload (visible per-run in the backup history, or via the "Test" button next to it afterwards).
 - **Large encrypted files**: decryption reads the whole ciphertext into memory (fine for typical dumps; swap for chunked authenticated decryption if you expect multi-GB encrypted files).
 - **No password reset via email** — a forgotten password requires an admin to reset it from `/users/[id]`. Self-serve "forgot password" would need its own token-based email flow.
 - **Session management UI** — sessions are DB-backed and revocable (deleting a user cascades to their sessions), but there's no "view/revoke your other active sessions" page yet.
@@ -188,10 +229,12 @@ If a task has encryption enabled, downloaded files are `.sql.gz.enc` — Backup 
 ## Project layout
 
 ```
-db/                        schema (users, sessions, tasks, runs, API keys, notification recipients, 2FA/passkeys) + drizzle client
+db/                        schema (users, sessions, tasks, shares, runs, destinations, API keys, notification recipients, 2FA/passkeys) + drizzle client
 lib/backup/crypto.ts        secret wrapping, file encryption, API key hashing
 lib/backup/engines/         per-database dump implementations (mysql, postgres)
-lib/backup/runner.ts        runs a backup end-to-end: dump → encrypt → record → prune → notify
+lib/backup/destinations/    pluggable off-site upload implementations (s3, google_drive, onedrive, email)
+lib/backup/purge.ts         removes a task (and everything hanging off it) from the DB, optionally its files too
+lib/backup/runner.ts        runs a backup end-to-end: dump → encrypt → record → prune → upload to destinations → notify
 lib/backup/scheduler.ts     node-cron job management
 lib/auth/api-key.ts         REST API scoped-key authentication
 lib/auth/password.ts        Argon2id password hashing
@@ -210,6 +253,6 @@ app/account/                self-service profile, password, 2FA, and passkey man
 app/users/                  admin-only user management, incl. 2FA/passkey reset
 app/notifications/          admin-only system notification recipients
 app/tasks/, app/api-keys/   the first-party UI + its server actions
-proxy.ts                    Next.js 16 request interception: session + 2FA-pending + role gating
+proxy.ts                    Next.js request interception: session + 2FA-pending + role gating
 instrumentation.ts          boots the scheduler on server start
 ```

@@ -26,7 +26,7 @@ export async function proxy(req: NextRequest) {
 
   if (!raw) return redirectToLogin();
 
-  // Real DB lookup (proxy.ts runs on the Node.js runtime in Next.js 16),
+  // Real DB lookup (proxy.ts runs on the Node.js runtime in Next.js),
   // not just a signature check — a revoked/expired session or a deleted
   // user is rejected here rather than only in individual pages/actions.
   const [row] = await db
