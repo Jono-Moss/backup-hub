@@ -1,6 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Custom Global Palette */
+  --color-paper: #F5F4F0;
+  --color-ink: #1B1F27;
+  --color-muted: #6B7280;
+  --color-line: #E2E0D8;
+
+  /* Primary Palette */
+  --color-primary: #35be9e;
+  --color-primary-dark: #164F41;
+  --color-primary-light: #E4EFEC;
+
+  /* Danger Palette */
+  --color-danger: #B23A2E;
+  --color-danger-dark: #862b22;
+  --color-danger-light: #F6E7E4;
+
+  /* Warning Palette */
+  --color-warn: #9A6B1F;
+  --color-warn-light: #F5EEDF;
+
+  /* Typography Override */
+  --font-sans: "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif";
+  --font-mono: "ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace";
+
+  /* Border Radius */
+  --radius-none: 0px;
+  --radius-sm: calc(6px - 2px);
+  --radius-md: 6px; /* Your old default */
+  --radius-lg: calc(6px + 2px);
+  --radius-xl: calc(6px + 4px);
+}
 
 body {
   background-color: #F5F4F0;
