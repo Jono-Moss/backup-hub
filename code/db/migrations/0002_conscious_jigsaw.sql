@@ -1,0 +1,1 @@
+ALTER TABLE `backup_destination` MODIFY COLUMN `type` enum('s3','google_drive','onedrive','email','opencloud') NOT NULL;

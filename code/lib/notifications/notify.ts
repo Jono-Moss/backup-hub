@@ -24,7 +24,7 @@ export async function notifyTaskSuccess(taskId: string, filename: string, sizeBy
         sendMail(
           r.email,
           `Backup succeeded: ${taskName}`,
-          `The backup task "${taskName}" completed successfully.\n\nFile: ${filename}\nSize: ${mb} MB`
+          `The backup task "${taskName}" completed successfully.\n\nFile: ${filename}\nSize: ${mb}`
         )
       )
   );

@@ -4,6 +4,7 @@ import { s3Destination } from "./s3";
 import { googleDriveDestination } from "./googledrive";
 import { oneDriveDestination } from "./onedrive";
 import { emailDestination } from "./email";
+import { openCloudDestination } from "./opencloud";
 
 // Add a new provider by implementing BackupDestination (see types.ts) and
 // adding one line here — the "add destination" form, its config fields,
@@ -13,6 +14,7 @@ const destinations: Record<DestinationType, BackupDestination> = {
   google_drive: googleDriveDestination,
   onedrive: oneDriveDestination,
   email: emailDestination,
+  opencloud:  openCloudDestination
 };
 
 export function getDestination(type: DestinationType): BackupDestination {

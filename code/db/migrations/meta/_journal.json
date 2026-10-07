@@ -15,6 +15,13 @@
       "when": 1790660555949,
       "tag": "0001_outstanding_pixie",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1791355478824,
+      "tag": "0002_conscious_jigsaw",
+      "breakpoints": true
     }
   ]
 }

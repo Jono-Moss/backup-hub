@@ -27,7 +27,7 @@ export type RunTrigger = (typeof RUN_TRIGGERS)[number];
 // new provider means implementing BackupDestination (lib/backup/destinations/types.ts)
 // and registering it in lib/backup/destinations/index.ts; nothing else here
 // needs to change since the config form is generated from configFields.
-export const DESTINATION_TYPES = ["s3", "google_drive", "onedrive", "email"] as const;
+export const DESTINATION_TYPES = ["s3", "google_drive", "onedrive", "email", "opencloud"] as const;
 export type DestinationType = (typeof DESTINATION_TYPES)[number];
 
 // "skipped" = the destination deliberately did nothing (e.g. the email

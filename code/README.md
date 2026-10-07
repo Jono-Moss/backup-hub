@@ -9,7 +9,7 @@ Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a mul
 - **Two-factor authentication & passkeys** — users can enable TOTP (any authenticator app) with recovery codes, and/or register WebAuthn passkeys (Touch ID, Face ID, Windows Hello, security keys). A passkey login counts as its own second factor. Admins can reset a user's 2FA/passkeys for account recovery.
 - **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password.
 - **Email notifications** — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured, everything else keeps working and emails are silently skipped.
-- **Off-site save locations** — a task can copy each completed backup to any number of remote destinations (S3-compatible storage, Google Drive, OneDrive) on top of the always-kept local copy. Google Drive and OneDrive connect with a one-click sign-in, and small enough backups can be emailed to any address as an attachment. Pluggable like the DB engines: implement `BackupDestination` in `lib/backup/destinations/` to add a new provider.
+- **Off-site save locations** — a task can copy each completed backup to any number of remote destinations (S3-compatible storage, Google Drive, OneDrive, OpenCloud) on top of the always-kept local copy. Google Drive and OneDrive connect with a one-click sign-in, and small enough backups can be emailed to any address as an attachment. Pluggable like the DB engines: implement `BackupDestination` in `lib/backup/destinations/` to add a new provider.
 - **REST API** at `/api/v1/*`, authenticated with scoped API keys (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`), optionally pinned to a single task. This is separate from user accounts — API keys are their own credential type.
 - **In-process cron scheduler** (`node-cron`, booted via `instrumentation.ts`) — one job per enabled task.
 - **`proxy.ts`** (Next.js 16's replacement for `middleware.ts`) does real DB session validation on every request — not just a signed-cookie check — and enforces admin-only access to `/users` and `/notifications`.
@@ -81,6 +81,7 @@ Built-in destinations:
 - **S3** — real AWS S3 or any S3-compatible provider (Backblaze B2, Wasabi, Cloudflare R2, DigitalOcean Spaces, MinIO, ...). Set a custom endpoint URL and enable "force path-style addressing" for most non-AWS providers.
 - **Google Drive** and **OneDrive** — the user clicks **Connect**, is shown a short code, enters it on Google's/Microsoft's own sign-in page, and approves. No passwords or tokens are ever pasted, and users never touch a cloud console. (Uses the OAuth *device flow*, which needs no redirect URL, so it works on any self-hosted domain.) Requires the one-time admin setup below.
 - **Email** — emails the backup file as an attachment to any address you choose, if it's under a size limit you set (larger files are recorded as `skipped`, not failed). This is separate from notification recipients on purpose: notifications say "it worked/failed", this delivers the data, and it can go to a different mailbox. Sent through the server's `SMTP_*` settings — unlike notifications, missing SMTP config is a real failure here, so a backup is never reported as delivered when it wasn't.
+- **OpenCloud** — Enter the WebDAV URL of the folder, the users name and App token to upload to your OpenCloud server. Remeber that OpenCloud App tokens have an expiry date, so either use one that has a long expiry date or remeber to delete the old destination and then add a new destination with the new App token. 
 
 ### One-time admin setup for "Connect" (Google Drive / OneDrive)
 
@@ -105,6 +106,12 @@ Some locked-down work/school tenants block users from consenting to third-party 
 **Token lifetime.** Google refresh tokens last until revoked (or unused for 6 months). Microsoft refresh tokens expire 90 days after issue but are reissued on every use, and Backup Hub saves each new one — so any task that runs at least once every 90 days stays connected.
 
 **Prefer not to use the shared app?** Under **Advanced: use my own credentials** when adding a Google Drive/OneDrive destination, you can paste your own OAuth client ID/secret and refresh token instead. Those destinations don't depend on the `.env` values at all.
+
+**OpenCloud**
+1. In OpenCloud, click on  My Account → Preferences → **Preferences**.
+2. In the Preferences table section you will see an option called **View options** under theme, enable the **Show WebDAV information in details view**.
+3. Now in the side panel of any folder or space, you will see a **WebDAV URL**. Copy and use the url for the desired location.
+4. To create a new App Token click on: My Account → Preferences → **App Tokens**. Remeber to set a long expiry date if you don't want to have to always recreate the destination in Backup-Hub.
 
 ### Adding another provider
 
