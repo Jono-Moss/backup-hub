@@ -12,14 +12,14 @@
     "build:migrate": "esbuild db/migrate.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/migrate.cjs"
   },
   "dependencies": {
-    "argon2": "^0.44.0",
     "@aws-sdk/client-s3": "^3.1140.0",
-    "googleapis": "^182.0.0",
     "@simplewebauthn/browser": "^14.0.0",
     "@simplewebauthn/server": "^14.0.2",
+    "argon2": "^0.44.0",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.45.2",
+    "googleapis": "^182.0.0",
     "mysql2": "^3.11.0",
     "next": "16.3.7",
     "node-cron": "^4.6.0",
@@ -31,6 +31,7 @@
     "uuid": "^11.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.0.0",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^8.0.1",
@@ -40,7 +41,7 @@
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.0",
     "drizzle-kit": "^0.31.10",
-    "postcss": "^8.4.0",
+    "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
