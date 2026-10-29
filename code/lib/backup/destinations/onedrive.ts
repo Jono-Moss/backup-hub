@@ -143,6 +143,7 @@ function itemUrl(path: string, suffix: string): string {
 export const oneDriveDestination: BackupDestination = {
   type: "onedrive",
   label: "OneDrive",
+  subfolderField: "folderPath",
   connect,
   configFields: [
     { name: "folderPath", label: "Folder path (optional)", type: "text", placeholder: "Backups", helpText: "Created if it doesn't exist. Leave blank to upload to the OneDrive root." },

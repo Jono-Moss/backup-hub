@@ -50,6 +50,7 @@ function makeFtpDestination(secure: boolean): BackupDestination {
   return {
     type: secure ? "ftps" : "ftp",
     label: secure ? "FTPS (FTP over TLS)" : "FTP (unencrypted)",
+    subfolderField: "pathPrefix",
     configFields: [
       { name: "host", label: "Host", type: "text", required: true, placeholder: "ftp.example.com" },
       {

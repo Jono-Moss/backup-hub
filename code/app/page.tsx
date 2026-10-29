@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-ink">Backup tasks</h1>
           <p className="text-sm text-muted mt-1">
@@ -22,7 +22,9 @@ export default async function DashboardPage() {
             You see the tasks you created and the ones shared with you.
           </p>
         </div>
-        <StandardLinkButton href="/tasks/new" title="New task" variant="standard" />
+        <div className="shrink-0">
+          <StandardLinkButton href="/tasks/new" title="New task" variant="standard" />
+        </div>
       </div>
 
       {tasks.length === 0 ? (

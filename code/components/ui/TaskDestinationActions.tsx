@@ -8,44 +8,59 @@ import {
 } from "@/app/tasks/actions";
 import { StandardActionButton } from "./standard/StandardActionButton";
 
+// All of these act on a task's *link* to a save location (linkId), not on
+// the saved location itself — see task_destination in db/schema.ts.
+
 export function ToggleTaskDestinationButton({
   taskId,
-  destinationId,
+  linkId,
   enabled,
 }: {
   taskId: string;
-  destinationId: string;
+  linkId: string;
   enabled: boolean;
 }) {
   return (
     <StandardActionButton
       title={enabled ? "Disable" : "Enable"}
-      action={() => toggleTaskDestinationEnabled(taskId, destinationId, !enabled)}
+      action={() => toggleTaskDestinationEnabled(taskId, linkId, !enabled)}
       variant="outline"
       compact
     />
   );
 }
 
-export function RemoveTaskDestinationButton({ taskId, destinationId }: { taskId: string; destinationId: string }) {
-  const bound = removeTaskDestination.bind(null, taskId, destinationId);
+export function RemoveTaskDestinationButton({
+  taskId,
+  linkId,
+  taskOnly,
+}: {
+  taskId: string;
+  linkId: string;
+  taskOnly: boolean;
+}) {
+  const bound = removeTaskDestination.bind(null, taskId, linkId);
   return (
     <StandardActionButton
       action={bound}
       title="Remove"
       variant="danger"
       pendingTitle="Removing..."
-      confirmMessage="Remove this backup destination? Future runs will stop copying files here — this doesn't delete anything already uploaded to the provider."
+      confirmMessage={
+        taskOnly
+          ? "Remove this save location? It's task-only, so it and its saved credentials are deleted. Future runs will stop copying files here — this doesn't delete anything already uploaded to the provider."
+          : "Stop this task using this save location? It stays saved in the owner's account for their other tasks. This doesn't delete anything already uploaded to the provider."
+      }
       compact
     />
   );
 }
 
-export function TestTaskDestinationButton({ taskId, destinationId }: { taskId: string; destinationId: string }) {
+export function TestTaskDestinationButton({ taskId, linkId }: { taskId: string; linkId: string }) {
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
 
   async function handleClick() {
-    setResult(await testExistingTaskDestination(taskId, destinationId));
+    setResult(await testExistingTaskDestination(taskId, linkId));
   }
 
   return (

@@ -22,8 +22,10 @@ export default async function SystemNotificationsPage() {
       <div>
         <h1 className="text-xl font-semibold text-ink mb-1">System notifications</h1>
         <p className="text-sm text-muted">
-          Account and task-lifecycle notifications (email, ntfy, Telegram or Discord), separate from per-task backup success/failure alerts (set those on
-          each task's page).
+          Server-wide alerts for account and task-lifecycle events (email, ntfy, Telegram or Discord), managed by
+          admins. Backup success/failure alerts are separate: each user sets those up under{" "}
+          <a href="/notification-channels" className="text-primary hover:underline">Notifications</a> and on each
+          task&apos;s page.
         </p>
       </div>
 
@@ -32,7 +34,7 @@ export default async function SystemNotificationsPage() {
           <p className="text-sm text-muted p-6">No system notification recipients yet.</p>
         ) : (
           recipients.map((r) => (
-            <div key={r.id} className="flex items-center justify-between px-5 py-4">
+            <div key={r.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-4 sm:px-5">
               <div>
                 <p className="text-sm font-medium text-ink">{r.target}</p>
                 <p className="text-xs text-muted mt-0.5">{r.events.map((e) => EVENT_LABELS[e]).join(", ")}</p>

@@ -25,7 +25,7 @@ export default async function UsersPage() {
 
       <StandardSection>
         {users.map((user) => (
-          <div key={user.id} className="flex items-center justify-between px-5 py-4">
+          <div key={user.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-4 sm:px-5">
             <div>
               <p className="text-sm font-medium text-ink">
                 {user.name} {user.id === me?.id && <span className="text-muted font-normal">(you)</span>}
@@ -34,7 +34,7 @@ export default async function UsersPage() {
                 {user.email} · {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <span
                 className={`text-xs px-2 py-0.5 ${
                   user.role === "admin" ? "bg-primary-light text-primary-dark" : "bg-paper text-muted"
@@ -42,7 +42,7 @@ export default async function UsersPage() {
               >
                 {user.role}
               </span>
-              {user.id != me?.id && <StandardLinkButton href={`/users/${user.id}`} title="Edit" /> }
+              {user.id != me?.id && <StandardLinkButton href={`/users/${user.id}`} title="Edit" compact /> }
               {user.id != me?.id && <DeleteUserButton userId={user.id} /> }
             </div>
           </div>

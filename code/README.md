@@ -63,7 +63,7 @@ A key belongs to the user who created it and acts as that user: on any task, it 
 
 ### Deleting (and keeping the files)
 
-Deleting a task removes it from the app: its run history, notification recipients, save locations, shares, and any API keys pinned to it. Deleting a **user** does that for every task they own, plus their shares on other people's tasks and their API keys.
+Deleting a task removes it from the app: its run history, task-only notification channels and save locations (saved ones stay in your account), shares, and any API keys pinned to it. Deleting a **user** does that for every task they own, plus their shares on other people's tasks and their API keys.
 
 Both dialogs ask **"Also permanently delete the backup files from disk?"**, unchecked by default:
 
@@ -74,7 +74,14 @@ Via the API, `DELETE /api/v1/tasks/:id` keeps the files by default; add `?purgeF
 
 ## Save locations (off-site destinations)
 
-Every completed backup is always kept locally under `BACKUP_DIR`. On top of that, a task can have any number of **destinations** (task detail page → Save locations) that each completed run also gets copied to. Managing destinations requires the same `tasks:write` ("Manage tasks") permission as notification recipients — see the sharing table above. Destinations are independent — one being unreachable never fails the run itself (the local copy already succeeded) or blocks the others. Each upload attempt is recorded per-destination and shown in the run history as `uploaded`, `failed`, or `skipped`.
+Every completed backup is always kept locally under `BACKUP_DIR`. On top of that, a task can have any number of **destinations** (task detail page → Save locations) that each completed run also gets copied to.
+
+Save locations come in two kinds:
+
+- **Saved (account-level)** — enter the credentials once, on the **Save locations** page or by ticking "Save to my account" when adding one to a task, then pick it from **Use a saved location** on any of your tasks. Editing it (e.g. a rotated OpenCloud app token) updates every task that uses it. Each task can add its own **subfolder** (S3, OpenCloud, FTP/FTPS/SFTP, OneDrive), defaulting to the task name, so tasks sharing a location don't mix files.
+- **Task-only** (the default when adding from a task) — tied to that one task; its credentials can never be picked for another task. Removing it from the task deletes it. On the Save locations page you can make one reusable later (one-way).
+
+Save locations belong to the task owner and are private to them — admins can't see them. People a task is shared with only ever see a location's name and type, never the owner's other saved locations. A shared user with "Manage tasks" can add a task-only location with their own credentials: the owner can remove it but can't edit it or make it reusable, so their credentials can't be pointed elsewhere or reused. Credentials are never sent back to the browser; when editing, leave a secret field blank to keep it. Managing destinations requires the same `tasks:write` ("Manage tasks") permission as notification recipients — see the sharing table above. Destinations are independent — one being unreachable never fails the run itself (the local copy already succeeded) or blocks the others. Each upload attempt is recorded per-destination and shown in the run history as `uploaded`, `failed`, or `skipped`.
 
 Built-in destinations:
 
@@ -123,10 +130,12 @@ Implement `BackupDestination` in `lib/backup/destinations/` and register it in `
 
 Two independent notification surfaces:
 
-1. **Per-task** (task detail page → Notifications section): add a recipient and choose whether it gets notified on success, failure, or both. Different tasks can have entirely different recipients.
-2. **System-wide** (`/notifications`, admin-only): recipients for account/task lifecycle events — `user_login`, `user_created`, `user_deleted`, `task_created`, `task_deleted`, `security_reset`.
+1. **Per-task** (task detail page → Notifications section): pick a channel and choose whether it gets notified on success, failure, or both. Different tasks can have entirely different recipients.
+2. **System-wide** (Admin menu → **System notifications**, `/notifications`, admin-only): recipients for account/task lifecycle events — `user_login`, `user_created`, `user_deleted`, `task_created`, `task_deleted`, `security_reset`.
 
-Each recipient picks how it's reached. Use **Send test** on the form to check the settings before saving. Tokens and webhook URLs are stored encrypted with `BACKUP_MASTER_KEY`, and are never shown again after saving.
+Per-task channels work like save locations: **saved channels** (on the **Notifications** page (top menu), or "Save to my account" when adding one to a task) are set up once and picked from any of your tasks, and editing one updates every task using it; **task-only** channels (the default when adding from a task) belong to that one task and can be made reusable later. The same privacy rules apply: only the task owner sees where a channel sends to, and a shared user's channel can be removed by the owner but not edited or reused. System-wide recipients are separate and admin-managed.
+
+Each channel picks how it's reached. Use **Send test** on the form to check the settings before saving. Tokens and webhook URLs are stored encrypted with `BACKUP_MASTER_KEY`, and are never shown again after saving.
 
 - **Email** — set the `SMTP_*` variables in `.env`. If SMTP isn't configured, `sendMail()` logs a warning once and no-ops.
 - **ntfy** — server URL (`https://ntfy.sh` or your own server) and a topic, then subscribe to that topic in the ntfy app. On the public ntfy.sh server anyone who knows a topic name can read it, so choose a hard-to-guess one. For protected topics, add an access token (`tk_...`, created with `ntfy token add` or in the web app under Account → Access tokens). Failures are sent with max priority.

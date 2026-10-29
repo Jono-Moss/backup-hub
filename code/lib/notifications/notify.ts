@@ -1,27 +1,27 @@
 import { db } from "@/db";
 import {
-  taskNotificationRecipient,
   systemNotificationRecipient,
   backupTask,
   type SystemNotificationEvent,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { deliver } from "./channels";
+import { listChannelLinksForTask } from "./store";
 import { formatBytes } from "./notifyUtils";
 
 export async function notifyTaskSuccess(taskId: string, filename: string, sizeBytes: number) {
   const [task, recipients] = await Promise.all([
     db.select({ name: backupTask.name }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1),
-    db.select().from(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId)),
+    listChannelLinksForTask(taskId),
   ]);
   const taskName = task[0]?.name ?? taskId;
   const mb = formatBytes(sizeBytes)
 
   await Promise.all(
     recipients
-      .filter((r) => r.notifyOnSuccess)
+      .filter((r) => r.link.notifyOnSuccess)
       .map((r) =>
-        deliver(r, {
+        deliver(r.channel, {
           title: `Backup succeeded: ${taskName}`,
           body: `The backup task "${taskName}" completed successfully.\n\nFile: ${filename}\nSize: ${mb}`,
           level: "success",
@@ -33,15 +33,15 @@ export async function notifyTaskSuccess(taskId: string, filename: string, sizeBy
 export async function notifyTaskFailure(taskId: string, errorMessage: string) {
   const [task, recipients] = await Promise.all([
     db.select({ name: backupTask.name }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1),
-    db.select().from(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId)),
+    listChannelLinksForTask(taskId),
   ]);
   const taskName = task[0]?.name ?? taskId;
 
   await Promise.all(
     recipients
-      .filter((r) => r.notifyOnFailure)
+      .filter((r) => r.link.notifyOnFailure)
       .map((r) =>
-        deliver(r, {
+        deliver(r.channel, {
           title: `Backup failed: ${taskName}`,
           body: `The backup task "${taskName}" failed.\n\nError: ${errorMessage}`,
           level: "failure",

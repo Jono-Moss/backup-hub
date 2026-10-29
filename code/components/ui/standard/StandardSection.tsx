@@ -23,7 +23,7 @@ export function StandardSection({
 
   return (
     <section
-      className={`bg-white border border-line p-6 rounded-md ${sectionStyle}`}
+      className={`bg-white border border-line p-4 sm:p-6 rounded-md ${sectionStyle}`}
     >
       {children}
     </section>

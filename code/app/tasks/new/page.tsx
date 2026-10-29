@@ -40,7 +40,7 @@ export default function NewTaskPage() {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="host">
               Host
@@ -77,13 +77,13 @@ export default function NewTaskPage() {
               className="w-full border border-line px-3 py-2 text-sm"
             />
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <label className="block text-sm text-ink mb-1" htmlFor="database">
               Database name
             </label>
             <input id="database" name="database" required className="w-full border border-line px-3 py-2 text-sm" />
           </div>
-          <div className="col-span-2 flex items-center gap-2">
+          <div className="sm:col-span-2 flex items-center gap-2">
             <input id="ssl" name="ssl" type="checkbox" />
             <label htmlFor="ssl" className="text-sm text-ink">
               Require SSL
@@ -102,7 +102,7 @@ export default function NewTaskPage() {
 
         <hr className="border-line" />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <CronSchedulePicker
               name="cronExpression"

@@ -20,6 +20,8 @@ import { v4 as uuid } from "uuid";
 import { hashPassword, isPasswordStrongEnough } from "@/lib/auth/password";
 import { requireAdmin, requireUser } from "@/lib/auth/session";
 import { notifySystemEvent } from "@/lib/notifications/notify";
+import { deleteAccountDestinationsOf } from "@/lib/backup/destinations/store";
+import { deleteAccountChannelsOf } from "@/lib/notifications/store";
 
 // Admins see how many tasks each user owns — a count only. They can't open,
 // list or change anyone's tasks unless the owner shares them.
@@ -129,6 +131,11 @@ export async function deleteUser(userId: string, deleteFiles: boolean) {
   for (const task of owned) {
     await purgeTask(task.id, { deleteFiles: deleteFiles === true });
   }
+
+  // Their account-level save locations and notification channels (task-only
+  // ones went with their tasks).
+  await deleteAccountDestinationsOf(userId);
+  await deleteAccountChannelsOf(userId);
 
   // Access this user had to other people's tasks, and their API keys.
   await db.delete(taskShare).where(eq(taskShare.userId, userId));

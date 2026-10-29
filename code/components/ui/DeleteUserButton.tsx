@@ -7,6 +7,7 @@ export function DeleteUserButton({ userId }: { userId: string }) {
   return (
     <DeleteWithFilesButton
       buttonTitle="Delete"
+      compact
       heading="Delete this user?"
       description={
         "Their sessions are revoked immediately, and all of their backup tasks, run history, recipients and API keys are removed from the app. This cannot be undone."

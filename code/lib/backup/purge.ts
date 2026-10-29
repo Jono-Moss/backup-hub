@@ -5,21 +5,22 @@ import {
   backupTask,
   backupRun,
   backupRunUpload,
-  backupDestination,
-  taskNotificationRecipient,
   taskShare,
   apiKey,
 } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { taskDir } from "@/lib/backup/runner";
 import { unscheduleTask } from "@/lib/backup/scheduler";
+import { deleteDestinationsForTask } from "@/lib/backup/destinations/store";
+import { deleteChannelsForTask } from "@/lib/notifications/store";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const DELETED_TASK_MANIFEST = "_deleted-task.json";
 
 // Removes a task and everything in the database hanging off it: run history
-// (and any per-destination upload records for those runs), destinations,
+// (and any per-destination upload records for those runs), its save-location
+// links and task-only save locations,
 // notification recipients, shares, and any API keys pinned to it.
 //
 // `deleteFiles` decides what happens to the backup files on disk:
@@ -54,8 +55,11 @@ export async function purgeTask(taskId: string, opts: { deleteFiles: boolean }) 
     );
   }
   await db.delete(backupRun).where(eq(backupRun.taskId, taskId));
-  await db.delete(backupDestination).where(eq(backupDestination.taskId, taskId));
-  await db.delete(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId));
+  // Its links, and its task-only save locations. Account-level ones stay in
+  // the owner's account for their other tasks.
+  await deleteDestinationsForTask(taskId);
+  // Same for notifications: its recipients, and its task-only channels.
+  await deleteChannelsForTask(taskId);
   await db.delete(taskShare).where(eq(taskShare.taskId, taskId));
   await db.update(apiKey).set({ revokedAt: new Date() }).where(eq(apiKey.taskId, taskId));
   await db.delete(backupTask).where(eq(backupTask.id, taskId));

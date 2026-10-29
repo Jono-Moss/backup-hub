@@ -58,7 +58,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
       {passkeys.length > 0 && (
         <div className="divide-y divide-line">
           {passkeys.map((p) => (
-            <div key={p.id} className="flex items-center justify-between py-2.5">
+            <div key={p.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
               <div>
                 <p className="text-sm text-ink">{p.name}</p>
                 <p className="text-xs text-muted">

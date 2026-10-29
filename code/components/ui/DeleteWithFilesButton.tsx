@@ -12,6 +12,7 @@ export function DeleteWithFilesButton({
   keepNote,
   confirmLabel = "Delete",
   onDelete,
+  compact = false,
 }: {
   buttonTitle: string;
   heading: string;
@@ -19,6 +20,8 @@ export function DeleteWithFilesButton({
   keepNote: string;
   confirmLabel?: string;
   onDelete: (deleteFiles: boolean) => Promise<void>;
+  /** Smaller button, for use inside list rows. */
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [deleteFiles, setDeleteFiles] = useState(false);
@@ -35,7 +38,7 @@ export function DeleteWithFilesButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md font-medium px-5 py-2.5 text-sm text-danger hover:underline transition-colors"
+        className={`rounded-md font-medium text-danger hover:underline transition-colors ${compact ? "px-2.5 py-1 text-xs" : "px-5 py-2.5 text-sm"}`}
       >
         {buttonTitle}
       </button>

@@ -9,6 +9,7 @@ export function RemoveSystemRecipientButton({ id }: { id: string }) {
       action={() => removeSystemRecipient(id)}
       title="Remove"
       variant="danger"
+      compact
     />
   );
 }

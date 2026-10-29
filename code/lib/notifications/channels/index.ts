@@ -25,14 +25,14 @@ const senders: Record<NotificationChannel, NotificationChannelSender> = {
   discord: discordSender,
 };
 
-/** The columns every recipient row (task or system) has for its channel. */
+/** The columns every channel row (notification_channel, system recipient) has. */
 export interface RecipientChannelColumns {
   channel: NotificationChannel;
   email: string | null;
   encryptedConfig: string | null;
 }
 
-function configOf(recipient: RecipientChannelColumns): ChannelConfig {
+export function configOf(recipient: RecipientChannelColumns): ChannelConfig {
   if (recipient.channel === "email") return { email: recipient.email ?? "" };
   return recipient.encryptedConfig ? JSON.parse(unwrapSecret(recipient.encryptedConfig)) : {};
 }
@@ -52,12 +52,17 @@ export function channelConfigFromForm(formData: FormData): { channel: Notificati
   return { channel, config };
 }
 
+/** How a channel's config is stored: email in its own column, everything else encrypted. */
+export function channelColumns(channel: NotificationChannel, config: ChannelConfig): RecipientChannelColumns {
+  return channel === "email"
+    ? { channel, email: config.email.toLowerCase(), encryptedConfig: null }
+    : { channel, email: null, encryptedConfig: wrapSecret(JSON.stringify(config)) };
+}
+
 /** Column values to insert for a new recipient, from a submitted add-recipient form. */
 export function recipientColumnsFromForm(formData: FormData): RecipientChannelColumns {
   const { channel, config } = channelConfigFromForm(formData);
-  return channel === "email"
-    ? { channel, email: config.email, encryptedConfig: null }
-    : { channel, email: null, encryptedConfig: wrapSecret(JSON.stringify(config)) };
+  return channelColumns(channel, config);
 }
 
 /** Safe-to-display summary, e.g. "Telegram · chat 12345". Never includes secrets. */

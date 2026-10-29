@@ -25,7 +25,7 @@ export default async function RootLayout({
 
                         <StandardHeader user={user} />
 
-                        <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
+                        <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 py-6 sm:py-8">
                             {children}
                         </main>
 

@@ -3,11 +3,12 @@ import os from "os";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { db } from "@/db";
-import { backupTask, backupRun, backupDestination, backupRunUpload, type RunTrigger } from "@/db/schema";
+import { backupTask, backupRun, backupRunUpload, type RunTrigger } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { unwrapConnection, unwrapSecret, wrapDestinationConfig, unwrapDestinationConfig, encryptFile, decryptFile } from "@/lib/backup/crypto";
+import { unwrapConnection, unwrapSecret, encryptFile, decryptFile } from "@/lib/backup/crypto";
 import { getEngine } from "@/lib/backup/engines";
 import { getDestination } from "@/lib/backup/destinations";
+import { configForLink, listLinksForTask, persistingRuntime, readConfig } from "@/lib/backup/destinations/store";
 import { notifyTaskSuccess, notifyTaskFailure } from "@/lib/notifications/notify";
 
 const BACKUP_DIR = process.env.BACKUP_DIR || "/var/backups";
@@ -119,29 +120,23 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
 }
 
 async function uploadToDestinations(taskId: string, taskName: string, runId: string, filePath: string, remoteFileName: string) {
-  const destinations = await db
-    .select()
-    .from(backupDestination)
-    .where(and(eq(backupDestination.taskId, taskId), eq(backupDestination.enabled, true)));
+  const links = (await listLinksForTask(taskId)).filter(({ link }) => link.enabled);
 
   await Promise.all(
-    destinations.map(async (dest) => {
+    links.map(async ({ link, destination: dest }) => {
       const uploadId = uuid();
-      await db.insert(backupRunUpload).values({ id: uploadId, runId, destinationId: dest.id, status: "uploading" });
+      await db
+        .insert(backupRunUpload)
+        .values({ id: uploadId, runId, destinationId: dest.id, destinationLabel: dest.label, status: "uploading" });
 
       try {
-        const config = unwrapDestinationConfig(dest.encryptedConfig);
-        const result = await getDestination(dest.type).upload(config, filePath, remoteFileName, {
+        const config = readConfig(dest);
+        const result = await getDestination(dest.type).upload(configForLink(dest, config, link.subfolder), filePath, remoteFileName, {
           taskName,
           // Lets a destination persist changes to its own config mid-upload
-          // (e.g. OneDrive's rotating refresh token).
-          updateConfig: async (patch) => {
-            Object.assign(config, patch);
-            await db
-              .update(backupDestination)
-              .set({ encryptedConfig: wrapDestinationConfig(config) })
-              .where(eq(backupDestination.id, dest.id));
-          },
+          // (e.g. OneDrive's rotating refresh token) — saved to the
+          // destination itself, so every task using it gets the new token.
+          ...persistingRuntime(dest, config),
         });
         await db
           .update(backupRunUpload)

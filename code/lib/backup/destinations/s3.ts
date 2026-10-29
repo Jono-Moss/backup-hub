@@ -26,6 +26,7 @@ function objectKey(config: DestinationConfig, remoteFileName: string): string {
 export const s3Destination: BackupDestination = {
   type: "s3",
   label: "S3 (AWS / Backblaze / Wasabi / R2 / MinIO / other S3-compatible)",
+  subfolderField: "pathPrefix",
   configFields: [
     { name: "bucket", label: "Bucket", type: "text", required: true },
     { name: "region", label: "Region", type: "text", placeholder: "us-east-1", helpText: "Use \"auto\" for providers that don't use AWS regions (e.g. R2)." },

@@ -9,7 +9,10 @@ import {
   backupRun,
   backupRunUpload,
   backupDestination,
+  taskDestination,
+  DESTINATION_TYPES,
   taskNotificationRecipient,
+  notificationChannel,
   taskShare,
   appUser,
   SCOPES,
@@ -17,16 +20,27 @@ import {
   type Scope,
   type DestinationType,
 } from "@/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v4 as uuid } from "uuid";
-import { wrapConnection, wrapSecret, unwrapSecret, wrapDestinationConfig, unwrapDestinationConfig } from "@/lib/backup/crypto";
+import { wrapConnection, wrapSecret, unwrapSecret } from "@/lib/backup/crypto";
 import { runBackupForTask, deleteRun, restoreRun, clearFailedRuns } from "@/lib/backup/runner";
 import { resyncTask } from "@/lib/backup/scheduler";
 import { purgeTask } from "@/lib/backup/purge";
 import { getEngine } from "@/lib/backup/engines";
 import { getDestination, listDestinationTypes } from "@/lib/backup/destinations";
+import {
+  configForLink,
+  createDestination,
+  deleteDestination,
+  getLink,
+  linkDestination,
+  listLinksForTask,
+  normalizeSubfolder,
+  persistingRuntime,
+  readConfig,
+} from "@/lib/backup/destinations/store";
 import { requireUser } from "@/lib/auth/session";
 import {
   getTaskAccess,
@@ -36,7 +50,16 @@ import {
   canDo,
 } from "@/lib/auth/task-access";
 import { notifySystemEvent } from "@/lib/notifications/notify";
-import { channelConfigFromForm, describeRecipient, recipientColumnsFromForm, sendTest } from "@/lib/notifications/channels";
+import { channelConfigFromForm, describeRecipient, sendTest } from "@/lib/notifications/channels";
+import {
+  createChannel,
+  defaultChannelLabel,
+  deleteChannel,
+  getChannelLink,
+  linkChannel,
+  listChannelLinksForTask,
+} from "@/lib/notifications/store";
+import { NOTIFICATION_CHANNEL_DEFINITIONS } from "@/lib/notifications/channels/definitions";
 
 // Tasks the current user owns or that have been shared with them.
 export async function listTasks() {
@@ -73,15 +96,21 @@ export async function listRuns(taskId: string) {
 // to come from listRuns(taskId), but this re-checks the scope itself and
 // only ever returns rows for runs that actually belong to taskId — a caller
 // can't use it to read another task's upload history by passing foreign ids.
+//
+// Only the owner gets remotePath and errorMessage: paths like
+// "sftp://host/folder/file" and raw provider errors reveal the owner's
+// storage setup, which people the task is shared with don't need — they
+// still see each upload's status.
 export async function listRunUploads(taskId: string, runIds: string[]) {
-  await requireTaskScope(taskId, "tasks:read");
+  const { access } = await requireTaskScope(taskId, "tasks:read");
   if (runIds.length === 0) return [];
-  return db
+  const uploads = await db
     .select({ upload: backupRunUpload })
     .from(backupRunUpload)
     .innerJoin(backupRun, eq(backupRun.id, backupRunUpload.runId))
     .where(and(eq(backupRun.taskId, taskId), inArray(backupRunUpload.runId, runIds)))
     .then((rows) => rows.map((r) => r.upload));
+  return access.isOwner ? uploads : uploads.map((u) => ({ ...u, remotePath: null, errorMessage: null }));
 }
 
 export async function createTask(formData: FormData) {
@@ -264,35 +293,99 @@ export async function restoreBackupRun(taskId: string, runId: string, password?:
 // --- Per-task notification recipients ---
 
 export async function listTaskRecipients(taskId: string) {
-  await requireTaskScope(taskId, "tasks:read");
-  const rows = await db.select().from(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId));
+  const { access } = await requireTaskScope(taskId, "tasks:read");
+  const rows = await listChannelLinksForTask(taskId);
   // Push-channel config holds bot tokens / webhook URLs — only send the
-  // browser a safe summary of where each recipient goes.
-  return rows.map(({ encryptedConfig, email, ...rest }) => ({
-    ...rest,
-    target: describeRecipient({ channel: rest.channel, email, encryptedConfig }),
+  // browser a safe summary of where each recipient goes. Even that summary
+  // (email address, ntfy topic, Telegram chat ID) and the channel's name
+  // (often an email address) are owner-only: on a public ntfy server the
+  // topic name is effectively the password.
+  return rows.map(({ link, channel }) => ({
+    id: link.id,
+    channelLabel: NOTIFICATION_CHANNEL_DEFINITIONS[channel.channel].label,
+    label: access.isOwner ? channel.label : null,
+    target: access.isOwner ? describeRecipient(channel) : null,
+    taskOnly: channel.taskId === taskId,
+    notifyOnSuccess: link.notifyOnSuccess,
+    notifyOnFailure: link.notifyOnFailure,
   }));
 }
 
-export async function addTaskRecipient(taskId: string, formData: FormData) {
-  await requireTaskScope(taskId, "tasks:write");
-
-  await db.insert(taskNotificationRecipient).values({
-    id: uuid(),
-    taskId,
-    ...recipientColumnsFromForm(formData),
-    notifyOnSuccess: formData.get("notifyOnSuccess") === "on",
-    notifyOnFailure: formData.get("notifyOnFailure") === "on",
-  });
-  revalidatePath(`/tasks/${taskId}`);
+// The owner's account-level notification channels this task doesn't use
+// yet. Owner-only, for the same reason as listAttachableDestinations.
+export async function listAttachableChannels(taskId: string) {
+  const me = await requireTaskOwner(taskId);
+  const [mine, links] = await Promise.all([
+    db
+      .select()
+      .from(notificationChannel)
+      .where(and(eq(notificationChannel.ownerId, me.id), isNull(notificationChannel.taskId))),
+    listChannelLinksForTask(taskId),
+  ]);
+  const used = new Set(links.map((l) => l.channel.id));
+  return mine
+    .filter((c) => !used.has(c.id))
+    .map((c) => ({ id: c.id, label: c.label, channelLabel: NOTIFICATION_CHANNEL_DEFINITIONS[c.channel].label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
 
+export async function attachSavedChannel(taskId: string, formData: FormData) {
+  const me = await requireTaskOwner(taskId);
+  const channelId = String(formData.get("channelId") ?? "");
+  const [channel] = await db
+    .select()
+    .from(notificationChannel)
+    .where(and(eq(notificationChannel.id, channelId), eq(notificationChannel.ownerId, me.id), isNull(notificationChannel.taskId)))
+    .limit(1);
+  if (!channel) throw new Error("Notification channel not found");
+  const links = await listChannelLinksForTask(taskId);
+  if (links.some((l) => l.channel.id === channel.id)) throw new Error("This task already uses that notification channel");
+
+  await linkChannel(taskId, channel.id, formData.get("notifyOnSuccess") === "on", formData.get("notifyOnFailure") === "on");
+  revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/notification-channels");
+}
+
+// A new channel added from a task page. Owned by the task's owner; task-only
+// unless the *owner* ticked "save to my account" — same rules as
+// addDestination.
+export async function addTaskRecipient(taskId: string, formData: FormData) {
+  const { user, access } = await requireTaskScope(taskId, "tasks:write");
+  const [task] = await db.select({ ownerId: backupTask.ownerId }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
+  if (!task) throw new Error("Task not found");
+  const { channel, config } = channelConfigFromForm(formData);
+  const toAccount = formData.get("saveToAccount") === "true" && access.isOwner;
+
+  await createChannel({
+    ownerId: task.ownerId,
+    createdBy: user.id,
+    taskOnlyFor: toAccount ? null : taskId,
+    channel,
+    label: String(formData.get("label") ?? "").trim() || defaultChannelLabel(channel, config),
+    config,
+    link: {
+      taskId,
+      notifyOnSuccess: formData.get("notifyOnSuccess") === "on",
+      notifyOnFailure: formData.get("notifyOnFailure") === "on",
+    },
+  });
+  revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/notification-channels");
+}
+
+// Removing a task-only channel deletes it; removing an account-level one only
+// stops this task using it.
 export async function removeTaskRecipient(taskId: string, recipientId: string) {
   await requireTaskScope(taskId, "tasks:write");
-  await db
-    .delete(taskNotificationRecipient)
-    .where(and(eq(taskNotificationRecipient.id, recipientId), eq(taskNotificationRecipient.taskId, taskId)));
+  const row = await getChannelLink(taskId, recipientId);
+  if (!row) return;
+  if (row.channel.taskId === taskId) {
+    await deleteChannel(row.channel.id);
+  } else {
+    await db.delete(taskNotificationRecipient).where(eq(taskNotificationRecipient.id, recipientId));
+  }
   revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/notification-channels");
 }
 
 // "Send test" on the add-recipient forms (task and system). Like
@@ -334,36 +427,118 @@ export async function listDestinationProviders() {
   }));
 }
 
+// What the task page's "Save locations" list shows. Only the owner gets the
+// per-task subfolder (it's part of where their files go — same rule as
+// upload paths in listRunUploads). Credentials never leave the server.
 export async function listTaskDestinations(taskId: string) {
-  await requireTaskScope(taskId, "tasks:read");
-  const rows = await db.select().from(backupDestination).where(eq(backupDestination.taskId, taskId));
-  // Never send encryptedConfig to the client — it's ciphertext, not secret
-  // by itself, but there's no reason to ship it to the browser at all.
-  return rows.map(({ encryptedConfig, ...rest }) => rest);
+  const { access } = await requireTaskScope(taskId, "tasks:read");
+  const rows = await listLinksForTask(taskId);
+  return rows.map(({ link, destination }) => ({
+    linkId: link.id,
+    destinationId: destination.id,
+    label: destination.label,
+    type: destination.type,
+    enabled: link.enabled,
+    taskOnly: destination.taskId === taskId,
+    subfolder: access.isOwner ? link.subfolder : null,
+  }));
 }
 
-function destinationConfigFromForm(formData: FormData): Record<string, string> {
+// The owner's account-level save locations not yet used by this task — the
+// "use a saved location" picker. Owner-only: a shared user must never see
+// (or attach) the owner's other credentials, and the owner's picker never
+// offers anyone else's.
+export async function listAttachableDestinations(taskId: string) {
+  const me = await requireTaskOwner(taskId);
+  const [mine, links] = await Promise.all([
+    db
+      .select()
+      .from(backupDestination)
+      .where(and(eq(backupDestination.ownerId, me.id), isNull(backupDestination.taskId))),
+    listLinksForTask(taskId),
+  ]);
+  const used = new Set(links.map((l) => l.destination.id));
+  return mine
+    .filter((d) => !used.has(d.id))
+    .map((d) => ({
+      id: d.id,
+      label: d.label,
+      type: d.type,
+      supportsSubfolder: !!getDestination(d.type).subfolderField,
+    }));
+}
+
+export async function attachSavedDestination(taskId: string, formData: FormData) {
+  const me = await requireTaskOwner(taskId);
+  const destinationId = String(formData.get("destinationId") ?? "");
+  const [dest] = await db
+    .select()
+    .from(backupDestination)
+    .where(and(eq(backupDestination.id, destinationId), eq(backupDestination.ownerId, me.id), isNull(backupDestination.taskId)))
+    .limit(1);
+  if (!dest) throw new Error("Save location not found");
+
+  const subfolder = getDestination(dest.type).subfolderField ? normalizeSubfolder(String(formData.get("subfolder") ?? "")) : null;
+  const links = await listLinksForTask(taskId);
+  if (links.some((l) => l.destination.id === dest.id)) throw new Error("This task already uses that save location");
+
+  await linkDestination(taskId, dest.id, subfolder);
+  revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/locations");
+}
+
+function destinationConfigFromForm(type: DestinationType, formData: FormData): Record<string, string> {
+  // Only the provider's own fields — nothing else on the form (label,
+  // "save to account", ...) ends up in the stored config.
   const config: Record<string, string> = {};
-  for (const [key, value] of formData.entries()) {
-    if (key === "type" || key === "label") continue;
-    if (typeof value === "string") config[key] = value;
+  for (const field of getDestination(type).configFields) {
+    const value = formData.get(field.name);
+    if (typeof value === "string" && value !== "") config[field.name] = value;
   }
   return config;
 }
 
-export async function addTaskDestination(taskId: string, formData: FormData) {
-  await requireTaskScope(taskId, "tasks:write");
+function destinationTypeFromForm(formData: FormData): DestinationType {
   const type = String(formData.get("type")) as DestinationType;
-  const label = String(formData.get("label") || getDestination(type).label);
+  if (!DESTINATION_TYPES.includes(type)) throw new Error(`Unsupported backup destination: ${type}`);
+  return type;
+}
 
-  await db.insert(backupDestination).values({
-    id: uuid(),
-    taskId,
+// Who a new save location belongs to, and whether it's task-only. Shared by
+// the plain add form and the sign-in (Connect) flow.
+//   - From a task page: needs "Manage tasks" on it. Owned by the task's
+//     owner; task-only unless the *owner* ticked "save to my account" (a
+//     shared user's credentials can never become reusable by the owner).
+//   - From the save locations page (taskId null): the current user's own
+//     account-level location.
+async function resolveNewDestinationScope(taskId: string | null, saveToAccount: boolean) {
+  if (!taskId) {
+    const me = await requireUser();
+    return { ownerId: me.id, createdBy: me.id, taskOnlyFor: null, linkToTaskId: undefined };
+  }
+  const { user, access } = await requireTaskScope(taskId, "tasks:write");
+  const [task] = await db.select({ ownerId: backupTask.ownerId }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
+  if (!task) throw new Error("Task not found");
+  const toAccount = saveToAccount && access.isOwner;
+  return { ownerId: task.ownerId, createdBy: user.id, taskOnlyFor: toAccount ? null : taskId, linkToTaskId: taskId };
+}
+
+function revalidateDestinationPages(taskId: string | null) {
+  if (taskId) revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/locations");
+}
+
+// taskId null = adding from the save locations page (account-level).
+export async function addDestination(taskId: string | null, formData: FormData) {
+  const type = destinationTypeFromForm(formData);
+  const scope = await resolveNewDestinationScope(taskId, formData.get("saveToAccount") === "true");
+  await createDestination({
+    ...scope,
     type,
-    label,
-    encryptedConfig: wrapDestinationConfig(destinationConfigFromForm(formData)),
+    label: String(formData.get("label") || "").trim() || getDestination(type).label,
+    config: destinationConfigFromForm(type, formData),
   });
-  revalidatePath(`/tasks/${taskId}`);
+  revalidateDestinationPages(taskId);
 }
 
 // Standalone check used by the "add destination" form before saving, same
@@ -372,50 +547,53 @@ export async function addTaskDestination(taskId: string, formData: FormData) {
 // requires being logged in, not any particular task permission.
 export async function testDestinationConnection(formData: FormData) {
   await requireUser();
-  const type = String(formData.get("type")) as DestinationType;
-  return getDestination(type).testConnection(destinationConfigFromForm(formData));
+  const type = destinationTypeFromForm(formData);
+  return getDestination(type).testConnection(destinationConfigFromForm(type, formData));
 }
 
-export async function toggleTaskDestinationEnabled(taskId: string, destinationId: string, enabled: boolean) {
+export async function toggleTaskDestinationEnabled(taskId: string, linkId: string, enabled: boolean) {
   await requireTaskScope(taskId, "tasks:write");
   await db
-    .update(backupDestination)
+    .update(taskDestination)
     .set({ enabled })
-    .where(and(eq(backupDestination.id, destinationId), eq(backupDestination.taskId, taskId)));
+    .where(and(eq(taskDestination.id, linkId), eq(taskDestination.taskId, taskId)));
   revalidatePath(`/tasks/${taskId}`);
 }
 
-export async function removeTaskDestination(taskId: string, destinationId: string) {
+// Removing a task-only location deletes it; removing an account-level one
+// only stops this task using it — it stays saved for the owner's other tasks.
+export async function removeTaskDestination(taskId: string, linkId: string) {
   await requireTaskScope(taskId, "tasks:write");
-  await db
-    .delete(backupDestination)
-    .where(and(eq(backupDestination.id, destinationId), eq(backupDestination.taskId, taskId)));
-  revalidatePath(`/tasks/${taskId}`);
+  const row = await getLink(taskId, linkId);
+  if (!row) return;
+  if (row.destination.taskId === taskId) {
+    await deleteDestination(row.destination.id);
+  } else {
+    await db.delete(taskDestination).where(eq(taskDestination.id, linkId));
+  }
+  revalidateDestinationPages(taskId);
 }
 
 // Re-runs testConnection with a destination's already-saved (encrypted)
-// config — used by a "Test" button next to an existing destination, as
-// opposed to the one on the add-destination form which tests in-progress,
-// unsaved values.
-export async function testExistingTaskDestination(taskId: string, destinationId: string) {
-  await requireTaskScope(taskId, "tasks:write");
-  const [dest] = await db
-    .select()
-    .from(backupDestination)
-    .where(and(eq(backupDestination.id, destinationId), eq(backupDestination.taskId, taskId)))
-    .limit(1);
-  if (!dest) return { ok: false as const, message: "Destination not found." };
+// config, as this task would use it (subfolder included) — used by the
+// "Test" button next to an existing destination, as opposed to the one on
+// the add-destination form which tests in-progress, unsaved values.
+export async function testExistingTaskDestination(taskId: string, linkId: string) {
+  const { access } = await requireTaskScope(taskId, "tasks:write");
+  const row = await getLink(taskId, linkId);
+  if (!row) return { ok: false as const, message: "Destination not found." };
 
-  const config = unwrapDestinationConfig(dest.encryptedConfig);
-  return getDestination(dest.type).testConnection(config, {
-    updateConfig: async (patch) => {
-      Object.assign(config, patch);
-      await db
-        .update(backupDestination)
-        .set({ encryptedConfig: wrapDestinationConfig(config) })
-        .where(eq(backupDestination.id, destinationId));
-    },
-  });
+  const config = readConfig(row.destination);
+  const result = await getDestination(row.destination.type).testConnection(
+    configForLink(row.destination, config, row.link.subfolder),
+    persistingRuntime(row.destination, config)
+  );
+  // Test messages and errors can name hosts, folders and SFTP fingerprints —
+  // shared managers only get pass/fail.
+  if (access.isOwner) return result;
+  return result.ok
+    ? { ok: true }
+    : { ok: false, message: "connection failed (details are only shown to the task owner)" };
 }
 
 // --- "Connect your account" (OAuth device flow) ---
@@ -427,11 +605,14 @@ export async function testExistingTaskDestination(taskId: string, destinationId:
 // server-side session state is needed. And the resulting refresh token never
 // reaches the browser at all: on approval, poll() saves the destination
 // itself.
+//
+// taskId null = connecting from the save locations page (account-level).
 
 const CONNECT_TOKEN_TTL_BUFFER_MS = 10_000;
 
-export async function startDestinationConnect(taskId: string, type: DestinationType) {
-  await requireTaskScope(taskId, "tasks:write");
+export async function startDestinationConnect(taskId: string | null, type: DestinationType) {
+  if (taskId) await requireTaskScope(taskId, "tasks:write");
+  const me = await requireUser();
   const connector = getDestination(type).connect;
   if (!connector) return { ok: false as const, message: "This provider doesn't support signing in." };
   if (!connector.isAvailable()) {
@@ -444,6 +625,7 @@ export async function startDestinationConnect(taskId: string, type: DestinationT
       JSON.stringify({
         type,
         taskId,
+        userId: me.id,
         state: flow.state,
         expiresAt: Date.now() + flow.expiresInSeconds * 1000 + CONNECT_TOKEN_TTL_BUFFER_MS,
       })
@@ -462,24 +644,26 @@ export async function startDestinationConnect(taskId: string, type: DestinationT
 }
 
 export async function pollDestinationConnect(
-  taskId: string,
+  taskId: string | null,
   token: string,
   label: string,
-  extra: Record<string, string>
+  extra: Record<string, string>,
+  saveToAccount: boolean
 ): Promise<
   | { status: "pending"; slowDown?: boolean }
   | { status: "complete"; account?: string }
   | { status: "error"; message: string }
 > {
-  await requireTaskScope(taskId, "tasks:write");
+  if (taskId) await requireTaskScope(taskId, "tasks:write");
+  const me = await requireUser();
 
-  let payload: { type: DestinationType; taskId: string; state: Record<string, string>; expiresAt: number };
+  let payload: { type: DestinationType; taskId: string | null; userId: string; state: Record<string, string>; expiresAt: number };
   try {
     payload = JSON.parse(unwrapSecret(token));
   } catch {
     return { status: "error", message: "Invalid or tampered sign-in session. Please start again." };
   }
-  if (payload.taskId !== taskId) {
+  if (payload.taskId !== taskId || payload.userId !== me.id) {
     return { status: "error", message: "This sign-in session belongs to a different task. Please start again." };
   }
   if (Date.now() > payload.expiresAt) {
@@ -502,14 +686,14 @@ export async function pollDestinationConnect(
   }
   Object.assign(config, result.config);
 
-  await db.insert(backupDestination).values({
-    id: uuid(),
-    taskId,
+  const scope = await resolveNewDestinationScope(taskId, saveToAccount);
+  await createDestination({
+    ...scope,
     type: payload.type,
     label: label.trim() || (result.account ? `${destination.label} (${result.account})` : destination.label),
-    encryptedConfig: wrapDestinationConfig(config),
+    config,
   });
-  revalidatePath(`/tasks/${taskId}`);
+  revalidateDestinationPages(taskId);
 
   return { status: "complete", account: result.account };
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  addTaskDestination,
+  addDestination,
   testDestinationConnection,
   startDestinationConnect,
   pollDestinationConnect,
@@ -38,6 +38,7 @@ type Flow = {
   expiresAt: number;
   label: string;
   extra: Record<string, string>;
+  saveToAccount: boolean;
 };
 
 // Renders the right config fields for whichever provider is selected —
@@ -49,7 +50,20 @@ type Flow = {
 // "Connect" mode: no credentials to paste, just click, enter a code on the
 // provider's site, and approve. "Advanced" reveals the credential fields
 // for people bringing their own OAuth app.
-export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; providers: Provider[] }) {
+//
+// Used on a task page (taskId set: the location is added to that task —
+// task-only unless the owner ticks "save to my account") and on the save
+// locations page (taskId null: always saved to the account).
+export function AddTaskDestinationForm({
+  taskId,
+  providers,
+  canSaveToAccount = false,
+}: {
+  taskId: string | null;
+  providers: Provider[];
+  /** Task owners only — a shared user's credentials can't become reusable by the owner. */
+  canSaveToAccount?: boolean;
+}) {
   const [type, setType] = useState(providers[0]?.type ?? "");
   const [advanced, setAdvanced] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
@@ -59,8 +73,8 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
   const formRef = useRef<HTMLFormElement>(null);
 
   const provider = providers.find((p) => p.type === type);
-  const bound = addTaskDestination.bind(null, taskId);
-  const formId = `add-destination-form-${taskId}`;
+  const bound = addDestination.bind(null, taskId);
+  const formId = `add-destination-form-${taskId ?? "account"}`;
 
   // "Connect" mode = provider supports sign-in, the server has it set up,
   // and the user hasn't opted into pasting their own credentials.
@@ -87,8 +101,9 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
 
     const extra: Record<string, string> = {};
     for (const [key, value] of data.entries()) {
-      if (key !== "type" && key !== "label" && typeof value === "string") extra[key] = value;
+      if (key !== "type" && key !== "label" && key !== "saveToAccount" && typeof value === "string") extra[key] = value;
     }
+    const saveToAccount = data.get("saveToAccount") === "true";
 
     const started = await startDestinationConnect(taskId, provider.type as DestinationType);
     if (!started.ok) {
@@ -103,6 +118,7 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
       expiresAt: Date.now() + started.expiresInSeconds * 1000,
       label: String(data.get("label") ?? ""),
       extra,
+      saveToAccount,
     });
   }
 
@@ -121,7 +137,7 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
         setFlow(null);
         return;
       }
-      const res = await pollDestinationConnect(taskId, flow.token, flow.label, flow.extra);
+      const res = await pollDestinationConnect(taskId, flow.token, flow.label, flow.extra, flow.saveToAccount);
       if (cancelled) return;
       if (res.status === "pending") {
         if (res.slowDown) delay += 5000;
@@ -162,9 +178,9 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
       className="space-y-4"
     >
       <p className="mt-2 text-sm font-semibold text-ink">
-        Add Destination
+        {taskId ? "Add a new save location" : "Add a save location"}
       </p>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="destination-type">
             Provider
@@ -211,7 +227,7 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
         <div key={`${type}-${field.name}`}>
           {field.type === "checkbox" ? (
             <label className="flex items-center gap-2 text-sm text-ink">
-              <input type="checkbox" name={field.name} />
+              <input type="checkbox" name={field.name} value="true" />
               {field.label}
             </label>
           ) : (
@@ -250,6 +266,18 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
         </div>
       ))}
 
+      {canSaveToAccount && (
+        <label className="flex items-start gap-2 text-sm text-ink">
+          <input type="checkbox" name="saveToAccount" value="true" className="mt-0.5" />
+          <span>
+            Save to my account so my other tasks can use it
+            <span className="block text-xs text-muted">
+              Leave unticked to keep it task-only: these credentials can then only ever be used by this task.
+            </span>
+          </span>
+        </label>
+      )}
+
       {flow && (
         <div className="border border-line rounded-md p-4 space-y-2 bg-white">
           <p className="text-sm text-ink">
@@ -275,7 +303,7 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
       )}
 
       {connectedAccount && (
-        <p className="text-sm text-primary">Connected as {connectedAccount}. The destination has been added.</p>
+        <p className="text-sm text-primary">Connected as {connectedAccount}. The save location has been added.</p>
       )}
       {connectError && <p className="text-sm text-danger">{connectError}</p>}
 
@@ -290,7 +318,7 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
         ) : (
           <>
             <StandardActionButton action={handleTest} variant="outline" title="Test connection" pendingTitle="Testing…" />
-            <StandardSubmitButton title="Add destination" />
+            <StandardSubmitButton title="Add save location" />
           </>
         )}
         {provider?.supportsConnect && provider.connectAvailable && (

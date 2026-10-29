@@ -121,17 +121,32 @@ export const backupRun = mysqlTable(
   })
 );
 
-// A remote save location attached to a task. A task can have zero or more
-// of these — each completed run gets copied to every enabled destination,
-// on top of the local copy that's always kept under BACKUP_DIR. Managing
-// destinations requires the same `tasks:write` scope as notification
-// recipients — anyone the owner shares "Manage tasks" with can add and
-// remove them too.
+// A remote save location: provider + credentials, saved once. Tasks use it
+// through `task_destination` links below; each completed run gets copied to
+// every enabled link's destination, on top of the local copy that's always
+// kept under BACKUP_DIR.
+//
+// Two scopes:
+//   - account-level (taskId NULL): saved to the owner's account and offered
+//     in the "use a saved location" picker on any of *their* tasks;
+//   - task-only (taskId set): tied to that one task and never offered
+//     anywhere else, so its credentials can't be reused even by the owner
+//     without entering them again. Removing it from the task deletes it.
+//
+// ownerId is always the owner of the task it was added to (or the account
+// it was saved to) — even when a shared "Manage tasks" user added it — so
+// removing someone's share never leaves their items in limbo. createdBy
+// records who actually entered the credentials: only they may edit one
+// (or make a task-only one reusable), so a task owner can't repoint a
+// shared user's credentials at a different server.
 export const backupDestination = mysqlTable(
   "backup_destination",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
-    taskId: varchar("task_id", { length: 36 }).notNull(),
+    ownerId: varchar("owner_id", { length: 36 }).notNull(),
+    // NULL = account-level, set = task-only for that task.
+    taskId: varchar("task_id", { length: 36 }),
+    createdBy: varchar("created_by", { length: 36 }).notNull(),
     type: mysqlEnum("type", DESTINATION_TYPES).notNull(),
     // User-given label ("Backblaze — offsite", "Shared Drive") so a task
     // with several destinations of the same type stays legible in the UI.
@@ -143,11 +158,33 @@ export const backupDestination = mysqlTable(
     // `text`, not varchar: SFTP private keys (RSA 4096 especially) push the
     // encrypted JSON past a few KB.
     encryptedConfig: text("encrypted_config").notNull(),
-    enabled: boolean("enabled").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
     taskIdx: index("backup_destination_task_idx").on(table.taskId),
+    ownerIdx: index("backup_destination_owner_idx").on(table.ownerId),
+  })
+);
+
+// Which destinations a task copies its backups to. Per-task settings live
+// here, not on the destination, so one saved location can be used by
+// several tasks with different settings.
+export const taskDestination = mysqlTable(
+  "task_destination",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    taskId: varchar("task_id", { length: 36 }).notNull(),
+    destinationId: varchar("destination_id", { length: 36 }).notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    // Appended to the destination's own folder/prefix for this task only, so
+    // tasks sharing one saved location don't all land in the same folder.
+    // Only for providers with a path-style folder (see BackupDestination.subfolderField).
+    subfolder: varchar("subfolder", { length: 512 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    taskDestinationIdx: uniqueIndex("task_destination_task_destination_idx").on(table.taskId, table.destinationId),
+    destinationIdx: index("task_destination_destination_idx").on(table.destinationId),
   })
 );
 
@@ -162,6 +199,9 @@ export const backupRunUpload = mysqlTable(
     id: varchar("id", { length: 36 }).primaryKey(),
     runId: varchar("run_id", { length: 36 }).notNull(),
     destinationId: varchar("destination_id", { length: 36 }).notNull(),
+    // Copy of the destination's label at upload time, so run history still
+    // reads sensibly after a saved location is renamed or deleted.
+    destinationLabel: varchar("destination_label", { length: 255 }),
     status: mysqlEnum("status", DESTINATION_UPLOAD_STATUSES).notNull().default("uploading"),
     // Human-readable location the file ended up at (e.g. "s3://bucket/key",
     // a Drive file id, or a Graph item path) — shown in the UI, not parsed.
@@ -327,22 +367,50 @@ export type TaskNotificationEvent = (typeof TASK_NOTIFICATION_EVENTS)[number];
 export const NOTIFICATION_CHANNELS = ["email", "ntfy", "telegram", "discord"] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
 
+// A saved way of reaching someone: a channel type plus its settings. Same
+// ownership model as backup_destination (see the comment there):
+//   - account-level (taskId NULL): offered in the "use a saved channel"
+//     picker on any of the owner's tasks;
+//   - task-only (taskId set): tied to that one task, never offered elsewhere,
+//     deleted when removed from the task.
+// ownerId is the task owner (or account owner); createdBy is whoever entered
+// the settings — only they may edit it or make a task-only one reusable.
+export const notificationChannel = mysqlTable(
+  "notification_channel",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    ownerId: varchar("owner_id", { length: 36 }).notNull(),
+    // NULL = account-level, set = task-only for that task.
+    taskId: varchar("task_id", { length: 36 }),
+    createdBy: varchar("created_by", { length: 36 }).notNull(),
+    channel: mysqlEnum("channel", NOTIFICATION_CHANNELS).notNull(),
+    label: varchar("label", { length: 255 }).notNull(),
+    // Only set for the "email" channel.
+    email: varchar("email", { length: 255 }),
+    // AES-256-GCM encrypted JSON of the channel's fields (non-email channels only).
+    encryptedConfig: text("encrypted_config"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    ownerIdx: index("notification_channel_owner_idx").on(table.ownerId),
+    taskIdx: index("notification_channel_task_idx").on(table.taskId),
+  })
+);
+
+// A task's use of a notification channel, and which outcomes it's sent.
 export const taskNotificationRecipient = mysqlTable(
   "task_notification_recipient",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     taskId: varchar("task_id", { length: 36 }).notNull(),
-    channel: mysqlEnum("channel", NOTIFICATION_CHANNELS).notNull().default("email"),
-    // Only set for the "email" channel.
-    email: varchar("email", { length: 255 }),
-    // AES-256-GCM encrypted JSON of the channel's fields (non-email channels only).
-    encryptedConfig: text("encrypted_config"),
+    channelId: varchar("channel_id", { length: 36 }).notNull(),
     notifyOnSuccess: boolean("notify_on_success").notNull().default(false),
     notifyOnFailure: boolean("notify_on_failure").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
     taskIdx: index("task_notification_recipient_task_idx").on(table.taskId),
+    channelIdx: index("task_notification_recipient_channel_idx").on(table.channelId),
   })
 );
 
@@ -361,7 +429,7 @@ export type SystemNotificationEvent = (typeof SYSTEM_NOTIFICATION_EVENTS)[number
 export const systemNotificationRecipient = mysqlTable("system_notification_recipient", {
   id: varchar("id", { length: 36 }).primaryKey(),
   channel: mysqlEnum("channel", NOTIFICATION_CHANNELS).notNull().default("email"),
-  // Same split as taskNotificationRecipient: `email` for the email channel,
+  // Same split as notificationChannel: `email` for the email channel,
   // `encryptedConfig` for the rest.
   email: varchar("email", { length: 255 }),
   encryptedConfig: text("encrypted_config"),

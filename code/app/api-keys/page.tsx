@@ -28,7 +28,7 @@ export default async function ApiKeysPage() {
           <p className="text-sm text-muted p-6">No API keys yet.</p>
         ) : (
           keys.map((key) => (
-            <div key={key.id} className="flex items-center justify-between px-5 py-4">
+            <div key={key.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-4 sm:px-5">
               <div>
                 <p className="text-sm font-medium text-ink">{key.name}</p>
                 <p className="text-xs text-muted mt-0.5 font-mono">{key.keyPrefix}…</p>

@@ -64,6 +64,7 @@ function remoteFilePath(dir: string, remoteFileName: string): string {
 export const sftpDestination: BackupDestination = {
   type: "sftp",
   label: "SFTP (SSH file transfer)",
+  subfolderField: "pathPrefix",
   configFields: [
     { name: "host", label: "Host", type: "text", required: true, placeholder: "sftp.example.com" },
     { name: "port", label: "Port", type: "number", placeholder: "22", helpText: "Leave blank for the default." },
@@ -73,6 +74,7 @@ export const sftpDestination: BackupDestination = {
       name: "privateKey",
       label: "Private key (optional)",
       type: "textarea",
+      secret: true,
       placeholder: "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----",
       helpText: "Paste the full key in OpenSSH or PEM format. Stored encrypted.",
     },

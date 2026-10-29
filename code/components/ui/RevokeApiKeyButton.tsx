@@ -8,6 +8,7 @@ export function RevokeApiKeyButton({ id }: { id: string }) {
     <StandardActionButton
       title="Revoke"
       variant="danger"
+      compact
       pendingTitle="Revoking..."
       confirmMessage="Revoke this API key? Any app using it will immediately lose access."
       action={() => revokeApiKey(id)}

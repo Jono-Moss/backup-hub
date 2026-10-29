@@ -11,6 +11,7 @@ export function RevokeTaskShareButton({ taskId, shareId }: { taskId: string; sha
       action={bound}
       title="Remove"
       variant="danger"
+      compact
       pendingTitle="Removing..."
       confirmMessage="Stop sharing this task with this user? Any API keys they made for it stop working too."
     />

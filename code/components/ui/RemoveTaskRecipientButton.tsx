@@ -6,9 +6,11 @@ import { StandardActionButton } from "./standard/StandardActionButton";
 export function RemoveTaskRecipientButton({
   taskId,
   recipientId,
+  taskOnly,
 }: {
   taskId: string;
   recipientId: string;
+  taskOnly: boolean;
 }) {
   const bound = removeTaskRecipient.bind(null, taskId, recipientId);
 
@@ -17,8 +19,13 @@ export function RemoveTaskRecipientButton({
       action={bound}
       title="Remove"
       variant="danger"
+      compact
       pendingTitle="Removing..."
-      confirmMessage="Delete this notification receipt? This cannot be undone."
+      confirmMessage={
+        taskOnly
+          ? "Remove this notification channel? It's task-only, so it and its saved settings are deleted."
+          : "Stop this task using this notification channel? It stays saved in the owner's account for their other tasks."
+      }
     />
   );
 }

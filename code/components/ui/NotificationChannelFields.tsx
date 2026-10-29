@@ -9,7 +9,7 @@ import { StandardActionButton } from "./standard/StandardActionButton";
 // Channel dropdown + that channel's fields + a "Send test" button. Rendered
 // inside both add-recipient forms (task and system); the fields are
 // generated from lib/notifications/channels/definitions.ts.
-export function NotificationChannelFields({ idPrefix }: { idPrefix: string }) {
+export function NotificationChannelFields({ idPrefix, showLabel = false }: { idPrefix: string; showLabel?: boolean }) {
   const [channel, setChannel] = useState<NotificationChannel>("email");
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -45,6 +45,20 @@ export function NotificationChannelFields({ idPrefix }: { idPrefix: string }) {
           ))}
         </select>
       </div>
+
+      {showLabel && (
+        <div>
+          <label className="block text-sm text-ink mb-1" htmlFor={`${idPrefix}-label`}>
+            Name (optional)
+          </label>
+          <input
+            id={`${idPrefix}-label`}
+            name="label"
+            placeholder={channel === "email" ? "The email address" : definition.label}
+            className="w-full border border-line px-3 py-2 text-sm"
+          />
+        </div>
+      )}
 
       {definition.fields.map((field) => (
         <div key={`${channel}-${field.name}`}>

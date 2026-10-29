@@ -30,6 +30,17 @@ export interface DestinationConfigField {
    * sign-in flow instead of being pasted.
    */
   credential?: boolean;
+  /**
+   * Never sent back to the browser once saved: the edit form leaves it blank
+   * and blank means "keep the current value". Fields of type "password" and
+   * `credential` fields are always treated as secret; set this for anything
+   * else that is (e.g. a pasted private key).
+   */
+  secret?: boolean;
+}
+
+export function isSecretField(field: DestinationConfigField): boolean {
+  return field.type === "password" || !!field.credential || !!field.secret;
 }
 
 // Config values as submitted by the form / stored (decrypted) — always
@@ -108,6 +119,13 @@ export interface BackupDestination {
   readonly label: string;
   /** Drives the generic config form — see components/ui/AddTaskDestinationForm.tsx. */
   readonly configFields: DestinationConfigField[];
+  /**
+   * Name of the config field holding a path-style folder/prefix (e.g.
+   * "pathPrefix"). When set, a task using this destination can add its own
+   * subfolder underneath it. Omit for providers without folder paths
+   * (Google Drive uses folder IDs; email has no folders).
+   */
+  readonly subfolderField?: string;
   /** Optional one-click account sign-in. Providers without OAuth simply omit it. */
   readonly connect?: DestinationConnector;
   /** Uploads one local file to this destination. Called after a run completes successfully. */

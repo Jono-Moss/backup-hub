@@ -8,6 +8,8 @@ import {
   listTaskShares,
   listTaskDestinations,
   listDestinationProviders,
+  listAttachableDestinations,
+  listAttachableChannels,
 } from "../actions";
 import { RunNowButton } from "@/components/ui/RunNowButton";
 import { ToggleEnabledButton } from "@/components/ui/ToggleEnabledButton";
@@ -16,6 +18,8 @@ import { DeleteRunButton, RestoreRunButton, ClearFailedRunsButton } from "@/comp
 import { AddTaskRecipientForm } from "@/components/ui/AddTaskRecipientForm";
 import { RemoveTaskRecipientButton } from "@/components/ui/RemoveTaskRecipientButton";
 import { AddTaskDestinationForm } from "@/components/ui/AddTaskDestinationForm";
+import { AttachSavedDestinationForm } from "@/components/ui/AttachSavedDestinationForm";
+import { AttachSavedChannelForm } from "@/components/ui/AttachSavedChannelForm";
 import {
   ToggleTaskDestinationButton,
   RemoveTaskDestinationButton,
@@ -51,19 +55,22 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const task = await getTask(id);
   if (!task) notFound();
-  const [runs, recipients, shares, destinations, destinationProviders] = await Promise.all([
+  const [runs, recipients, shares, destinations, destinationProviders, attachable, attachableChannels] = await Promise.all([
     listRuns(id),
     listTaskRecipients(id),
     task.access.isOwner ? listTaskShares(id) : Promise.resolve([]),
     listTaskDestinations(id),
     listDestinationProviders(),
+    task.access.isOwner ? listAttachableDestinations(id) : Promise.resolve([]),
+    task.access.isOwner ? listAttachableChannels(id) : Promise.resolve([]),
   ]);
+  const providerLabels = Object.fromEntries(destinationProviders.map((p) => [p.type, p.label]));
   const uploads = await listRunUploads(id, runs.map((r) => r.id));
   const uploadsByRun = new Map<string, typeof uploads>();
   for (const u of uploads) {
     uploadsByRun.set(u.runId, [...(uploadsByRun.get(u.runId) ?? []), u]);
   }
-  const destinationById = new Map(destinations.map((d) => [d.id, d]));
+  const destinationById = new Map(destinations.map((d) => [d.destinationId, d]));
   const updateSettings = updateTaskSettings.bind(null, task.id);
 
   // What this user may do here. Hiding a control is only for tidiness — every
@@ -78,7 +85,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-ink">{task.name}</h1>
           <p className="text-sm text-muted mt-1">
@@ -86,7 +93,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             {!task.access.isOwner && ` · shared by ${task.ownerName}`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {can.manage && <ToggleEnabledButton taskId={task.id} enabled={task.enabled} />}
           {can.trigger && <RunNowButton taskId={task.id} />}
         </div>
@@ -100,7 +107,32 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         {runs.length === 0 ? (
           <p className="text-sm text-muted">No backups yet — run one now, or wait for the next scheduled run.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Phones: one card per run. */}
+          <div className="sm:hidden divide-y divide-line">
+            {runs.map((run) => (
+              <div key={run.id} className="py-3 space-y-1.5 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className={`font-medium capitalize ${statusStyle[run.status]}`}>{run.status}</span>
+                  <span className="text-xs text-muted capitalize">{run.triggeredBy}</span>
+                </div>
+                <p className="text-muted">
+                  <LocalTime value={run.startedAt} /> · {formatBytes(run.sizeBytes)}
+                </p>
+                <p className="font-mono text-xs text-ink break-all">{run.filename ?? "—"}</p>
+                {run.status === "failed" && run.errorMessage && (
+                  <p className="text-xs text-muted break-words">{run.errorMessage}</p>
+                )}
+                <div className="text-xs">
+                  <RunUploads uploads={uploadsByRun.get(run.id) ?? []} destinationById={destinationById} />
+                </div>
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <RunButtons taskId={task.id} run={run} can={can} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-muted border-b border-line">
@@ -117,34 +149,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                   <tr key={run.id} className="border-b border-line last:border-0">
                     <td className="py-2.5 font-mono text-xs text-ink">
                       {run.filename ?? "—"}
-                      {(uploadsByRun.get(run.id) ?? []).length > 0 && (
-                        <div className="mt-1 space-y-0.5">
-                          {(uploadsByRun.get(run.id) ?? []).map((u) => {
-                            const dest = destinationById.get(u.destinationId);
-                            const style =
-                              u.status === "completed"
-                                ? "text-primary"
-                                : u.status === "failed"
-                                  ? "text-danger"
-                                  : u.status === "skipped"
-                                    ? "text-muted"
-                                    : "text-warn";
-                            const text =
-                              u.status === "completed"
-                                ? "uploaded"
-                                : u.status === "failed"
-                                  ? "failed"
-                                  : u.status === "skipped"
-                                    ? `skipped — ${u.errorMessage ?? ""}`
-                                    : "uploading…";
-                            return (
-                              <div key={u.id} className={`font-sans normal-case ${style}`} title={u.errorMessage ?? u.remotePath ?? undefined}>
-                                {dest?.label ?? "destination"}: {text}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <RunUploads uploads={uploadsByRun.get(run.id) ?? []} destinationById={destinationById} />
                     </td>
                     <td className="py-2.5 text-muted"><LocalTime value={run.startedAt} /></td>
                     <td className="py-2.5 text-muted">{formatBytes(run.sizeBytes)}</td>
@@ -158,27 +163,14 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                       )}
                     </td>
                     <td className="py-2.5 text-right space-x-3 whitespace-nowrap">
-                      {run.status === "completed" && (
-                        <>
-                          {can.download && (
-                            <StandardLinkButton
-                              href={`/tasks/${task.id}/runs/${run.id}/download`}
-                              title="Download"
-                              compact
-                            />
-                          )}
-                          {can.restore && (
-                            <RestoreRunButton taskId={task.id} runId={run.id} encrypted={run.encrypted} />
-                          )}
-                        </>
-                      )}
-                      {can.deleteRuns && <DeleteRunButton taskId={task.id} runId={run.id} />}
+                      <RunButtons taskId={task.id} run={run} can={can} />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          </>
         )}
       </StandardSection>
 
@@ -191,57 +183,101 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         {recipients.length > 0 && (
           <div className="divide-y divide-line mb-4">
             {recipients.map((r) => (
-              <div key={r.id} className="flex items-center justify-between py-2.5">
+              <div key={r.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
                 <div>
-                  <p className="text-sm text-ink">{r.target}</p>
+                  <p className="text-sm text-ink">
+                    {r.label ?? (
+                      <>
+                        {r.channelLabel} <span className="text-muted">(details visible to the task owner only)</span>
+                      </>
+                    )}
+                  </p>
                   <p className="text-xs text-muted">
+                    {r.target && r.target !== r.label && <>{r.target} · </>}
+                    {r.taskOnly ? "task-only" : task.access.isOwner ? "from your saved channels" : "saved channel"}
+                    {" · "}
                     {[r.notifyOnSuccess && "on success", r.notifyOnFailure && "on failure"]
                       .filter(Boolean)
                       .join(", ") || "no events selected"}
                   </p>
                 </div>
-                {can.manage && <RemoveTaskRecipientButton taskId={task.id} recipientId={r.id} />}
+                {can.manage && <RemoveTaskRecipientButton taskId={task.id} recipientId={r.id} taskOnly={r.taskOnly} />}
               </div>
             ))}
           </div>
         )}
 
-        {can.manage && <AddTaskRecipientForm taskId={task.id} />}
+        {task.access.isOwner && (
+          <div className="border-t border-line pt-4 mb-6">
+            <AttachSavedChannelForm taskId={task.id} saved={attachableChannels} />
+          </div>
+        )}
+
+        {can.manage && (
+          <div className="border-t border-line pt-4">
+            <AddTaskRecipientForm taskId={task.id} canSaveToAccount={task.access.isOwner} />
+          </div>
+        )}
       </StandardSection>
 
       {can.manage && (
         <StandardSection>
           <h2 className="text-sm font-semibold text-ink mb-1">Remote Save locations</h2>
           <p className="text-sm text-muted mb-4">
-            Every completed backup is always kept locally. Add a destination below to also copy each file off-site —
-            a task can have any number of destinations, and each is tried independently, so one being down never
-            affects the others or the local copy.
+            Every completed backup is always kept locally. Save locations also copy each file off-site — a task can
+            have any number, and each is tried independently, so one being down never affects the others or the
+            local copy.
           </p>
 
           {destinations.length > 0 && (
             <div className="divide-y divide-line mb-4">
               {destinations.map((d) => (
-                <div key={d.id} className="flex items-center justify-between py-2.5 gap-4">
+                <div key={d.linkId} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
                   <div className="min-w-0">
                     <p className="text-sm text-ink truncate">
                       {d.label}
                       {!d.enabled && <span className="text-muted font-normal"> (disabled)</span>}
                     </p>
                     <p className="text-xs text-muted">
-                      {destinationProviders.find((p) => p.type === d.type)?.label ?? d.type}
+                      {providerLabels[d.type] ?? d.type}
+                      {" · "}
+                      {d.taskOnly ? "task-only" : task.access.isOwner ? "from your saved locations" : "saved location"}
+                      {d.subfolder && (
+                        <>
+                          {" · subfolder "}
+                          <span className="font-mono">{d.subfolder}</span>
+                        </>
+                      )}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <TestTaskDestinationButton taskId={task.id} destinationId={d.id} />
-                    <ToggleTaskDestinationButton taskId={task.id} destinationId={d.id} enabled={d.enabled} />
-                    <RemoveTaskDestinationButton taskId={task.id} destinationId={d.id} />
+                  <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
+                    <TestTaskDestinationButton taskId={task.id} linkId={d.linkId} />
+                    <ToggleTaskDestinationButton taskId={task.id} linkId={d.linkId} enabled={d.enabled} />
+                    <RemoveTaskDestinationButton taskId={task.id} linkId={d.linkId} taskOnly={d.taskOnly} />
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          <AddTaskDestinationForm taskId={task.id} providers={destinationProviders} />
+          {task.access.isOwner && (
+            <div className="border-t border-line pt-4 mb-6">
+              <AttachSavedDestinationForm
+                taskId={task.id}
+                taskName={task.name}
+                saved={attachable}
+                providerLabels={providerLabels}
+              />
+            </div>
+          )}
+
+          <div className="border-t border-line pt-2">
+            <AddTaskDestinationForm
+              taskId={task.id}
+              providers={destinationProviders}
+              canSaveToAccount={task.access.isOwner}
+            />
+          </div>
         </StandardSection>
       )}
 
@@ -255,7 +291,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           {shares.length > 0 && (
             <div className="divide-y divide-line mb-6">
               {shares.map((share) => (
-                <div key={share.id} className="flex items-center justify-between py-2.5">
+                <div key={share.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
                   <div>
                     <p className="text-sm text-ink">
                       {share.name} <span className="text-muted">({share.email})</span>
@@ -289,7 +325,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <CronSchedulePicker
                 name="cronExpression"
@@ -348,5 +384,62 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       </StandardSection>
       )}
     </div>
+  );
+}
+type Upload = Awaited<ReturnType<typeof listRunUploads>>[number];
+type Run = Awaited<ReturnType<typeof listRuns>>[number];
+
+// Per-destination upload status lines under a run ("Home NAS: uploaded").
+function RunUploads({ uploads, destinationById }: { uploads: Upload[]; destinationById: Map<string, { label: string }> }) {
+  if (uploads.length === 0) return null;
+  return (
+    <div className="mt-1 space-y-0.5">
+      {uploads.map((u) => {
+        const dest = destinationById.get(u.destinationId);
+        const style =
+          u.status === "completed"
+            ? "text-primary"
+            : u.status === "failed"
+              ? "text-danger"
+              : u.status === "skipped"
+                ? "text-muted"
+                : "text-warn";
+        const text =
+          u.status === "completed"
+            ? "uploaded"
+            : u.status === "failed"
+              ? "failed"
+              : u.status === "skipped"
+                ? u.errorMessage ? `skipped — ${u.errorMessage}` : "skipped"
+                : "uploading…";
+        return (
+          <div key={u.id} className={`font-sans normal-case ${style}`} title={u.errorMessage ?? u.remotePath ?? undefined}>
+            {dest?.label ?? u.destinationLabel ?? "destination"}: {text}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RunButtons({
+  taskId,
+  run,
+  can,
+}: {
+  taskId: string;
+  run: Run;
+  can: { download: boolean; restore: boolean; deleteRuns: boolean };
+}) {
+  return (
+    <>
+      {run.status === "completed" && (
+        <>
+          {can.download && <StandardLinkButton href={`/tasks/${taskId}/runs/${run.id}/download`} title="Download" compact />}
+          {can.restore && <RestoreRunButton taskId={taskId} runId={run.id} encrypted={run.encrypted} />}
+        </>
+      )}
+      {can.deleteRuns && <DeleteRunButton taskId={taskId} runId={run.id} />}
+    </>
   );
 }

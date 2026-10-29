@@ -217,6 +217,8 @@ export const openCloudDestination: BackupDestination = {
 
   label: "OpenCloud",
 
+  subfolderField: "pathPrefix",
+
   configFields: [
     {
       name: "webdavUrl",
