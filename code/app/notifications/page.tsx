@@ -22,7 +22,7 @@ export default async function SystemNotificationsPage() {
       <div>
         <h1 className="text-xl font-semibold text-ink mb-1">System notifications</h1>
         <p className="text-sm text-muted">
-          Account and task-lifecycle emails, separate from per-task backup success/failure alerts (set those on
+          Account and task-lifecycle notifications (email, ntfy, Telegram or Discord), separate from per-task backup success/failure alerts (set those on
           each task's page).
         </p>
       </div>
@@ -34,7 +34,7 @@ export default async function SystemNotificationsPage() {
           recipients.map((r) => (
             <div key={r.id} className="flex items-center justify-between px-5 py-4">
               <div>
-                <p className="text-sm font-medium text-ink">{r.email}</p>
+                <p className="text-sm font-medium text-ink">{r.target}</p>
                 <p className="text-xs text-muted mt-0.5">{r.events.map((e) => EVENT_LABELS[e]).join(", ")}</p>
               </div>
               <RemoveSystemRecipientButton id={r.id} />

@@ -185,7 +185,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       <StandardSection>
         <h2 className="text-sm font-semibold text-ink mb-1">Notifications</h2>
         <p className="text-sm text-muted mb-4">
-          Email recipients for this task's backup outcomes. Requires SMTP to be configured (see .env).
+          Where to send this task's backup outcomes — email (requires SMTP, see .env), ntfy, Telegram or Discord.
         </p>
 
         {recipients.length > 0 && (
@@ -193,7 +193,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             {recipients.map((r) => (
               <div key={r.id} className="flex items-center justify-between py-2.5">
                 <div>
-                  <p className="text-sm text-ink">{r.email}</p>
+                  <p className="text-sm text-ink">{r.target}</p>
                   <p className="text-xs text-muted">
                     {[r.notifyOnSuccess && "on success", r.notifyOnFailure && "on failure"]
                       .filter(Boolean)

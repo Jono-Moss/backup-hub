@@ -6,7 +6,7 @@ import {
   type SystemNotificationEvent,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { sendMail } from "./mailer";
+import { deliver } from "./channels";
 import { formatBytes } from "./notifyUtils";
 
 export async function notifyTaskSuccess(taskId: string, filename: string, sizeBytes: number) {
@@ -21,11 +21,11 @@ export async function notifyTaskSuccess(taskId: string, filename: string, sizeBy
     recipients
       .filter((r) => r.notifyOnSuccess)
       .map((r) =>
-        sendMail(
-          r.email,
-          `Backup succeeded: ${taskName}`,
-          `The backup task "${taskName}" completed successfully.\n\nFile: ${filename}\nSize: ${mb}`
-        )
+        deliver(r, {
+          title: `Backup succeeded: ${taskName}`,
+          body: `The backup task "${taskName}" completed successfully.\n\nFile: ${filename}\nSize: ${mb}`,
+          level: "success",
+        })
       )
   );
 }
@@ -41,11 +41,11 @@ export async function notifyTaskFailure(taskId: string, errorMessage: string) {
     recipients
       .filter((r) => r.notifyOnFailure)
       .map((r) =>
-        sendMail(
-          r.email,
-          `Backup failed: ${taskName}`,
-          `The backup task "${taskName}" failed.\n\nError: ${errorMessage}`
-        )
+        deliver(r, {
+          title: `Backup failed: ${taskName}`,
+          body: `The backup task "${taskName}" failed.\n\nError: ${errorMessage}`,
+          level: "failure",
+        })
       )
   );
 }
@@ -64,6 +64,6 @@ export async function notifySystemEvent(event: SystemNotificationEvent, message:
   };
 
   await Promise.all(
-    subscribed.map((r) => sendMail(r.email, `Backup Hub: ${subjects[event]}`, message))
+    subscribed.map((r) => deliver(r, { title: `Backup Hub: ${subjects[event]}`, body: message, level: "info" }))
   );
 }

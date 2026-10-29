@@ -6,22 +6,26 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
 import { requireAdmin } from "@/lib/auth/session";
+import { describeRecipient, recipientColumnsFromForm } from "@/lib/notifications/channels";
 
 export async function listSystemRecipients() {
   await requireAdmin();
-  return db.select().from(systemNotificationRecipient);
+  const rows = await db.select().from(systemNotificationRecipient);
+  return rows.map(({ encryptedConfig, email, ...rest }) => ({
+    ...rest,
+    target: describeRecipient({ channel: rest.channel, email, encryptedConfig }),
+  }));
 }
 
 export async function addSystemRecipient(formData: FormData) {
   await requireAdmin();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const events = formData.getAll("events") as SystemNotificationEvent[];
 
-  if (!email || events.length === 0) {
-    throw new Error("Email and at least one event are required");
+  if (events.length === 0) {
+    throw new Error("At least one event is required");
   }
 
-  await db.insert(systemNotificationRecipient).values({ id: uuid(), email, events });
+  await db.insert(systemNotificationRecipient).values({ id: uuid(), ...recipientColumnsFromForm(formData), events });
   revalidatePath("/notifications");
 }
 

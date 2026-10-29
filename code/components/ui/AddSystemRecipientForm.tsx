@@ -3,6 +3,7 @@
 import { addSystemRecipient } from "@/app/notifications/actions";
 import { SYSTEM_NOTIFICATION_EVENTS, type SystemNotificationEvent } from "@/db/schema";
 import { StandardSubmitButton } from "./standard/StandardSubmitButton";
+import { NotificationChannelFields } from "./NotificationChannelFields";
 
 const EVENT_LABELS: Record<SystemNotificationEvent, string> = {
   user_login: "User logins",
@@ -20,12 +21,7 @@ export function AddSystemRecipientForm() {
       action={(formData) => addSystemRecipient(formData)}
       className="space-y-4"
     >
-      <div>
-        <label className="block text-sm text-ink mb-1" htmlFor="email">
-          Email
-        </label>
-        <input id="email" name="email" type="email" required className="w-full border border-line px-3 py-2 text-sm" />
-      </div>
+      <NotificationChannelFields idPrefix="system-recipient" />
       <div>
         <p className="text-sm text-ink mb-2">Notify for</p>
         <div className="space-y-2">

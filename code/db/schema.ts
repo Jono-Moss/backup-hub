@@ -320,12 +320,23 @@ export const userPasskey = mysqlTable(
 export const TASK_NOTIFICATION_EVENTS = ["success", "failure"] as const;
 export type TaskNotificationEvent = (typeof TASK_NOTIFICATION_EVENTS)[number];
 
+// How a recipient is reached. "email" uses the server's SMTP settings and
+// the `email` column; the others are push services whose settings (topic,
+// bot token, webhook URL — mostly secrets) live in `encryptedConfig`. See
+// lib/notifications/channels/.
+export const NOTIFICATION_CHANNELS = ["email", "ntfy", "telegram", "discord"] as const;
+export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
+
 export const taskNotificationRecipient = mysqlTable(
   "task_notification_recipient",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     taskId: varchar("task_id", { length: 36 }).notNull(),
-    email: varchar("email", { length: 255 }).notNull(),
+    channel: mysqlEnum("channel", NOTIFICATION_CHANNELS).notNull().default("email"),
+    // Only set for the "email" channel.
+    email: varchar("email", { length: 255 }),
+    // AES-256-GCM encrypted JSON of the channel's fields (non-email channels only).
+    encryptedConfig: text("encrypted_config"),
     notifyOnSuccess: boolean("notify_on_success").notNull().default(false),
     notifyOnFailure: boolean("notify_on_failure").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -349,7 +360,11 @@ export type SystemNotificationEvent = (typeof SYSTEM_NOTIFICATION_EVENTS)[number
 
 export const systemNotificationRecipient = mysqlTable("system_notification_recipient", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  email: varchar("email", { length: 255 }).notNull(),
+  channel: mysqlEnum("channel", NOTIFICATION_CHANNELS).notNull().default("email"),
+  // Same split as taskNotificationRecipient: `email` for the email channel,
+  // `encryptedConfig` for the rest.
+  email: varchar("email", { length: 255 }),
+  encryptedConfig: text("encrypted_config"),
   events: json("events").$type<SystemNotificationEvent[]>().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

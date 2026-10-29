@@ -36,6 +36,7 @@ import {
   canDo,
 } from "@/lib/auth/task-access";
 import { notifySystemEvent } from "@/lib/notifications/notify";
+import { channelConfigFromForm, describeRecipient, recipientColumnsFromForm, sendTest } from "@/lib/notifications/channels";
 
 // Tasks the current user owns or that have been shared with them.
 export async function listTasks() {
@@ -264,18 +265,22 @@ export async function restoreBackupRun(taskId: string, runId: string, password?:
 
 export async function listTaskRecipients(taskId: string) {
   await requireTaskScope(taskId, "tasks:read");
-  return db.select().from(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId));
+  const rows = await db.select().from(taskNotificationRecipient).where(eq(taskNotificationRecipient.taskId, taskId));
+  // Push-channel config holds bot tokens / webhook URLs — only send the
+  // browser a safe summary of where each recipient goes.
+  return rows.map(({ encryptedConfig, email, ...rest }) => ({
+    ...rest,
+    target: describeRecipient({ channel: rest.channel, email, encryptedConfig }),
+  }));
 }
 
 export async function addTaskRecipient(taskId: string, formData: FormData) {
   await requireTaskScope(taskId, "tasks:write");
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!email) throw new Error("Email is required");
 
   await db.insert(taskNotificationRecipient).values({
     id: uuid(),
     taskId,
-    email,
+    ...recipientColumnsFromForm(formData),
     notifyOnSuccess: formData.get("notifyOnSuccess") === "on",
     notifyOnFailure: formData.get("notifyOnFailure") === "on",
   });
@@ -288,6 +293,20 @@ export async function removeTaskRecipient(taskId: string, recipientId: string) {
     .delete(taskNotificationRecipient)
     .where(and(eq(taskNotificationRecipient.id, recipientId), eq(taskNotificationRecipient.taskId, taskId)));
   revalidatePath(`/tasks/${taskId}`);
+}
+
+// "Send test" on the add-recipient forms (task and system). Like
+// testDestinationConnection, it only needs a logged-in user since nothing
+// is saved.
+export async function sendTestNotification(formData: FormData): Promise<{ ok: boolean; message?: string }> {
+  await requireUser();
+  try {
+    const { channel, config } = channelConfigFromForm(formData);
+    const detail = await sendTest(channel, config);
+    return { ok: true, message: detail || undefined };
+  } catch (err) {
+    return { ok: false, message: String(err instanceof Error ? err.message : err).slice(0, 500) };
+  }
 }
 
 // --- Backup destinations (off-site save locations) ---

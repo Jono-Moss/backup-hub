@@ -1,6 +1,6 @@
 # Backup Hub
 
-Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a multi-user web UI, role-based permissions, email notifications, and a scoped REST API so other apps can create, trigger, and manage backup tasks programmatically.
+Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a multi-user web UI, role-based permissions, email/ntfy/Telegram/Discord notifications, and a scoped REST API so other apps can create, trigger, and manage backup tasks programmatically.
 
 ## What's here
 
@@ -8,7 +8,7 @@ Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a mul
 - **Multi-user accounts** with two roles: `admin` (manages users and system notifications) and `user`. Backup tasks are **private to the user who created them** — even admins can't see them unless the owner shares them. Passwords are hashed with Argon2id.
 - **Two-factor authentication & passkeys** — users can enable TOTP (any authenticator app) with recovery codes, and/or register WebAuthn passkeys (Touch ID, Face ID, Windows Hello, security keys). A passkey login counts as its own second factor. Admins can reset a user's 2FA/passkeys for account recovery.
 - **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password.
-- **Email notifications** — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured, everything else keeps working and emails are silently skipped.
+- **Notifications** by email, [ntfy](https://ntfy.sh), Telegram or Discord — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured or a push service is unreachable, everything else keeps working and the notification is skipped (and logged).
 - **Off-site save locations** — a task can copy each completed backup to any number of remote destinations (S3-compatible storage, Google Drive, OneDrive, OpenCloud, FTP, FTPS, SFTP) on top of the always-kept local copy. Google Drive and OneDrive connect with a one-click sign-in, and small enough backups can be emailed to any address as an attachment. Pluggable like the DB engines: implement `BackupDestination` in `lib/backup/destinations/` to add a new provider.
 - **REST API** at `/api/v1/*`, authenticated with scoped API keys (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`), optionally pinned to a single task. This is separate from user accounts — API keys are their own credential type.
 - **In-process cron scheduler** (`node-cron`, booted via `instrumentation.ts`) — one job per enabled task.
@@ -119,14 +119,21 @@ Some locked-down work/school tenants block users from consenting to third-party 
 
 Implement `BackupDestination` in `lib/backup/destinations/` and register it in `lib/backup/destinations/index.ts`. The add-destination form is generated from your implementation's `configFields`, so no UI code changes. If the provider has an OAuth device flow, also implement the optional `connect` (`start()` / `poll()`) and the Connect button appears automatically. If the provider rotates refresh tokens, persist the new one with `updateConfig()` (see `onedrive.ts`).
 
-## Email notifications
+## Notifications
 
-Set the `SMTP_*` variables in `.env` to enable email. Two independent notification surfaces:
+Two independent notification surfaces:
 
-1. **Per-task** (task detail page → Notifications section): add any email address, choose whether it gets notified on success, failure, or both. Different tasks can have entirely different recipients.
-2. **System-wide** (`/notifications`, admin-only): recipients for account/task lifecycle events — `user_login`, `user_created`, `user_deleted`, `task_created`, `task_deleted`.
+1. **Per-task** (task detail page → Notifications section): add a recipient and choose whether it gets notified on success, failure, or both. Different tasks can have entirely different recipients.
+2. **System-wide** (`/notifications`, admin-only): recipients for account/task lifecycle events — `user_login`, `user_created`, `user_deleted`, `task_created`, `task_deleted`, `security_reset`.
 
-If SMTP isn't configured, `sendMail()` logs a warning once and no-ops — it will never throw and break a backup run, a login, or a task creation.
+Each recipient picks how it's reached. Use **Send test** on the form to check the settings before saving. Tokens and webhook URLs are stored encrypted with `BACKUP_MASTER_KEY`, and are never shown again after saving.
+
+- **Email** — set the `SMTP_*` variables in `.env`. If SMTP isn't configured, `sendMail()` logs a warning once and no-ops.
+- **ntfy** — server URL (`https://ntfy.sh` or your own server) and a topic, then subscribe to that topic in the ntfy app. On the public ntfy.sh server anyone who knows a topic name can read it, so choose a hard-to-guess one. For protected topics, add an access token (`tk_...`, created with `ntfy token add` or in the web app under Account → Access tokens). Failures are sent with max priority.
+- **Telegram** — message [@BotFather](https://t.me/BotFather), send `/newbot`, and copy the bot token. Then send your new bot a message (or add it to a group) — bots can't start conversations. To find the chat ID, open `https://api.telegram.org/bot<token>/getUpdates` and look for `"chat":{"id":...}` (group IDs are negative).
+- **Discord** — in the channel's settings → Integrations → Webhooks → New Webhook → **Copy Webhook URL**.
+
+Push notifications are best-effort like email: a failed send is logged and never breaks a backup run, a login, or a task creation.
 
 ## Deployment note (important)
 
@@ -254,6 +261,7 @@ lib/auth/recovery-codes.ts  2FA recovery code generation/hashing
 lib/auth/webauthn.ts        WebAuthn RP config + ephemeral challenge-cookie helpers
 lib/notifications/mailer.ts nodemailer transport, best-effort sends
 lib/notifications/notify.ts task and system notification dispatch
+lib/notifications/channels/ email / ntfy / Telegram / Discord senders + form field definitions
 app/api/v1/                 the public REST API
 app/setup/                  first-run admin account creation
 app/login/                  email/password login, logout, passkey login
