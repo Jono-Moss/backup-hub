@@ -16,7 +16,8 @@ export async function GET(req: Request, { params }: { params: Params }) {
       .from(backupRun)
       .where(eq(backupRun.taskId, id))
       .orderBy(desc(backupRun.startedAt));
-    return Response.json(runs);
+    // keyCheck stays server-side (see db/schema.ts).
+    return Response.json(runs.map(({ keyCheck, ...run }) => run));
   } catch (e) {
     return jsonError(e);
   }

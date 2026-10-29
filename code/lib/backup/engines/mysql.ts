@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import mysql from "mysql2/promise";
 import type { BackupEngine } from "./types";
+import { editLines } from "./lines";
 import type { ConnectionConfig } from "@/lib/backup/crypto";
 
 // Overridable so a machine with multiple mysqldump versions installed (e.g.
@@ -308,7 +309,7 @@ export const mysqlEngine: BackupEngine = {
     await dumpWithRetry(conn, destPath);
   },
 
-  async restore(conn, srcPath) {
+  async restore(conn, srcPath, options) {
     const flavor = await detectFlavor();
     const args = [
       "-h", conn.host,
@@ -358,7 +359,8 @@ export const mysqlEngine: BackupEngine = {
         )
       );
 
-      pipeline(input, gunzip, proc.stdin).then(
+      const testEdits = options?.forTest ? [editLines(stripDefiner)] : [];
+      pipeline([input, gunzip, ...testEdits, proc.stdin]).then(
         () => {
           pipelineDone = true;
           settle();
@@ -399,4 +401,61 @@ export const mysqlEngine: BackupEngine = {
       return { ok: false, message: e.message };
     }
   },
+
+  // Both mysqldump and MariaDB's dump end with this comment (comments are on).
+  completionMarker: /^-- Dump completed( on|$)/,
+  createTablePattern: /^CREATE TABLE /,
+
+  scratch: {
+    async create(server, name) {
+      await withServer(server, (c) => c.query(`CREATE DATABASE ${quoteName(name)}`));
+    },
+    async drop(server, name) {
+      await withServer(server, (c) => c.query(`DROP DATABASE IF EXISTS ${quoteName(name)}`));
+    },
+    async list(server, prefix) {
+      const rows = await withServer(server, async (c) => (await c.query("SHOW DATABASES"))[0] as Record<string, string>[]);
+      return rows.map((r) => Object.values(r)[0]).filter((n) => n.startsWith(prefix));
+    },
+    async countTables(conn) {
+      const rows = await withServer(conn, async (c) =>
+        (await c.query(
+          "SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE'",
+          [conn.database]
+        ))[0] as { n: number }[]
+      );
+      return Number(rows[0]?.n ?? 0);
+    },
+  },
 };
+
+// Triggers, views and routines carry DEFINER=`user`@`host` from the original
+// server; restoring them as a different user needs SUPER/SET_USER_ID, so a
+// test restore drops the clause and lets the object belong to the test user.
+function stripDefiner(line: string): string {
+  return line.includes("DEFINER=") ? line.replace(/DEFINER=`[^`]*`@`[^`]*`\s*/g, "") : line;
+}
+
+// Only ever called with names verify.ts generated and validated, but quote
+// defensively anyway.
+function quoteName(name: string) {
+  if (!/^[A-Za-z0-9_]+$/.test(name)) throw new Error(`Refusing unexpected database name: ${name}`);
+  return `\`${name}\``;
+}
+
+async function withServer<T>(conn: ConnectionConfig, fn: (c: mysql.Connection) => Promise<T>): Promise<T> {
+  const c = await mysql.createConnection({
+    host: conn.host,
+    port: conn.port,
+    user: conn.user,
+    password: conn.password,
+    database: conn.database || undefined,
+    ssl: conn.ssl ? { rejectUnauthorized: false } : undefined,
+    connectTimeout: 10000,
+  });
+  try {
+    return await fn(c);
+  } finally {
+    await c.end().catch(() => {});
+  }
+}

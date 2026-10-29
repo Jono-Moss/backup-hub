@@ -12,7 +12,7 @@
 </div>
 
 <p align="center">
-  <img src="docs/screenshots/task.png" alt="A backup task in Backup Hub: run history with off-site upload status, and download, restore and delete buttons" width="900" />
+  <img src="docs/screenshots/task.png" alt="A backup task in Backup Hub: run history with off-site upload status, check results, and a download button with a menu of more actions for each backup" width="900" />
 </p>
 
 ---
@@ -27,6 +27,7 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
 
 - Multi-user accounts with two roles (`admin` / `user`), TOTP + passkey two-factor auth, and per-task sharing
 - One-click **restore**, and a **dry run** button to test a backup before you save the task
+- **Backup checks**: every backup is read back and fingerprinted automatically, and can be **test-restored** into a throwaway database on a scratch server, so you know it actually restores
 - **Off-site copies** to S3-compatible storage (AWS, Backblaze B2, Wasabi, R2, MinIO…), Google Drive, OneDrive, OpenCloud, FTP/FTPS, SFTP or email — set a location up once and reuse it across tasks
 - **Notifications** by email, ntfy, Telegram or Discord, per task and system-wide
 - A scoped REST API (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`) for driving Backup Hub from other tools
@@ -38,6 +39,10 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
 **Your backup tasks** — each with its own database, schedule and retention.
 
 <img src="docs/screenshots/tasks.png" alt="The task list: three backup tasks with their engine, schedule and retention" width="900" />
+
+**Every backup's actions in one place** — download, restore, verify the file, test-restore it, or delete it. Check results show under each backup's status.
+
+<img src="docs/screenshots/backup-actions.png" alt="A task's backup history with one backup's actions menu open: Restore, Verify file, Test restore and Delete, plus Verify all, Test-restore all and Remove failed buttons" width="900" />
 
 <table>
   <tr>
@@ -52,9 +57,67 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
   </tr>
 </table>
 
-**On your phone** — backup history, navigation and settings all work on small screens.
+**On your phone** — backup history, every backup's actions in a bottom drawer, and the navigation menu.
 
-<img src="docs/screenshots/mobile.png" alt="Three phone screenshots: a task's backup history, the open navigation menu, and the notifications page" width="900" />
+<img src="docs/screenshots/mobile.png" alt="Three phone screenshots: a task's backup history, the actions drawer for one backup (download, restore, verify, test restore, delete), and the navigation menu" width="900" />
+
+<details>
+<summary><b>More screenshots</b> — task details, new task, account, users, API keys and sign-in</summary>
+<br />
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Task notifications</b> — pick saved channels or add one just for this task, and choose success and/or failure.<br /><br />
+      <img src="docs/screenshots/task-notifications.png" alt="A task's notifications: two saved channels, and forms to use a saved channel or add a new one" />
+    </td>
+    <td width="50%" valign="top">
+      <b>Task save locations</b> — attach saved locations (each with its own subfolder) or add a task-only one.<br /><br />
+      <img src="docs/screenshots/task-save-locations.png" alt="A task's save locations: two saved locations with subfolders, and forms to use a saved location or add a new one" />
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Sharing and settings</b> — share a task with chosen permissions, and set its schedule, retention, encryption and test restores.<br /><br />
+      <img src="docs/screenshots/task-sharing-settings.png" alt="A task's sharing and settings: a shared user with their permissions, and the schedule, retention, encryption and test-restore settings" />
+    </td>
+    <td width="50%" valign="top">
+      <b>New task</b> — connection details, a test-connection and dry-run button, schedule and encryption.<br /><br />
+      <img src="docs/screenshots/new-task.png" alt="The new backup task form: database connection, schedule, retention and encryption" />
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Your account</b> — name and password, two-factor authentication with recovery codes, and passkeys.<br /><br />
+      <img src="docs/screenshots/account.png" alt="The account page: name and password, two-factor authentication enabled, and two passkeys" />
+    </td>
+    <td width="50%" valign="top">
+      <b>Users (admin)</b> — admins add and manage users; tasks stay private to their owner.<br /><br />
+      <img src="docs/screenshots/users.png" alt="The admin users page: three users with their roles and task counts, and a form to add a user" />
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>API keys</b> — scoped keys for the REST API, optionally pinned to one task.<br /><br />
+      <img src="docs/screenshots/api-keys.png" alt="The API keys page: a form to create a scoped key, and an existing key" />
+    </td>
+    <td width="50%" valign="top">
+      <b>Sign in</b> — with a password (plus two-factor) or a passkey.<br /><br />
+      <img src="docs/screenshots/login.png" alt="The sign-in page with email and password fields and a passkey button" />
+    </td>
+  </tr>
+</table>
+
+</details>
 
 <sub>Screenshots show demo data.</sub>
 
@@ -128,6 +191,10 @@ services:
       WEBAUTHN_RP_NAME: "${BH_WEBAUTHN_RP_NAME}"
       WEBAUTHN_RP_ID: "${BH_WEBAUTHN_RP_ID}"
       WEBAUTHN_ORIGIN: "${BH_WEBAUTHN_ORIGIN}"
+
+      # Optional: servers for test restores (see example.env-file).
+      VERIFY_MYSQL_URL: "${BH_VERIFY_MYSQL_URL:-}"
+      VERIFY_POSTGRES_URL: "${BH_VERIFY_POSTGRES_URL:-}"
 
     volumes:
       - ./data/backups:/var/backups/backup-hub

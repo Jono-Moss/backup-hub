@@ -144,6 +144,37 @@ Each channel picks how it's reached. Use **Send test** on the form to check the 
 
 Push notifications are best-effort like email: a failed send is logged and never breaks a backup run, a login, or a task creation.
 
+## Checking backups
+
+A backup you can't restore is worse than none, because you only find out when you need it. Backup Hub checks backup files at three levels:
+
+1. **Fingerprint** — a SHA-256 of each file is recorded when it's made. A check recomputes it, so a file that has changed on disk since (damaged, truncated, tampered with) is caught.
+2. **Read-back** — the whole file is read back the way a restore would read it: decrypted (AES-GCM's integrity check fails on any damaged byte), decompressed (gzip checks its own checksum), and checked to end with the dump tool's "dump completed" line, which a dump that was cut short won't have.
+3. **Test restore** — the backup is restored into a brand-new throwaway database on a separate scratch server, Backup Hub checks that tables came back, then drops the database again. This is the only way to be sure a backup really restores.
+
+**Automatically:** every new backup gets levels 1 and 2 before it's marked completed. If it fails, the run is marked **failed**, the broken file is removed, and the task's failure recipients are alerted, so you find out now and not at restore time. Each task can also opt in to **Test-restore each new backup** (task settings). It runs in the background after the backup and alerts on failure.
+
+**By hand:** in a task's backup history, open a backup's **⋯** menu (a bottom drawer on phones) and choose **Verify file** (levels 1+2) or **Test restore** (all three). **Verify all** checks every stored backup of the task, and **Test-restore all** test-restores each of them in turn. Checks are queued and run one at a time, and the page updates as they finish. Running a check needs the **Trigger backups** permission. Via the API: `POST /api/v1/runs/:runId/verify` (add `?level=restore` for a test restore), then read `verifyStatus` / `verifyMessage` from the run list.
+
+**Encrypted backups** are checked with the task's saved backup password. If that password has changed since a backup was made, the check says so instead of calling the file damaged. Restore it with its original password.
+
+### Setting up test restores
+
+Test restores need a database server to restore into. Point these at a **separate scratch server, never production**: a test restore loads the whole backup into it.
+
+```bash
+VERIFY_MYSQL_URL="mysql://verify:secret@scratch-mysql:3306"                 # add ?ssl=true to require TLS
+VERIFY_POSTGRES_URL="postgres://verify:secret@scratch-postgres:5432/postgres"  # the path is the database to connect to; add ?sslmode=require for TLS
+```
+
+(In Docker, set `BH_VERIFY_MYSQL_URL` / `BH_VERIFY_POSTGRES_URL` in `docker/.env`.) Leave one unset and test restores are simply not offered for that engine.
+
+- The account needs permission to create and drop the test databases. For MySQL/MariaDB, ``GRANT ALL ON `bh\_verify\_%`.* TO 'verify'@'%';`` limits it to just those. For Postgres, use a role with `CREATEDB`.
+- Each test creates a database named `bh_verify_<time>_<random>`, restores into it, and always drops it afterwards, even if the test fails. Databases left behind by a server that stopped mid-test are dropped at the next start once they're over 6 hours old.
+- Ownership and permission statements from the original server (Postgres `OWNER TO` / `GRANT` / `REVOKE`, MySQL `DEFINER=` clauses) are skipped in test restores, since those users won't exist on the scratch server. Real restores are unchanged.
+- Use a scratch server running the same database type and a similar version to production. Restoring a newer server's dump into an older one can fail for reasons that have nothing to do with the backup.
+- If the scratch server itself has a problem (can't connect, can't create the database), users see a generic message and the details go to the server log, so the scratch server's address and login errors aren't shown to every user.
+
 ## Deployment note (important)
 
 The scheduler is an **in-process cron job** — it only fires reliably on a long-running Node server (Docker, a VM, PM2, etc., as in the provided `docker-compose.yml`). On serverless platforms like Vercel, the process doesn't stay warm between requests, so `node-cron` won't reliably fire. If you deploy serverless, point an external cron (e.g. Vercel Cron, or a system crontab hitting a protected endpoint) at each due task instead of relying on `instrumentation.ts`.
@@ -161,6 +192,9 @@ curl -H "Authorization: Bearer bkp_..." https://your-host/api/v1/tasks
 
 # Trigger a backup
 curl -X POST -H "Authorization: Bearer bkp_..." https://your-host/api/v1/tasks/<taskId>/runs
+
+# Check a backup file (add ?level=restore for a test restore); results appear in the run list
+curl -X POST -H "Authorization: Bearer bkp_..." https://your-host/api/v1/runs/<runId>/verify
 
 # Download the most recent backup file
 curl -H "Authorization: Bearer bkp_..." https://your-host/api/v1/runs/<runId>/download -o backup.sql.gz.enc
@@ -259,7 +293,8 @@ lib/backup/crypto.ts        secret wrapping, file encryption, API key hashing
 lib/backup/engines/         per-database dump implementations (mysql, postgres)
 lib/backup/destinations/    pluggable off-site upload implementations (s3, google_drive, onedrive, email)
 lib/backup/purge.ts         removes a task (and everything hanging off it) from the DB, optionally its files too
-lib/backup/runner.ts        runs a backup end-to-end: dump → encrypt → record → prune → upload to destinations → notify
+lib/backup/runner.ts        runs a backup end-to-end: dump → encrypt → check → record → prune → upload to destinations → notify
+lib/backup/verify.ts        backup file checks (fingerprint, read-back, test restore) and their background queue
 lib/backup/scheduler.ts     node-cron job management
 lib/auth/api-key.ts         REST API scoped-key authentication
 lib/auth/password.ts        Argon2id password hashing

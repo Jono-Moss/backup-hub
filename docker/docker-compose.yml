@@ -29,6 +29,10 @@ services:
       WEBAUTHN_RP_ID: "${BH_WEBAUTHN_RP_ID}"
       WEBAUTHN_ORIGIN: "${BH_WEBAUTHN_ORIGIN}"
 
+      # Optional: servers for test restores (see example.env-file).
+      VERIFY_MYSQL_URL: "${BH_VERIFY_MYSQL_URL:-}"
+      VERIFY_POSTGRES_URL: "${BH_VERIFY_POSTGRES_URL:-}"
+
     volumes:
       - ./data/backups:/var/backups/backup-hub
 

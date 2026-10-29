@@ -26,6 +26,7 @@ import { redirect } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { wrapConnection, wrapSecret, unwrapSecret } from "@/lib/backup/crypto";
 import { runBackupForTask, deleteRun, restoreRun, clearFailedRuns } from "@/lib/backup/runner";
+import { enqueueVerify, testRestoreAvailable } from "@/lib/backup/verify";
 import { resyncTask } from "@/lib/backup/scheduler";
 import { purgeTask } from "@/lib/backup/purge";
 import { getEngine } from "@/lib/backup/engines";
@@ -87,7 +88,10 @@ export async function getTask(id: string) {
 
 export async function listRuns(taskId: string) {
   await requireTaskScope(taskId, "tasks:read");
-  return db.select().from(backupRun).where(eq(backupRun.taskId, taskId)).orderBy(desc(backupRun.startedAt));
+  const runs = await db.select().from(backupRun).where(eq(backupRun.taskId, taskId)).orderBy(desc(backupRun.startedAt));
+  // keyCheck stays server-side: it would let someone test password guesses
+  // for an encrypted backup without having the file.
+  return runs.map(({ keyCheck, ...run }) => run);
 }
 
 // One row per (run, destination) upload — used to show off-site copy
@@ -210,6 +214,7 @@ export async function updateTaskSettings(taskId: string, formData: FormData) {
     cronExpression: String(formData.get("cronExpression") || "0 3 * * *"),
     retentionCount: Number(formData.get("retentionCount")) || 7,
     encryptionEnabled,
+    testRestoreAfterBackup: formData.get("testRestoreAfterBackup") === "on",
   };
   if (backupPassword) {
     updates.encryptedBackupPassword = wrapSecret(backupPassword);
@@ -288,6 +293,55 @@ export async function restoreBackupRun(taskId: string, runId: string, password?:
   const result = await restoreRun(runId, password);
   revalidatePath(`/tasks/${taskId}`);
   return result;
+}
+
+// --- Checking backup files (lib/backup/verify.ts) ---
+//
+// Checks only read the file (and, for a test restore, write to a throwaway
+// database on the admin's scratch server), so they come with the same
+// "Trigger backups" permission as running a backup. They're queued and run
+// in the background; the page polls while any are pending.
+
+export async function verifyBackupRun(taskId: string, runId: string) {
+  await requireTaskScope(taskId, "runs:trigger");
+  await assertRunInTask(taskId, runId);
+  await enqueueVerify([runId], "check");
+  revalidatePath(`/tasks/${taskId}`);
+}
+
+export async function testRestoreBackupRun(taskId: string, runId: string) {
+  await requireTaskScope(taskId, "runs:trigger");
+  await assertRunInTask(taskId, runId);
+  const [task] = await db.select({ engine: backupTask.engine }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
+  if (!task || !testRestoreAvailable(task.engine)) throw new Error("Test restores aren't set up on this server");
+  await enqueueVerify([runId], "restore");
+  revalidatePath(`/tasks/${taskId}`);
+}
+
+/** Checks every stored backup of the task (fingerprint + read-back, not test restores). */
+export async function verifyAllBackupRuns(taskId: string) {
+  await requireTaskScope(taskId, "runs:trigger");
+  const runs = await db
+    .select({ id: backupRun.id })
+    .from(backupRun)
+    .where(and(eq(backupRun.taskId, taskId), eq(backupRun.status, "completed")))
+    .orderBy(desc(backupRun.startedAt));
+  await enqueueVerify(runs.map((r) => r.id), "check");
+  revalidatePath(`/tasks/${taskId}`);
+}
+
+/** Test-restores every stored backup of the task, one after another. */
+export async function testRestoreAllBackupRuns(taskId: string) {
+  await requireTaskScope(taskId, "runs:trigger");
+  const [task] = await db.select({ engine: backupTask.engine }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
+  if (!task || !testRestoreAvailable(task.engine)) throw new Error("Test restores aren't set up on this server");
+  const runs = await db
+    .select({ id: backupRun.id })
+    .from(backupRun)
+    .where(and(eq(backupRun.taskId, taskId), eq(backupRun.status, "completed")))
+    .orderBy(desc(backupRun.startedAt));
+  await enqueueVerify(runs.map((r) => r.id), "restore");
+  revalidatePath(`/tasks/${taskId}`);
 }
 
 // --- Per-task notification recipients ---

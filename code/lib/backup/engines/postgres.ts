@@ -5,6 +5,7 @@ import { Transform } from "stream";
 import fs from "fs";
 import path from "path";
 import type { BackupEngine } from "./types";
+import { editLines } from "./lines";
 import type { ConnectionConfig } from "@/lib/backup/crypto";
 
 // Uses pg_dump's custom-ish plain-SQL output piped through gzip, same
@@ -131,7 +132,7 @@ export const postgresEngine: BackupEngine = {
     });
   },
 
-  async restore(conn, srcPath) {
+  async restore(conn, srcPath, options) {
     // The dump was taken with --clean --if-exists, so the SQL itself
     // already drops/recreates objects before restoring them — no extra
     // --clean flag needed here, just feed it back through psql.
@@ -177,7 +178,8 @@ export const postgresEngine: BackupEngine = {
         reject(new Error(`Failed to start psql (is it installed?): ${err.message}`))
       );
 
-      pipeline(input, gunzip, stripForwardOnlyPreamble(), proc.stdin).then(
+      const testEdits = options?.forTest ? [editLines(dropOwnershipStatements)] : [];
+      pipeline([input, gunzip, stripForwardOnlyPreamble(), ...testEdits, proc.stdin]).then(
         () => {
           pipelineDone = true;
           settle();
@@ -215,4 +217,67 @@ export const postgresEngine: BackupEngine = {
       });
     });
   },
+
+  // Plain-format pg_dump always ends with this comment.
+  completionMarker: /^-- PostgreSQL database dump complete/,
+  createTablePattern: /^CREATE TABLE /,
+
+  scratch: {
+    async create(server, name) {
+      await psqlCommand(server, `CREATE DATABASE ${quoteName(name)}`);
+    },
+    async drop(server, name) {
+      // WITH (FORCE) (Postgres 13+) also ends any session still connected to
+      // it; fall back to a plain DROP on older servers.
+      try {
+        await psqlCommand(server, `DROP DATABASE IF EXISTS ${quoteName(name)} WITH (FORCE)`);
+      } catch (err: any) {
+        if (!/syntax error/i.test(String(err.message))) throw err;
+        await psqlCommand(server, `DROP DATABASE IF EXISTS ${quoteName(name)}`);
+      }
+    },
+    async list(server, prefix) {
+      const out = await psqlCommand(server, "SELECT datname FROM pg_database");
+      return out.split("\n").map((l) => l.trim()).filter((n) => n.startsWith(prefix));
+    },
+    async countTables(conn) {
+      const out = await psqlCommand(
+        conn,
+        "SELECT count(*) FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')"
+      );
+      return Number(out.trim()) || 0;
+    },
+  },
 };
+
+// Ownership and privileges refer to roles on the original server, which a
+// test-restore server won't have; with ON_ERROR_STOP they'd fail the test.
+// The restored objects simply belong to the test user instead.
+const OWNERSHIP_STATEMENTS = [/^ALTER [A-Z ]+ .* OWNER TO /, /^GRANT /, /^REVOKE /, /^ALTER DEFAULT PRIVILEGES /];
+function dropOwnershipStatements(line: string): string | null {
+  return OWNERSHIP_STATEMENTS.some((re) => re.test(line)) ? null : line;
+}
+
+function quoteName(name: string) {
+  if (!/^[a-z0-9_]+$/.test(name)) throw new Error(`Refusing unexpected database name: ${name}`);
+  return `"${name}"`;
+}
+
+// Runs one SQL command through psql and returns its unaligned output.
+function psqlCommand(conn: ConnectionConfig, sql: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(
+      "psql",
+      ["-h", conn.host, "-p", String(conn.port), "-U", conn.user, "-d", conn.database || "postgres", "--no-password", "-v", "ON_ERROR_STOP=1", "-tAc", sql],
+      { env: pgEnv(conn) }
+    );
+    let stdout = "";
+    let stderr = "";
+    proc.stdout.on("data", (d) => (stdout += d.toString()));
+    proc.stderr.on("data", (d) => (stderr += d.toString()));
+    proc.on("error", (err) => reject(new Error(`Failed to start psql (is it installed?): ${err.message}`)));
+    proc.on("close", (code) =>
+      code === 0 ? resolve(stdout) : reject(new Error(stderr.trim().slice(0, 800) || `psql exited with code ${code}`))
+    );
+  });
+}

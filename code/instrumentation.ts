@@ -14,5 +14,12 @@ export async function register() {
     } catch (err) {
       console.error("[scheduler] failed to schedule tasks at startup — the app will still start, but scheduled backups won't run until this is resolved:", err);
     }
+
+    // Backup checks run in an in-process queue, so any that were queued or
+    // running when the server stopped won't finish — clear them, and drop
+    // test-restore databases a stopped server left behind.
+    const { resetInterruptedChecks, cleanUpTestDatabases } = await import("./lib/backup/verify");
+    await resetInterruptedChecks().catch((err) => console.error("[verify] couldn't reset interrupted checks:", err));
+    void cleanUpTestDatabases();
   }
 }

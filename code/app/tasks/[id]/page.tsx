@@ -1,4 +1,8 @@
 import { notFound } from "next/navigation";
+import { testRestoreAvailable } from "@/lib/backup/verify";
+import { VerifyBadge } from "@/components/ui/VerifyBadge";
+import { RefreshWhileChecking } from "@/components/ui/VerifyActions";
+import { BulkRunActions } from "@/components/ui/BulkRunActions";
 import {
   getTask,
   listRuns,
@@ -14,7 +18,7 @@ import {
 import { RunNowButton } from "@/components/ui/RunNowButton";
 import { ToggleEnabledButton } from "@/components/ui/ToggleEnabledButton";
 import { DeleteTaskButton } from "@/components/ui/DeleteTaskButton";
-import { DeleteRunButton, RestoreRunButton, ClearFailedRunsButton } from "@/components/ui/RunActions";
+import { RunActions } from "@/components/ui/RunActions";
 import { AddTaskRecipientForm } from "@/components/ui/AddTaskRecipientForm";
 import { RemoveTaskRecipientButton } from "@/components/ui/RemoveTaskRecipientButton";
 import { AddTaskDestinationForm } from "@/components/ui/AddTaskDestinationForm";
@@ -26,7 +30,6 @@ import {
   TestTaskDestinationButton,
 } from "@/components/ui/TaskDestinationActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
-import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { LocalTime } from "@/components/ui/LocalTime";
 import { CronSchedulePicker } from "@/components/ui/CronSchedulePicker";
@@ -65,6 +68,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
     task.access.isOwner ? listAttachableChannels(id) : Promise.resolve([]),
   ]);
   const providerLabels = Object.fromEntries(destinationProviders.map((p) => [p.type, p.label]));
+  const canTestRestore = testRestoreAvailable(task.engine);
+  const checking = runs.some(isChecking);
+  const completedCount = runs.filter((r) => r.status === "completed").length;
   const uploads = await listRunUploads(id, runs.map((r) => r.id));
   const uploadsByRun = new Map<string, typeof uploads>();
   for (const u of uploads) {
@@ -100,9 +106,16 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <StandardSection>
-        <div className="flex items-center justify-between mb-4">
+        <RefreshWhileChecking active={checking} />
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h2 className="text-sm font-semibold text-ink">Backup history</h2>
-          {can.deleteRuns && runs.some((r) => r.status === "failed") && <ClearFailedRunsButton taskId={task.id} />}
+          <BulkRunActions
+            taskId={task.id}
+            completedCount={completedCount}
+            failedCount={runs.filter((r) => r.status === "failed").length}
+            can={can}
+            testRestore={canTestRestore}
+          />
         </div>
         {runs.length === 0 ? (
           <p className="text-sm text-muted">No backups yet — run one now, or wait for the next scheduled run.</p>
@@ -112,13 +125,34 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           <div className="lg:hidden divide-y divide-line">
             {runs.map((run) => (
               <div key={run.id} className="py-3 space-y-1.5 text-sm">
-                <div className="flex items-center justify-between gap-3">
-                  <span className={`font-medium capitalize ${statusStyle[run.status]}`}>{run.status}</span>
-                  <span className="text-xs text-muted capitalize">{run.triggeredBy}</span>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className={`font-medium capitalize ${statusStyle[run.status]}`}>{run.status}</span>
+                    <p className="text-muted">
+                      <LocalTime value={run.startedAt} /> · {formatBytes(run.sizeBytes)} ·{" "}
+                      <span className="capitalize">{run.triggeredBy}</span>
+                    </p>
+                  </div>
+                  <RunActions
+                    taskId={task.id}
+                    run={run}
+                    can={can}
+                    testRestore={canTestRestore}
+                    checking={isChecking(run)}
+                    variant="mobile"
+                    title={run.filename ?? "Failed backup"}
+                    summary={
+                      <>
+                        <LocalTime value={run.startedAt} /> · {formatBytes(run.sizeBytes)}
+                        {run.status === "completed" && (
+                          <span className="block mt-1">
+                            <VerifyBadge {...verifyProps(run)} />
+                          </span>
+                        )}
+                      </>
+                    }
+                  />
                 </div>
-                <p className="text-muted">
-                  <LocalTime value={run.startedAt} /> · {formatBytes(run.sizeBytes)}
-                </p>
                 <p className="font-mono text-xs text-ink break-all">{run.filename ?? "—"}</p>
                 {run.status === "failed" && run.errorMessage && (
                   <p className="text-xs text-muted break-words">{run.errorMessage}</p>
@@ -126,9 +160,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                 <div className="text-xs">
                   <RunUploads uploads={uploadsByRun.get(run.id) ?? []} destinationById={destinationById} />
                 </div>
-                <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <RunButtons taskId={task.id} run={run} can={can} />
-                </div>
+                {run.status === "completed" && <VerifyBadge {...verifyProps(run)} />}
               </div>
             ))}
           </div>
@@ -163,9 +195,21 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                           {run.errorMessage}
                         </span>
                       )}
+                      {run.status === "completed" && (
+                        <span className="block mt-0.5 max-w-56">
+                          <VerifyBadge {...verifyProps(run)} />
+                        </span>
+                      )}
                     </td>
-                    <td className="py-2.5 text-right space-x-3 whitespace-nowrap">
-                      <RunButtons taskId={task.id} run={run} can={can} />
+                    <td className="py-2.5 text-right whitespace-nowrap">
+                      <RunActions
+                        taskId={task.id}
+                        run={run}
+                        can={can}
+                        testRestore={canTestRestore}
+                        checking={isChecking(run)}
+                        variant="desktop"
+                      />
                     </td>
                   </tr>
                 ))}
@@ -373,6 +417,27 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             />
           </div>
 
+          {canTestRestore && (
+            <div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="testRestoreAfterBackup"
+                  name="testRestoreAfterBackup"
+                  type="checkbox"
+                  defaultChecked={task.testRestoreAfterBackup}
+                />
+                <label htmlFor="testRestoreAfterBackup" className="text-sm text-ink">
+                  Test-restore each new backup
+                </label>
+              </div>
+              <p className="text-xs text-muted mt-1">
+                Every backup is already checked to read back completely. This also restores it into a temporary
+                database on the server&apos;s test-restore server, checks it, then deletes it — slower, and alerts the
+                task&apos;s failure recipients if it fails.
+              </p>
+            </div>
+          )}
+
           <p className="text-xs text-muted">
             Database connection details aren&apos;t editable here yet — delete and recreate the task to change them,
             or use <code className="font-mono">PATCH /api/v1/tasks/:id</code>.
@@ -424,24 +489,10 @@ function RunUploads({ uploads, destinationById }: { uploads: Upload[]; destinati
   );
 }
 
-function RunButtons({
-  taskId,
-  run,
-  can,
-}: {
-  taskId: string;
-  run: Run;
-  can: { download: boolean; restore: boolean; deleteRuns: boolean };
-}) {
-  return (
-    <>
-      {run.status === "completed" && (
-        <>
-          {can.download && <StandardLinkButton href={`/tasks/${taskId}/runs/${run.id}/download`} title="Download" compact />}
-          {can.restore && <RestoreRunButton taskId={taskId} runId={run.id} encrypted={run.encrypted} />}
-        </>
-      )}
-      {can.deleteRuns && <DeleteRunButton taskId={taskId} runId={run.id} />}
-    </>
-  );
+function verifyProps(run: Run) {
+  return { status: run.verifyStatus, level: run.verifyLevel, message: run.verifyMessage, verifiedAt: run.verifiedAt };
+}
+
+function isChecking(run: Run) {
+  return run.verifyStatus === "queued" || run.verifyStatus === "running";
 }

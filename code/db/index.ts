@@ -14,4 +14,13 @@ if (!process.env.APP_DATABASE_URL) {
 
 const pool = mysql.createPool(process.env.APP_DATABASE_URL);
 
+// Talk to the database in UTC. Drizzle sends and reads timestamps as UTC,
+// but a server running in local time (e.g. a MariaDB on a desktop) would
+// otherwise apply its own timezone to NOW() defaults and to the values we
+// send, putting times out by the server's UTC offset. Runs on each new
+// connection before anything else is queued on it.
+pool.pool.on("connection", (connection) => {
+  connection.query("SET time_zone = '+00:00'");
+});
+
 export const db = drizzle(pool, { schema, mode: "default" });

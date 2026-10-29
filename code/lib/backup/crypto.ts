@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { pipeline } from "stream/promises";
+import { Readable } from "stream";
 import fs from "fs";
 
 // All secrets-at-rest (DB credentials, backup passwords) are wrapped with
@@ -63,8 +64,21 @@ function deriveFileKey(password: string, salt: Buffer): Buffer {
 }
 
 // File layout: [salt(16)][iv(12)][ciphertext...][authTag(16)]
-export async function encryptFile(srcPath: string, destPath: string, password: string): Promise<void> {
-  const salt = crypto.randomBytes(16);
+const SALT_LEN = 16;
+const HEADER_LEN = 28;
+const TAG_LEN = 16;
+
+// A short value derived from the file key, stored next to the run (never sent
+// to clients). On a failed decrypt it tells "the password is different from
+// the one this file was made with" apart from "the file is damaged" — AES-GCM
+// on its own reports both the same way.
+function keyCheckFromKey(key: Buffer): string {
+  return crypto.createHmac("sha256", key).update("backup-hub:key-check").digest("hex").slice(0, 16);
+}
+
+/** Encrypts srcPath into destPath and returns the file's key check value. */
+export async function encryptFile(srcPath: string, destPath: string, password: string): Promise<{ keyCheck: string }> {
+  const salt = crypto.randomBytes(SALT_LEN);
   const iv = crypto.randomBytes(12);
   const key = deriveFileKey(password, salt);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
@@ -80,24 +94,50 @@ export async function encryptFile(srcPath: string, destPath: string, password: s
   await new Promise<void>((resolve) => {
     out.end(cipher.getAuthTag(), () => resolve());
   });
+  return { keyCheck: keyCheckFromKey(key) };
 }
 
-// Note: reads the full ciphertext into memory to verify the auth tag before
-// writing plaintext out. Fine for typical dump sizes; for very large (multi-GB)
-// encrypted dumps, swap for a chunked authenticated-decrypt implementation.
-export async function decryptFile(srcPath: string, destPath: string, password: string): Promise<void> {
-  const full = await fs.promises.readFile(srcPath);
-  const salt = full.subarray(0, 16);
-  const iv = full.subarray(16, 28);
-  const tag = full.subarray(full.length - 16);
-  const ciphertext = full.subarray(28, full.length - 16);
+async function readEnvelope(srcPath: string) {
+  const fh = await fs.promises.open(srcPath, "r");
+  try {
+    const { size } = await fh.stat();
+    if (size < HEADER_LEN + TAG_LEN) throw new Error("The file is too short to be an encrypted backup.");
+    const header = Buffer.alloc(HEADER_LEN);
+    const tag = Buffer.alloc(TAG_LEN);
+    await fh.read(header, 0, HEADER_LEN, 0);
+    await fh.read(tag, 0, TAG_LEN, size - TAG_LEN);
+    return { salt: header.subarray(0, SALT_LEN), iv: header.subarray(SALT_LEN, HEADER_LEN), tag, size };
+  } finally {
+    await fh.close();
+  }
+}
 
-  const key = deriveFileKey(password, salt);
-  const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+/** The key check value for an existing encrypted file and a candidate password. */
+export async function keyCheckForFile(srcPath: string, password: string): Promise<string> {
+  const { salt } = await readEnvelope(srcPath);
+  return keyCheckFromKey(deriveFileKey(password, salt));
+}
+
+/**
+ * Streams that turn an encrypted backup back into its .sql.gz bytes — spread
+ * them into a pipeline(). Reads in chunks rather than loading the whole file.
+ * The auth tag is checked when the stream ends: a wrong password or a single
+ * damaged byte anywhere makes the pipeline fail, so callers must not treat
+ * output as trustworthy until the pipeline has resolved.
+ */
+export async function decryptStreams(srcPath: string, password: string): Promise<[NodeJS.ReadableStream, crypto.DecipherGCM]> {
+  const { salt, iv, tag, size } = await readEnvelope(srcPath);
+  const decipher = crypto.createDecipheriv("aes-256-gcm", deriveFileKey(password, salt), iv);
   decipher.setAuthTag(tag);
+  const body =
+    size === HEADER_LEN + TAG_LEN
+      ? Readable.from([])
+      : fs.createReadStream(srcPath, { start: HEADER_LEN, end: size - TAG_LEN - 1 });
+  return [body, decipher];
+}
 
-  const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-  await fs.promises.writeFile(destPath, plaintext);
+export async function decryptFile(srcPath: string, destPath: string, password: string): Promise<void> {
+  await pipeline(...(await decryptStreams(srcPath, password)), fs.createWriteStream(destPath));
 }
 
 // --- Destination config (S3/Drive/OneDrive credentials, etc.) ---

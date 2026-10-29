@@ -21,6 +21,14 @@ export type RunStatus = (typeof RUN_STATUSES)[number];
 export const RUN_TRIGGERS = ["cron", "manual", "api"] as const;
 export type RunTrigger = (typeof RUN_TRIGGERS)[number];
 
+// Backup file checks (lib/backup/verify.ts). "check" = fingerprint + read
+// the whole file back (decrypt, decompress, dump-completed marker);
+// "restore" = all of that plus a test restore into a throwaway database.
+export const VERIFY_STATUSES = ["queued", "running", "passed", "failed"] as const;
+export type VerifyStatus = (typeof VERIFY_STATUSES)[number];
+export const VERIFY_LEVELS = ["check", "restore"] as const;
+export type VerifyLevel = (typeof VERIFY_LEVELS)[number];
+
 // Remote storage destinations a completed backup file can be copied to, in
 // addition to the local copy on BACKUP_DIR (local storage is always kept —
 // a destination is an *extra* off-site copy, never a replacement). Adding a
@@ -67,6 +75,10 @@ export const backupTask = mysqlTable(
 
   encryptionEnabled: boolean("encryption_enabled").notNull().default(false),
   encryptedBackupPassword: varchar("encrypted_backup_password", { length: 512 }),
+
+  // Also test-restore every new backup into a throwaway database on the
+  // admin-configured scratch server (VERIFY_MYSQL_URL / VERIFY_POSTGRES_URL).
+  testRestoreAfterBackup: boolean("test_restore_after_backup").notNull().default(false),
 
   enabled: boolean("enabled").notNull().default(true),
 
@@ -115,6 +127,20 @@ export const backupRun = mysqlTable(
 
     startedAt: timestamp("started_at").defaultNow().notNull(),
     finishedAt: timestamp("finished_at"),
+
+    // SHA-256 of the file as written, so a later check can tell if it has
+    // changed on disk. NULL for backups made before this existed (the first
+    // check records it).
+    sha256: varchar("sha256", { length: 64 }),
+    // For encrypted backups: a short value derived from the encryption key,
+    // so a failed decrypt can be told apart as "the task's password has
+    // changed since" vs "the file is damaged". Never sent to clients — it
+    // would let someone test password guesses without the file.
+    keyCheck: varchar("key_check", { length: 32 }),
+    verifyStatus: mysqlEnum("verify_status", VERIFY_STATUSES),
+    verifyLevel: mysqlEnum("verify_level", VERIFY_LEVELS),
+    verifyMessage: varchar("verify_message", { length: 2048 }),
+    verifiedAt: timestamp("verified_at"),
   },
   (table) => ({
     taskIdx: index("backup_run_task_idx").on(table.taskId),

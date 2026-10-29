@@ -25,6 +25,12 @@ import { deleteAccountChannelsOf } from "@/lib/notifications/store";
 
 // Admins see how many tasks each user owns — a count only. They can't open,
 // list or change anyone's tasks unless the owner shares them.
+// Tasks owned by each user. The table names are spelled out on purpose:
+// inside a raw sql`` fragment Drizzle writes columns without their table, so
+// `${appUser.id}` would come out as plain `id` — which in this subquery means
+// backup_task.id, and the count was always 0.
+const ownedTaskCount = sql<number>`(select count(*) from ${backupTask} where ${backupTask}.${sql.identifier("owner_id")} = ${appUser}.${sql.identifier("id")})`.mapWith(Number);
+
 export async function listUsers() {
   await requireAdmin();
   return db
@@ -34,7 +40,7 @@ export async function listUsers() {
       name: appUser.name,
       role: appUser.role,
       createdAt: appUser.createdAt,
-      taskCount: sql<number>`(select count(*) from ${backupTask} where ${backupTask.ownerId} = ${appUser.id})`.mapWith(Number),
+      taskCount: ownedTaskCount,
     })
     .from(appUser)
     .orderBy(desc(appUser.createdAt));
@@ -48,7 +54,7 @@ export async function getUser(id: string) {
       email: appUser.email,
       name: appUser.name,
       role: appUser.role,
-      taskCount: sql<number>`(select count(*) from ${backupTask} where ${backupTask.ownerId} = ${appUser.id})`.mapWith(Number),
+      taskCount: ownedTaskCount,
     })
     .from(appUser)
     .where(eq(appUser.id, id))

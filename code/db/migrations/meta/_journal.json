@@ -50,6 +50,20 @@
       "when": 1793272908618,
       "tag": "0006_colossal_sharon_ventura",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1793278494757,
+      "tag": "0007_dusty_wrecker",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1793280397031,
+      "tag": "0008_utc_timestamps",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import type { IconType } from "react-icons";
 import { useModal } from "../modal/ModalProvider";
 
 type ActionButtonVariant = "standard" | "danger" | "outline" | "link";
@@ -15,6 +16,8 @@ type ActionButtonProps = {
     tooltip?: string;
     fullWidth?: boolean;
     compact?: boolean;
+    /** Optional icon shown before the title. */
+    icon?: IconType;
 };
 
 export function StandardActionButton({
@@ -26,7 +29,8 @@ export function StandardActionButton({
     disabled = false,
     tooltip,
     fullWidth = false,
-    compact = false
+    compact = false,
+    icon: Icon,
 }: ActionButtonProps) {
     const [isPending, startTransition] = useTransition();
     const { confirm } = useModal();
@@ -74,8 +78,9 @@ export function StandardActionButton({
             type="button"
             onClick={handleClick}
             disabled={disabled || isPending}
-            className={`rounded-md font-medium ${sizeStyle} transition-colors disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed ${buttonStyle} ${fullWidth === true ? 'w-full' : ''}`}
+            className={`${Icon ? "inline-flex items-center gap-1.5" : ""} rounded-md font-medium ${sizeStyle} transition-colors disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed ${buttonStyle} ${fullWidth === true ? 'w-full' : ''}`}
         >
+            {Icon && <Icon size={compact ? 14 : 16} aria-hidden="true" className="shrink-0" />}
             {isPending ? pendingTitle : title}
         </button>
     );

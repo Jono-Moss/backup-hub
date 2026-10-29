@@ -10,17 +10,10 @@ import { getEngine } from "@/lib/backup/engines";
 import { getDestination } from "@/lib/backup/destinations";
 import { configForLink, listLinksForTask, persistingRuntime, readConfig } from "@/lib/backup/destinations/store";
 import { notifyTaskSuccess, notifyTaskFailure } from "@/lib/notifications/notify";
+import { taskDir, getRunFilePath } from "./paths";
+import { checkNewBackup, enqueueVerify, testRestoreAvailable } from "./verify";
 
-const BACKUP_DIR = process.env.BACKUP_DIR || "/var/backups";
-
-export function taskDir(taskId: string) {
-  // BACKUP_DIR comes from an env var, so Turbopack can't statically prove
-  // this path stays scoped — without the ignore comment it conservatively
-  // traces the entire project into the server bundle. This directory is
-  // never used to resolve arbitrary user input beyond a UUID task id, so
-  // it's safe to opt out of that tracing.
-  return path.join(/* turbopackIgnore: true */ BACKUP_DIR, taskId);
-}
+export { taskDir, getRunFilePath } from "./paths";
 
 export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger = "manual") {
   const [task] = await db.select().from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
@@ -53,15 +46,23 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
     let finalPath = rawPath;
     let finalName = baseName;
     let encrypted = false;
+    let keyCheck: string | null = null;
 
     if (task.encryptionEnabled && task.encryptedBackupPassword) {
       const password = unwrapSecret(task.encryptedBackupPassword);
       finalName = `${baseName}.enc`;
       finalPath = path.join(dir, finalName);
-      await encryptFile(rawPath, finalPath, password);
+      ({ keyCheck } = await encryptFile(rawPath, finalPath, password));
       await fs.promises.unlink(rawPath); // never keep the unencrypted copy around
       encrypted = true;
     }
+
+    // Read the new file back before calling it a backup: a dump tool that
+    // died halfway, or a full disk, can leave a file that looks fine but
+    // can't be restored. A failed check fails the run (and the file is
+    // removed below) so it's alerted on now, not discovered at restore time.
+    const check = await checkNewBackup(task, finalPath, encrypted, keyCheck);
+    if (!check.ok) throw new Error(`The backup file failed its check: ${check.message}`);
 
     const stat = await fs.promises.stat(/*turbopackIgnore: true*/ finalPath);
 
@@ -73,6 +74,12 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
         encrypted,
         status: "completed",
         finishedAt: new Date(),
+        sha256: check.sha256,
+        keyCheck,
+        verifyStatus: "passed",
+        verifyLevel: "check",
+        verifyMessage: check.message,
+        verifiedAt: new Date(),
       })
       .where(eq(backupRun.id, runId));
 
@@ -88,6 +95,12 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
     notifyTaskSuccess(task.id, finalName, stat.size).catch((err) =>
       console.error("[notify] task success email failed:", err)
     );
+
+    // Optional, slower: restore it into a throwaway database too. Queued in
+    // the background so the run itself finishes now; alerts on failure.
+    if (task.testRestoreAfterBackup && testRestoreAvailable(task.engine)) {
+      await enqueueVerify([runId], "restore", { notify: true });
+    }
 
     return { runId, filename: finalName, sizeBytes: stat.size };
   } catch (err: any) {
@@ -211,9 +224,6 @@ export async function deleteRun(runId: string) {
   await db.delete(backupRun).where(eq(backupRun.id, runId));
 }
 
-export function getRunFilePath(taskId: string, filename: string) {
-  return path.join(/* turbopackIgnore: true */ taskDir(taskId), filename);
-}
 
 // Restores one completed run's backup file into its task's own target
 // database. Returns a result object rather than throwing, so the calling
