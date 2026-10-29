@@ -27,7 +27,7 @@ export type RunTrigger = (typeof RUN_TRIGGERS)[number];
 // new provider means implementing BackupDestination (lib/backup/destinations/types.ts)
 // and registering it in lib/backup/destinations/index.ts; nothing else here
 // needs to change since the config form is generated from configFields.
-export const DESTINATION_TYPES = ["s3", "google_drive", "onedrive", "email", "opencloud"] as const;
+export const DESTINATION_TYPES = ["s3", "google_drive", "onedrive", "email", "opencloud", "ftp", "ftps", "sftp"] as const;
 export type DestinationType = (typeof DESTINATION_TYPES)[number];
 
 // "skipped" = the destination deliberately did nothing (e.g. the email
@@ -140,7 +140,9 @@ export const backupDestination = mysqlTable(
     // destination's configFields (lib/backup/destinations/types.ts) —
     // access keys, refresh tokens, bucket/folder names, etc. Wrapped with
     // BACKUP_MASTER_KEY, same as DB connection credentials.
-    encryptedConfig: varchar("encrypted_config", { length: 4096 }).notNull(),
+    // `text`, not varchar: SFTP private keys (RSA 4096 especially) push the
+    // encrypted JSON past a few KB.
+    encryptedConfig: text("encrypted_config").notNull(),
     enabled: boolean("enabled").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },

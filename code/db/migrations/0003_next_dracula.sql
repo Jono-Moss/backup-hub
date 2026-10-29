@@ -1,0 +1,2 @@
+ALTER TABLE `backup_destination` MODIFY COLUMN `type` enum('s3','google_drive','onedrive','email','opencloud','ftp','ftps','sftp') NOT NULL;--> statement-breakpoint
+ALTER TABLE `backup_destination` MODIFY COLUMN `encrypted_config` text NOT NULL;

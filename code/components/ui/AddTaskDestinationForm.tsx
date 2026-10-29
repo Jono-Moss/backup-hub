@@ -14,7 +14,7 @@ import { StandardActionButton } from "./standard/StandardActionButton";
 type ConfigField = {
   name: string;
   label: string;
-  type: "text" | "password" | "number" | "checkbox";
+  type: "text" | "password" | "number" | "checkbox" | "textarea";
   required?: boolean;
   placeholder?: string;
   defaultValue?: string;
@@ -220,6 +220,18 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
                 {field.label}
                 {field.required && <span className="text-danger"> *</span>}
               </label>
+              {field.type === "textarea" ? (
+                <textarea
+                  id={`destination-${field.name}`}
+                  name={field.name}
+                  required={field.required}
+                  placeholder={field.placeholder}
+                  defaultValue={field.defaultValue}
+                  rows={6}
+                  spellCheck={false}
+                  className="w-full border border-line px-3 py-2 text-sm font-mono"
+                />
+              ) : (
               <input
                 id={`destination-${field.name}`}
                 name={field.name}
@@ -231,6 +243,7 @@ export function AddTaskDestinationForm({ taskId, providers }: { taskId: string; 
                 step={field.type === "number" ? "any" : undefined}
                 className="w-full border border-line px-3 py-2 text-sm"
               />
+              )}
             </>
           )}
           {field.helpText && <p className="text-xs text-muted mt-1">{field.helpText}</p>}

@@ -8,7 +8,7 @@
 // so no UI code needs to change for a new provider. If the provider supports
 // a "sign in with your account" flow, also implement the optional `connect`.
 
-export type DestinationFieldType = "text" | "password" | "number" | "checkbox";
+export type DestinationFieldType = "text" | "password" | "number" | "checkbox" | "textarea";
 
 export interface DestinationConfigField {
   /** Key this value is stored under in the destination's config JSON. */

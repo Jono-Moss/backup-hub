@@ -53,7 +53,7 @@ export function TestTaskDestinationButton({ taskId, destinationId }: { taskId: s
       <StandardActionButton action={handleClick} title="Test" variant="outline" pendingTitle="Testing…" compact />
       {result && (
         <span className={`text-xs ${result.ok ? "text-primary" : "text-danger"}`}>
-          {result.ok ? "OK" : `Failed: ${result.message ?? "unknown error"}`}
+          {result.ok ? result.message ?? "OK" : `Failed: ${result.message ?? "unknown error"}`}
         </span>
       )}
     </div>
