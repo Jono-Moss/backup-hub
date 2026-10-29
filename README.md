@@ -11,29 +11,61 @@
   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-supported-35be9e.svg)
 </div>
 
+<p align="center">
+  <img src="docs/screenshots/task.png" alt="A backup task in Backup Hub: run history with off-site upload status, and download, restore and delete buttons" width="900" />
+</p>
+
 ---
 
 ## What is this?
 
 Backup Hub is a small, self-hostable service that takes scheduled, encrypted backups of your MySQL and PostgreSQL databases, and gives you a web UI and a REST API to manage them.
 
-Point it at a database, give it a cron schedule and a retention count, and it handles the rest: running `mysqldump`/`pg_dump` on schedule, compressing and optionally encrypting the result, pruning old backups, emailing you if a run fails, and letting you download — or restore — any backup from the browser.
+Point it at a database, give it a cron schedule and a retention count, and it handles the rest: running `mysqldump`/`pg_dump` on schedule, compressing and optionally encrypting the result, pruning old backups, copying them off-site, notifying you if a run fails, and letting you download — or restore — any backup from the browser.
 
 A few highlights (the full list, with all the detail, is in [`code/README.md`](code/README.md)):
 
-- Multi-user accounts with two roles (`admin` / `user`), TOTP + passkey two-factor auth
+- Multi-user accounts with two roles (`admin` / `user`), TOTP + passkey two-factor auth, and per-task sharing
 - One-click **restore**, and a **dry run** button to test a backup before you save the task
+- **Off-site copies** to S3-compatible storage (AWS, Backblaze B2, Wasabi, R2, MinIO…), Google Drive, OneDrive, OpenCloud, FTP/FTPS, SFTP or email — set a location up once and reuse it across tasks
+- **Notifications** by email, ntfy, Telegram or Discord, per task and system-wide
 - A scoped REST API (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`) for driving Backup Hub from other tools
-- Email notifications per task and system-wide
-- Everything encrypted at rest — stored DB credentials, backup passwords, and (optionally) the backup files themselves
+- Everything encrypted at rest — stored DB credentials, save-location and notification credentials, backup passwords, and (optionally) the backup files themselves
+- Works on your phone as well as your desktop
+
+## Screenshots
+
+**Your backup tasks** — each with its own database, schedule and retention.
+
+<img src="docs/screenshots/tasks.png" alt="The task list: three backup tasks with their engine, schedule and retention" width="900" />
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Save locations</b> — enter credentials once and reuse them on any task, or keep them task-only.<br /><br />
+      <img src="docs/screenshots/save-locations.png" alt="The save locations page: saved locations used by several tasks, and a task-only location" />
+    </td>
+    <td width="50%" valign="top">
+      <b>Notifications</b> — email, ntfy, Telegram or Discord, chosen per task.<br /><br />
+      <img src="docs/screenshots/notifications.png" alt="The notifications page: saved Discord, ntfy and email channels, and a task-only Telegram channel" />
+    </td>
+  </tr>
+</table>
+
+**On your phone** — backup history, navigation and settings all work on small screens.
+
+<img src="docs/screenshots/mobile.png" alt="Three phone screenshots: a task's backup history, the open navigation menu, and the notifications page" width="900" />
+
+<sub>Screenshots show demo data.</sub>
 
 ## Repository layout
 
-This repo is split into two top-level folders:
+This repo is split into these top-level folders:
 
 | Folder | What's in it |
 |---|---|
 | [`code/`](code/) | The actual application — a Next.js app. This is where you'll find the source, the full project documentation ([`code/README.md`](code/README.md)), and the license. |
+| [`docs/`](docs/) | Screenshots used in this README. |
 | [`docker/`](docker/) | Everything needed to run Backup Hub in Docker: the `Dockerfile`, a ready-to-use `docker-compose.yml` (Backup Hub + a MySQL container), the container's `entrypoint.sh`, and a multi-arch `build.sh` build script. |
 
 If you're just here to run it, you don't need to open `code/` at all — start with `docker/` below.

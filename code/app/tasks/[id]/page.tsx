@@ -108,8 +108,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           <p className="text-sm text-muted">No backups yet — run one now, or wait for the next scheduled run.</p>
         ) : (
           <>
-          {/* Phones: one card per run. */}
-          <div className="sm:hidden divide-y divide-line">
+          {/* Phones and tablets: one card per run. The table needs ~900px. */}
+          <div className="lg:hidden divide-y divide-line">
             {runs.map((run) => (
               <div key={run.id} className="py-3 space-y-1.5 text-sm">
                 <div className="flex items-center justify-between gap-3">
@@ -132,32 +132,34 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               </div>
             ))}
           </div>
-          <div className="hidden sm:block overflow-x-auto">
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-muted border-b border-line">
-                  <th className="py-2 font-medium">File</th>
-                  <th className="py-2 font-medium">Started</th>
-                  <th className="py-2 font-medium">Size</th>
-                  <th className="py-2 font-medium">Trigger</th>
-                  <th className="py-2 font-medium">Status</th>
+                  <th className="py-2 pr-4 font-medium">File</th>
+                  <th className="py-2 pr-4 font-medium">Started</th>
+                  <th className="py-2 pr-4 font-medium">Status</th>
                   <th className="py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id} className="border-b border-line last:border-0">
-                    <td className="py-2.5 font-mono text-xs text-ink">
-                      {run.filename ?? "—"}
+                    <td className="py-2.5 pr-4 min-w-56 font-mono text-xs text-ink">
+                      <span className="break-all">{run.filename ?? "—"}</span>
                       <RunUploads uploads={uploadsByRun.get(run.id) ?? []} destinationById={destinationById} />
                     </td>
-                    <td className="py-2.5 text-muted"><LocalTime value={run.startedAt} /></td>
-                    <td className="py-2.5 text-muted">{formatBytes(run.sizeBytes)}</td>
-                    <td className="py-2.5 text-muted capitalize">{run.triggeredBy}</td>
-                    <td className={`py-2.5 font-medium capitalize ${statusStyle[run.status]}`}>
+                    {/* Size and trigger sit under the date, so the filename gets the width. */}
+                    <td className="py-2.5 pr-4 text-muted whitespace-nowrap">
+                      <LocalTime value={run.startedAt} />
+                      <span className="block text-xs mt-0.5">
+                        {formatBytes(run.sizeBytes)} · <span className="capitalize">{run.triggeredBy}</span>
+                      </span>
+                    </td>
+                    <td className={`py-2.5 pr-4 font-medium capitalize ${statusStyle[run.status]}`}>
                       {run.status}
                       {run.status === "failed" && run.errorMessage && (
-                        <span className="block text-xs text-muted font-normal normal-case mt-0.5 max-w-xs truncate" title={run.errorMessage}>
+                        <span className="block text-xs text-muted font-normal normal-case mt-0.5 max-w-48 truncate" title={run.errorMessage}>
                           {run.errorMessage}
                         </span>
                       )}
