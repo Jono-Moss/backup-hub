@@ -218,8 +218,17 @@ export const postgresEngine: BackupEngine = {
     });
   },
 
-  // Plain-format pg_dump always ends with this comment.
+  // Plain-format pg_dump always ends with this comment block:
+  //   --
+  //   -- PostgreSQL database dump complete
+  //   --
+  //
+  //   \unrestrict <random key>
+  // The closing "\unrestrict" line (pairing with a "\restrict <key>" at the
+  // top) is written since 17.6 / 16.10 / 15.14 / 14.19 / 13.22
+  // (CVE-2025-8714). Skip it and the bare "--" to find the marker.
   completionMarker: /^-- PostgreSQL database dump complete/,
+  trailerLines: /^(--|\\unrestrict\s+\S+)$/,
   createTablePattern: /^CREATE TABLE /,
 
   scratch: {

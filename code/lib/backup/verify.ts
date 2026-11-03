@@ -85,13 +85,17 @@ export function fileSha256(filePath: string): Promise<string> {
   });
 }
 
-/** Reads decompressed SQL, remembering the last non-empty line and counting CREATE TABLEs. */
-function sqlScanner(createTable: RegExp) {
+/**
+ * Reads decompressed SQL, remembering the last non-empty line (ignoring
+ * lines matching `trailer`, which the dump tool writes after its completion
+ * marker) and counting CREATE TABLEs.
+ */
+function sqlScanner(createTable: RegExp, trailer?: RegExp) {
   const stats = { lastLine: "", createTables: 0, bytes: 0 };
   let partial = "";
   const take = (line: string) => {
     if (createTable.test(line)) stats.createTables++;
-    if (line.trim()) stats.lastLine = line;
+    if (line.trim() && !trailer?.test(line.trim())) stats.lastLine = line;
   };
   const sink = new Writable({
     write(chunk: Buffer, _enc, cb) {
@@ -143,7 +147,7 @@ async function checkFile(run: Run, task: Task, filePath: string, decryptedCopy?:
   }
 
   const engine = getEngine(task.engine);
-  const { sink, stats } = sqlScanner(engine.createTablePattern);
+  const { sink, stats } = sqlScanner(engine.createTablePattern, engine.trailerLines);
   let gzPath = filePath;
 
   if (run.encrypted) {

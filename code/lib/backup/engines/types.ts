@@ -38,6 +38,11 @@ export interface BackupEngine {
    * without it was cut short (tool killed, disk full, ...).
    */
   readonly completionMarker: RegExp;
+  /**
+   * Lines the dump tool may write *after* the completion marker, skipped
+   * when looking for it (e.g. pg_dump's closing `\unrestrict <key>`).
+   */
+  readonly trailerLines?: RegExp;
   /** Counts the tables a dump creates (lines it'd run). Used to sanity-check a test restore. */
   readonly createTablePattern: RegExp;
   readonly scratch: ScratchDatabaseOps;
