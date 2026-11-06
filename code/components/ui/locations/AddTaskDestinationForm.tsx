@@ -177,8 +177,6 @@ export function AddTaskDestinationForm({
       }}
       className="space-y-4"
     >
-      {/* On a task page the add panel already titles this form. */}
-      {!taskId && <p className="mt-2 text-sm font-semibold text-ink">Add a save location</p>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="destination-type">

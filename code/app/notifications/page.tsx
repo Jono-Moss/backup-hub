@@ -1,7 +1,10 @@
 import { listSystemRecipients } from "./actions";
 import { AddSystemRecipientForm } from "@/components/ui/notifications/AddSystemRecipientForm";
 import { RemoveSystemRecipientButton } from "@/components/ui/notifications/RemoveSystemRecipientButton";
-import { StandardSection } from "@/components/ui/standard/StandardSection";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { AddableSection } from "@/components/ui/common/AddableSection";
+import { LuMegaphone } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -29,25 +32,31 @@ export default async function SystemNotificationsPage() {
         </p>
       </div>
 
-      <StandardSection>
-        {recipients.length === 0 ? (
-          <p className="text-sm text-muted p-6">No system notification recipients yet.</p>
-        ) : (
-          recipients.map((r) => (
-            <div key={r.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-4 sm:px-5">
-              <div>
-                <p className="text-sm font-medium text-ink">{r.target}</p>
-                <p className="text-xs text-muted mt-0.5">{r.events.map((e) => EVENT_LABELS[e]).join(", ")}</p>
-              </div>
-              <RemoveSystemRecipientButton id={r.id} />
-            </div>
-          ))
-        )}
-      </StandardSection>
-
-      <StandardSection WidthVariant="half">
-        <AddSystemRecipientForm />
-      </StandardSection>
+      <AddableSection
+        id="recipients"
+        title="Recipients"
+        icon={<LuMegaphone />}
+        count={recipients.length}
+        description="Who is alerted about account and task-lifecycle events, and for which ones."
+        canAdd
+        addLabel="Add recipient"
+        panelTitle="New system recipient"
+        tabs={[{ key: "new", label: "Create new", content: <AddSystemRecipientForm /> }]}
+        emptyMessage="No system notification recipients yet."
+      >
+        <StandardEntryList>
+          {recipients.map((r) => (
+            <StandardEntryCard
+              key={r.id}
+              title={r.target}
+              badges={r.events.map((e) => (
+                <StandardBadge key={e}>{EVENT_LABELS[e] ?? e}</StandardBadge>
+              ))}
+              actions={<RemoveSystemRecipientButton id={r.id} />}
+            />
+          ))}
+        </StandardEntryList>
+      </AddableSection>
     </div>
   );
 }

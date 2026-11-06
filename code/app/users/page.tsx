@@ -1,11 +1,13 @@
-import Link from "next/link";
 import { listUsers } from "./actions";
 import { createUser } from "./actions";
 import { getCurrentUser } from "@/lib/auth/session";
 import { DeleteUserButton } from "@/components/ui/users/DeleteUserButton";
-import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { AddableSection } from "@/components/ui/common/AddableSection";
+import { LuUsers } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -23,78 +25,102 @@ export default async function UsersPage() {
         </p>
       </div>
 
-      <StandardSection>
-        {users.map((user) => (
-          <div key={user.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-4 sm:px-5">
-            <div>
-              <p className="text-sm font-medium text-ink">
-                {user.name} {user.id === me?.id && <span className="text-muted font-normal">(you)</span>}
-              </p>
-              <p className="text-xs text-muted mt-0.5">
-                {user.email} · {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <span
-                className={`text-xs px-2 py-0.5 ${
-                  user.role === "admin" ? "bg-primary-light text-primary-dark" : "bg-paper text-muted"
-                }`}
-              >
-                {user.role}
-              </span>
-              {user.id != me?.id && <StandardLinkButton href={`/users/${user.id}`} title="Edit" compact /> }
-              {user.id != me?.id && <DeleteUserButton userId={user.id} /> }
-            </div>
-          </div>
-        ))}
-      </StandardSection>
-
-      <StandardSection WidthVariant="half">
-        <h2 className="text-sm font-semibold text-ink mb-4">Add a user</h2>
-        <form action={createUser} className="space-y-4">
-          <div>
-            <label className="block text-sm text-ink mb-1" htmlFor="name">
-              Name
-            </label>
-            <input id="name" name="name" required className="w-full border border-line px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm text-ink mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="w-full border border-line px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-ink mb-1" htmlFor="password">
-              Temporary password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              className="w-full border border-line px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-ink mb-1" htmlFor="role">
-              Role
-            </label>
-            <select id="role" name="role" className="w-full border border-line px-3 py-2 text-sm bg-white">
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <StandardSubmitButton title="Create user" />
-        </form>
-      </StandardSection>
+      <AddableSection
+        id="users"
+        title="All users"
+        icon={<LuUsers />}
+        count={users.length}
+        description="Everyone who can sign in to this server."
+        canAdd
+        addLabel="Add user"
+        panelTitle="New user"
+        tabs={[
+          {
+            key: "new",
+            label: "Create new",
+            content: (
+              <form action={createUser} className="space-y-4 max-w-xl">
+                <div>
+                  <label className="block text-sm text-ink mb-1" htmlFor="name">
+                    Name
+                  </label>
+                  <input id="name" name="name" required className="w-full border border-line px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm text-ink mb-1" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    className="w-full border border-line px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-ink mb-1" htmlFor="password">
+                    Temporary password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    minLength={8}
+                    className="w-full border border-line px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-ink mb-1" htmlFor="role">
+                    Role
+                  </label>
+                  <select id="role" name="role" className="w-full border border-line px-3 py-2 text-sm bg-white">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <StandardSubmitButton title="Create user" />
+              </form>
+            ),
+          },
+        ]}
+        emptyMessage="No users."
+      >
+        <StandardEntryList>
+          {users.map((user) => {
+            const isMe = user.id === me?.id;
+            return (
+              <StandardEntryCard
+                key={user.id}
+                title={
+                  <>
+                    {user.name} {isMe && <span className="font-normal text-muted">(you)</span>}
+                  </>
+                }
+                meta={
+                  <>
+                    {user.email} · {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
+                  </>
+                }
+                badges={
+                  <StandardBadge tone={user.role === "admin" ? "primary" : "neutral"}>
+                    {user.role === "admin" ? "Admin" : "User"}
+                  </StandardBadge>
+                }
+                actions={
+                  !isMe && (
+                    <>
+                      <StandardLinkButton href={`/users/${user.id}`} title="Edit" compact />
+                      <DeleteUserButton userId={user.id} />
+                    </>
+                  )
+                }
+              />
+            );
+          })}
+        </StandardEntryList>
+      </AddableSection>
     </div>
   );
 }

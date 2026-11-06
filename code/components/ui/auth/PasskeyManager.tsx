@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { startRegistration } from "@simplewebauthn/browser";
 import { startPasskeyRegistration, finishPasskeyRegistration, deletePasskey } from "@/app/account/actions";
 import { LocalTime } from "@/components/ui/common/LocalTime";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { LuPlus } from "react-icons/lu";
 import { useModal } from "@/components/ui/modal/ModalProvider";
 
 type Passkey = {
@@ -55,13 +57,14 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
 
   return (
     <div className="space-y-4">
-      {passkeys.length > 0 && (
-        <div className="divide-y divide-line">
+      {passkeys.length > 0 ? (
+        <StandardEntryList>
           {passkeys.map((p) => (
-            <div key={p.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
-              <div>
-                <p className="text-sm text-ink">{p.name}</p>
-                <p className="text-xs text-muted">
+            <StandardEntryCard
+              key={p.id}
+              title={p.name}
+              meta={
+                <>
                   Added <LocalTime value={p.createdAt} options={DATE_OPTIONS} />
                   {p.lastUsedAt ? (
                     <>
@@ -71,17 +74,23 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                   ) : (
                     " · never used"
                   )}
-                </p>
-              </div>
-              <button
-                onClick={() => removePasskey(p.id)}
-                disabled={isPending}
-                className="text-danger text-sm hover:underline disabled:opacity-50"
-              >
-                Remove
-              </button>
-            </div>
+                </>
+              }
+              actions={
+                <button
+                  onClick={() => removePasskey(p.id)}
+                  disabled={isPending}
+                  className="text-danger text-sm hover:underline disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              }
+            />
           ))}
+        </StandardEntryList>
+      ) : (
+        <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+          No passkeys yet.
         </div>
       )}
 
@@ -91,8 +100,9 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
         type="button"
         onClick={addPasskey}
         disabled={isPending}
-        className="border border-line text-ink text-sm font-medium px-4 py-2 hover:border-primary transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white border-b-2 border-b-primary-dark hover:border-b-transparent shadow-inner disabled:opacity-50"
       >
+        <LuPlus size={16} aria-hidden="true" />
         {isPending ? "Working…" : "Add a passkey"}
       </button>
     </div>

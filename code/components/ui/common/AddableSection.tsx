@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { LuPlus, LuX } from "react-icons/lu";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
 
 export type AddTab = { key: string; label: string; content: React.ReactNode };
+
+const AddPanelContext = createContext<{ close: () => void } | null>(null);
+
+/** Lets a form inside the add panel close it (null outside an AddableSection). */
+export function useAddPanel() {
+  return useContext(AddPanelContext);
+}
 
 // A section whose list of configured items is always visible, while the
 // forms for adding a new one stay hidden behind a "+ Add" button in the
@@ -14,7 +21,9 @@ export type AddTab = { key: string; label: string; content: React.ReactNode };
 //
 // With several `tabs` (e.g. "Use a saved channel" / "Create new") the panel
 // shows one at a time. The panel closes itself when `count` changes, i.e.
-// after the add succeeded and the server re-rendered the list.
+// after the add succeeded and the server re-rendered the list — unless
+// `closeOnAdd` is false, for forms that show a result first (a new API key)
+// and close the panel themselves via useAddPanel().
 export function AddableSection({
   id,
   title,
@@ -26,6 +35,7 @@ export function AddableSection({
   panelTitle,
   tabs,
   emptyMessage,
+  closeOnAdd = true,
   children,
 }: {
   id: string;
@@ -38,6 +48,7 @@ export function AddableSection({
   panelTitle: string;
   tabs: AddTab[];
   emptyMessage: string;
+  closeOnAdd?: boolean;
   /** The list of existing entries — only rendered when count > 0. */
   children?: React.ReactNode;
 }) {
@@ -47,9 +58,9 @@ export function AddableSection({
   const previousCount = useRef(count);
 
   useEffect(() => {
-    if (count !== previousCount.current) setOpen(false);
+    if (closeOnAdd && count !== previousCount.current) setOpen(false);
     previousCount.current = count;
-  }, [count]);
+  }, [count, closeOnAdd]);
 
   function openPanel() {
     setOpen(true);
@@ -130,7 +141,9 @@ export function AddableSection({
             </div>
           )}
 
-          <div role="tabpanel">{activeTab?.content}</div>
+          <AddPanelContext.Provider value={{ close: () => setOpen(false) }}>
+            <div role="tabpanel">{activeTab?.content}</div>
+          </AddPanelContext.Provider>
         </div>
       )}
     </StandardSection>

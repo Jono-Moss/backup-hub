@@ -4,6 +4,9 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
+import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { LuArrowLeft, LuShieldCheck, LuUser } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -17,14 +20,29 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   const resetAuthFactors = adminResetAuthFactors.bind(null, user.id);
 
   return (
-    <div className="max-w-md">
-      <h1 className="text-xl font-semibold text-ink mb-1">{user.name}</h1>
-      <p className="text-sm text-muted mb-6">
-        {user.email} · owns {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
-      </p>
+    <div className="max-w-2xl space-y-8">
+      <div>
+        <a href="/users" className="inline-flex items-center gap-1 text-sm text-muted hover:text-primary mb-3">
+          <LuArrowLeft size={14} aria-hidden="true" /> All users
+        </a>
+        <h1 className="text-xl font-semibold text-ink mb-1">{user.name}</h1>
+        <p className="text-sm text-muted">
+          {user.email} · owns {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
+        </p>
+      </div>
 
-      <StandardSection>
-        <form action={save} className="space-y-5">
+      <StandardSection id="details">
+        <StandardSectionHeader
+          title="Account details"
+          icon={<LuUser />}
+          description="Name, role, and a password reset if they're locked out."
+          action={
+            <StandardBadge tone={user.role === "admin" ? "primary" : "neutral"}>
+              {user.role === "admin" ? "Admin" : "User"}
+            </StandardBadge>
+          }
+        />
+        <form action={save} className="space-y-5 max-w-md">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
               Name
@@ -80,27 +98,39 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
           </div>
 
           <StandardSubmitButton title="Save changes" />
-            
         </form>
       </StandardSection>
 
-      {!isSelf && (authFactors.totpEnabled || authFactors.passkeyCount > 0) && (
-        <div className="mt-6">
-          <StandardSection>
-            <h2 className="text-sm font-semibold text-ink mb-1">Two-factor authentication & passkeys</h2>
-            <p className="text-sm text-muted mb-4">
-              {authFactors.totpEnabled ? "Authenticator app enabled" : "No authenticator app"}
-              {" · "}
-              {authFactors.passkeyCount} passkey{authFactors.passkeyCount === 1 ? "" : "s"} registered
-            </p>
-            <StandardActionButton
-              title="Reset 2FA & passkeys"
-              variant="danger"
-              confirmMessage={`Remove all two-factor authentication and passkeys for ${user.name}? They'll be able to sign in with just their password afterward, and will need to re-enroll from their own account page.`}
-              action={resetAuthFactors}
-            />
-          </StandardSection>
-        </div>
+      {!isSelf && (
+        <StandardSection id="security">
+          <StandardSectionHeader
+            title="Two-factor authentication & passkeys"
+            icon={<LuShieldCheck />}
+            description="Reset these if the user has lost their authenticator app or security key."
+          />
+          {authFactors.totpEnabled || authFactors.passkeyCount > 0 ? (
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-1.5">
+                <StandardBadge tone={authFactors.totpEnabled ? "primary" : "neutral"}>
+                  {authFactors.totpEnabled ? "Authenticator app enabled" : "No authenticator app"}
+                </StandardBadge>
+                <StandardBadge tone={authFactors.passkeyCount > 0 ? "primary" : "neutral"}>
+                  {authFactors.passkeyCount} passkey{authFactors.passkeyCount === 1 ? "" : "s"}
+                </StandardBadge>
+              </div>
+              <StandardActionButton
+                title="Reset 2FA & passkeys"
+                variant="danger"
+                confirmMessage={`Remove all two-factor authentication and passkeys for ${user.name}? They'll be able to sign in with just their password afterward, and will need to re-enroll from their own account page.`}
+                action={resetAuthFactors}
+              />
+            </div>
+          ) : (
+            <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+              No authenticator app or passkeys set up — this user signs in with a password only.
+            </div>
+          )}
+        </StandardSection>
       )}
     </div>
   );

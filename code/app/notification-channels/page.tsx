@@ -3,6 +3,11 @@ import { AddAccountChannelForm } from "@/components/ui/notifications/AddAccountC
 import { DeleteChannelButton, MakeChannelReusableButton, TestChannelButton } from "@/components/ui/notifications/ChannelActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
+import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { AddableSection } from "@/components/ui/common/AddableSection";
+import { LuBell, LuLink } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -26,26 +31,30 @@ function UsedBy({ channel }: { channel: Channel }) {
 }
 
 function ChannelRow({ channel }: { channel: Channel }) {
+  // Push channels' summary already starts with the type ("ntfy · host / topic").
+  const target = channel.target.startsWith(channel.channelLabel)
+    ? channel.target.slice(channel.channelLabel.length).replace(/^ · /, "")
+    : channel.target;
   return (
-    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-3">
-      <div className="min-w-0">
-        <p className="text-sm text-ink truncate">{channel.label}</p>
-        <p className="text-xs text-muted">
-          {/* Push channels' summary already starts with the type ("ntfy · host / topic"). */}
-          {channel.target.startsWith(channel.channelLabel) ? channel.target : channel.channelLabel}
-          {!channel.target.startsWith(channel.channelLabel) && channel.target !== channel.label && <> · {channel.target}</>}
-          {" · "}
+    <StandardEntryCard
+      title={channel.label}
+      meta={
+        <>
+          {target && target !== channel.label && <>{target} · </>}
           <UsedBy channel={channel} />
           {channel.addedByName && <> · added by {channel.addedByName}</>}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
-        <TestChannelButton id={channel.id} />
-        {channel.addedByMe && <StandardLinkButton href={`/notification-channels/${channel.id}`} title="Edit" compact />}
-        {channel.taskOnly && channel.addedByMe && <MakeChannelReusableButton id={channel.id} />}
-        <DeleteChannelButton id={channel.id} usedByCount={channel.usedBy.length} />
-      </div>
-    </div>
+        </>
+      }
+      badges={<StandardBadge tone="primary">{channel.channelLabel}</StandardBadge>}
+      actions={
+        <>
+          <TestChannelButton id={channel.id} />
+          {channel.addedByMe && <StandardLinkButton href={`/notification-channels/${channel.id}`} title="Edit" compact />}
+          {channel.taskOnly && channel.addedByMe && <MakeChannelReusableButton id={channel.id} />}
+          <DeleteChannelButton id={channel.id} usedByCount={channel.usedBy.length} />
+        </>
+      }
+    />
   );
 }
 
@@ -67,39 +76,43 @@ export default async function NotificationChannelsPage() {
         </p>
       </div>
 
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-1">Saved channels</h2>
-        <p className="text-sm text-muted mb-2">Reusable across your tasks.</p>
-        {reusable.length === 0 ? (
-          <p className="text-sm text-muted py-3">None yet — add one below, or make a task-only channel reusable.</p>
-        ) : (
-          <div className="divide-y divide-line">
-            {reusable.map((c) => (
-              <ChannelRow key={c.id} channel={c} />
-            ))}
-          </div>
-        )}
-      </StandardSection>
+      <AddableSection
+        id="saved"
+        title="Saved channels"
+        icon={<LuBell />}
+        count={reusable.length}
+        description="Reusable across your tasks."
+        canAdd
+        addLabel="Add channel"
+        panelTitle="New notification channel"
+        tabs={[{ key: "new", label: "Create new", content: <AddAccountChannelForm /> }]}
+        emptyMessage="No saved channels yet — add one, or make a task-only channel reusable."
+      >
+        <StandardEntryList>
+          {reusable.map((c) => (
+            <ChannelRow key={c.id} channel={c} />
+          ))}
+        </StandardEntryList>
+      </AddableSection>
 
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-1">Task-only channels</h2>
-        <p className="text-sm text-muted mb-2">
-          Tied to one of your tasks. Channels someone you shared a task with added are listed too: you can remove
-          them, but only they can change their settings.
-        </p>
+      <StandardSection id="task-only">
+        <StandardSectionHeader
+          title="Task-only channels"
+          icon={<LuLink />}
+          count={taskOnly.length}
+          description="Tied to one of your tasks. Channels someone you shared a task with added are listed too: you can remove them, but only they can change their settings."
+        />
         {taskOnly.length === 0 ? (
-          <p className="text-sm text-muted py-3">None.</p>
+          <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+            No task-only channels.
+          </div>
         ) : (
-          <div className="divide-y divide-line">
+          <StandardEntryList>
             {taskOnly.map((c) => (
               <ChannelRow key={c.id} channel={c} />
             ))}
-          </div>
+          </StandardEntryList>
         )}
-      </StandardSection>
-
-      <StandardSection>
-        <AddAccountChannelForm />
       </StandardSection>
     </div>
   );

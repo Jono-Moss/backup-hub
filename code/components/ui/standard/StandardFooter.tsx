@@ -32,7 +32,7 @@ export function StandardFooter() {
                             rel="noopener noreferrer"
                             className="inline-block transition duration-300 hover:scale-105"
                         >
-                            <Image src={byteswopLogoImg} height={40} alt="Byteswop Logo" className="h-7 w-auto sm:h-10" />
+                            <Image src={byteswopLogoImg} height={80} alt="Byteswop Logo" className="h-7 w-auto sm:h-10" />
                         </a>
                     </div>
 
@@ -45,7 +45,7 @@ export function StandardFooter() {
                             rel="noopener noreferrer"
                             className="inline-block transition duration-300 hover:scale-105"
                         >
-                            <Image src={myfinLogoImg} height={40} alt="MyFin Logo" className="h-7 w-auto sm:h-10" />
+                            <Image src={myfinLogoImg} height={80} alt="MyFin Logo" className="h-7 w-auto sm:h-10" />
                         </a>
                     </div>
 

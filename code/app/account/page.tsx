@@ -7,6 +7,9 @@ import { TotpEnrollFlow } from "@/components/ui/auth/TotpEnrollFlow";
 import { DisableTotpForm } from "@/components/ui/auth/DisableTotpForm";
 import { RegenerateRecoveryCodesButton } from "@/components/ui/auth/RegenerateRecoveryCodesButton";
 import { PasskeyManager } from "@/components/ui/auth/PasskeyManager";
+import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { LuFingerprint, LuShieldCheck, LuUser } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +18,19 @@ export default async function AccountPage() {
   const [totpStatus, passkeys] = await Promise.all([getTotpStatus(), listPasskeys()]);
 
   return (
-    <div className="max-w-md space-y-8">
+    <div className="max-w-2xl space-y-8">
       <div>
         <h1 className="text-xl font-semibold text-ink mb-1">Your account</h1>
         <p className="text-sm text-muted">{me.email}</p>
       </div>
 
-      <StandardSection>
-        <form action={updateOwnProfile} className="space-y-5">
+      <StandardSection id="profile">
+        <StandardSectionHeader
+          title="Profile & password"
+          icon={<LuUser />}
+          description="Your display name, and your sign-in password."
+        />
+        <form action={updateOwnProfile} className="space-y-5 max-w-md">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
               Name
@@ -38,7 +46,7 @@ export default async function AccountPage() {
 
           <hr className="border-line" />
 
-          <p className="text-sm text-ink">Change password</p>
+          <p className="text-sm font-semibold text-ink">Change password</p>
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="currentPassword">
               Current password
@@ -69,16 +77,19 @@ export default async function AccountPage() {
         </form>
       </StandardSection>
 
-      <StandardSection>
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-sm font-semibold text-ink">Two-factor authentication</h2>
-          {totpStatus.enabled && (
-            <span className="text-xs px-2 py-0.5 bg-primary-light text-primary-dark">Enabled</span>
-          )}
-        </div>
-        <p className="text-sm text-muted mb-4">
-          Require a code from an authenticator app in addition to your password when signing in.
-        </p>
+      <StandardSection id="two-factor">
+        <StandardSectionHeader
+          title="Two-factor authentication"
+          icon={<LuShieldCheck />}
+          description="Require a code from an authenticator app in addition to your password when signing in."
+          action={
+            totpStatus.enabled ? (
+              <StandardBadge tone="primary">Enabled</StandardBadge>
+            ) : (
+              <StandardBadge tone="warn">Not enabled</StandardBadge>
+            )
+          }
+        />
 
         {totpStatus.enabled ? (
           <div className="space-y-3">
@@ -93,12 +104,13 @@ export default async function AccountPage() {
         )}
       </StandardSection>
 
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-1">Passkeys</h2>
-        <p className="text-sm text-muted mb-4">
-          Sign in with Touch ID, Face ID, Windows Hello, or a security key — no password needed, and it counts as
-          your second factor on its own.
-        </p>
+      <StandardSection id="passkeys">
+        <StandardSectionHeader
+          title="Passkeys"
+          icon={<LuFingerprint />}
+          count={passkeys.length}
+          description="Sign in with Touch ID, Face ID, Windows Hello, or a security key — no password needed, and it counts as your second factor on its own."
+        />
         <PasskeyManager passkeys={passkeys} />
       </StandardSection>
     </div>

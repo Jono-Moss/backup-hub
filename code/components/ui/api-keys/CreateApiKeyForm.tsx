@@ -5,10 +5,12 @@ import { createApiKey } from "@/app/api-keys/actions";
 import { SCOPE_OPTIONS } from "@/components/ui/api-keys/scopeOptions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
+import { useAddPanel } from "@/components/ui/common/AddableSection";
 
 
 export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string }[] }) {
   const [issuedKey, setIssuedKey] = useState<string | null>(null);
+  const panel = useAddPanel();
 
   async function handleSubmit(formData: FormData) {
     const raw = await createApiKey(formData);
@@ -23,7 +25,10 @@ export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string 
         </p>
         <code className="block bg-white border border-line px-3 py-2 text-xs font-mono break-all mb-2">{issuedKey}</code>
         <StandardActionButton
-          action={() => setIssuedKey(null)}
+          action={() => {
+            setIssuedKey(null);
+            panel?.close();
+          }}
           title="Done"
         />
       </div>

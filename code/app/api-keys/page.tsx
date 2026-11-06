@@ -1,7 +1,11 @@
 import { listApiKeys, listTasksForPicker } from "./actions";
 import { CreateApiKeyForm } from "@/components/ui/api-keys/CreateApiKeyForm";
 import { RevokeApiKeyButton } from "@/components/ui/api-keys/RevokeApiKeyButton";
-import { StandardSection } from "@/components/ui/standard/StandardSection";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { AddableSection } from "@/components/ui/common/AddableSection";
+import { scopeLabel } from "@/components/ui/api-keys/scopeOptions";
+import { LuKeyRound } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -19,29 +23,39 @@ export default async function ApiKeysPage() {
         </p>
       </div>
 
-      <StandardSection WidthVariant="half">
-        <CreateApiKeyForm tasks={tasks} />
-      </StandardSection>
-
-      <StandardSection>
-        {keys.length === 0 ? (
-          <p className="text-sm text-muted p-6">No API keys yet.</p>
-        ) : (
-          keys.map((key) => (
-            <div key={key.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-4 sm:px-5">
-              <div>
-                <p className="text-sm font-medium text-ink">{key.name}</p>
-                <p className="text-xs text-muted mt-0.5 font-mono">{key.keyPrefix}…</p>
-                <p className="text-xs text-muted mt-1">
-                  {key.scopes.join(", ")}
-                  {key.taskId ? " · scoped to one task" : " · all tasks"}
-                </p>
-              </div>
-              <RevokeApiKeyButton id={key.id} />
-            </div>
-          ))
-        )}
-      </StandardSection>
+      <AddableSection
+        id="keys"
+        title="Your API keys"
+        icon={<LuKeyRound />}
+        count={keys.length}
+        description="Revoke a key as soon as the app using it no longer needs access."
+        canAdd
+        addLabel="Create key"
+        panelTitle="New API key"
+        tabs={[{ key: "new", label: "Create new", content: <CreateApiKeyForm tasks={tasks} /> }]}
+        emptyMessage="No API keys yet."
+        // The new key is shown once in the panel; it closes when you click Done.
+        closeOnAdd={false}
+      >
+        <StandardEntryList>
+          {keys.map((key) => (
+            <StandardEntryCard
+              key={key.id}
+              title={key.name}
+              meta={<span className="font-mono">{key.keyPrefix}…</span>}
+              badges={
+                <>
+                  <StandardBadge tone="primary">{key.taskId ? "One task" : "All tasks"}</StandardBadge>
+                  {key.scopes.map((s) => (
+                    <StandardBadge key={s}>{scopeLabel(s)}</StandardBadge>
+                  ))}
+                </>
+              }
+              actions={<RevokeApiKeyButton id={key.id} />}
+            />
+          ))}
+        </StandardEntryList>
+      </AddableSection>
     </div>
   );
 }

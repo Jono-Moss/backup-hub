@@ -4,6 +4,11 @@ import { AddTaskDestinationForm } from "@/components/ui/locations/AddTaskDestina
 import { DeleteLocationButton, MakeReusableButton, TestLocationButton } from "@/components/ui/locations/LocationActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
+import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { AddableSection } from "@/components/ui/common/AddableSection";
+import { LuCloudUpload, LuLink } from "react-icons/lu";
 
 export const dynamic = "force-dynamic";
 
@@ -28,21 +33,24 @@ function UsedBy({ location }: { location: Location }) {
 
 function LocationRow({ location }: { location: Location }) {
   return (
-    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-3">
-      <div className="min-w-0">
-        <p className="text-sm text-ink truncate">{location.label}</p>
-        <p className="text-xs text-muted">
-          {location.typeLabel} · <UsedBy location={location} />
+    <StandardEntryCard
+      title={location.label}
+      meta={
+        <>
+          <UsedBy location={location} />
           {location.addedByName && <> · added by {location.addedByName}</>}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
-        <TestLocationButton id={location.id} />
-        {location.addedByMe && <StandardLinkButton href={`/locations/${location.id}`} title="Edit" compact />}
-        {location.taskOnly && location.addedByMe && <MakeReusableButton id={location.id} />}
-        <DeleteLocationButton id={location.id} usedByCount={location.usedBy.length} />
-      </div>
-    </div>
+        </>
+      }
+      badges={<StandardBadge tone="primary">{location.typeLabel}</StandardBadge>}
+      actions={
+        <>
+          <TestLocationButton id={location.id} />
+          {location.addedByMe && <StandardLinkButton href={`/locations/${location.id}`} title="Edit" compact />}
+          {location.taskOnly && location.addedByMe && <MakeReusableButton id={location.id} />}
+          <DeleteLocationButton id={location.id} usedByCount={location.usedBy.length} />
+        </>
+      }
+    />
   );
 }
 
@@ -63,39 +71,43 @@ export default async function SaveLocationsPage() {
         </p>
       </div>
 
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-1">Saved locations</h2>
-        <p className="text-sm text-muted mb-2">Reusable across your tasks.</p>
-        {reusable.length === 0 ? (
-          <p className="text-sm text-muted py-3">None yet — add one below, or make a task-only location reusable.</p>
-        ) : (
-          <div className="divide-y divide-line">
-            {reusable.map((l) => (
-              <LocationRow key={l.id} location={l} />
-            ))}
-          </div>
-        )}
-      </StandardSection>
+      <AddableSection
+        id="saved"
+        title="Saved locations"
+        icon={<LuCloudUpload />}
+        count={reusable.length}
+        description="Reusable across your tasks."
+        canAdd={providers.length > 0}
+        addLabel="Add location"
+        panelTitle="New save location"
+        tabs={[{ key: "new", label: "Create new", content: <AddTaskDestinationForm taskId={null} providers={providers} /> }]}
+        emptyMessage="No saved locations yet — add one, or make a task-only location reusable."
+      >
+        <StandardEntryList>
+          {reusable.map((l) => (
+            <LocationRow key={l.id} location={l} />
+          ))}
+        </StandardEntryList>
+      </AddableSection>
 
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-1">Task-only locations</h2>
-        <p className="text-sm text-muted mb-2">
-          Tied to one of your tasks. Locations someone you shared a task with added are listed too: you can remove
-          them, but only they can change their credentials.
-        </p>
+      <StandardSection id="task-only">
+        <StandardSectionHeader
+          title="Task-only locations"
+          icon={<LuLink />}
+          count={taskOnly.length}
+          description="Tied to one of your tasks. Locations someone you shared a task with added are listed too: you can remove them, but only they can change their credentials."
+        />
         {taskOnly.length === 0 ? (
-          <p className="text-sm text-muted py-3">None.</p>
+          <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+            No task-only locations.
+          </div>
         ) : (
-          <div className="divide-y divide-line">
+          <StandardEntryList>
             {taskOnly.map((l) => (
               <LocationRow key={l.id} location={l} />
             ))}
-          </div>
+          </StandardEntryList>
         )}
-      </StandardSection>
-
-      <StandardSection>
-        <AddTaskDestinationForm taskId={null} providers={providers} />
       </StandardSection>
     </div>
   );

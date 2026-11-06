@@ -233,7 +233,7 @@ export function StandardHeader({ user }: StandardHeaderProps) {
                     <Image
                         src={logoImg}
                         alt="Backup Hub Logo"
-                        height={40}
+                        height={80}
                         className="w-auto h-8 md:h-10"
                         loading="eager"
                     />
