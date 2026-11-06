@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import type { IconType } from "react-icons";
 import { useModal } from "../modal/ModalProvider";
@@ -32,7 +33,7 @@ export function StandardActionButton({
     action,
     variant = "standard",
     confirmMessage,
-    pendingTitle = "Processing...",
+    pendingTitle: pendingTitleProp,
     disabled = false,
     tooltip,
     fullWidth = false,
@@ -40,6 +41,8 @@ export function StandardActionButton({
     icon: Icon,
     successMessage,
 }: ActionButtonProps) {
+    const t = useTranslations("common");
+    const pendingTitle = pendingTitleProp ?? t("processing");
     const [isPending, startTransition] = useTransition();
     const { confirm } = useModal();
     const run = useActionFeedback();

@@ -7,6 +7,15 @@ import { hashPassword } from "@/lib/auth/password";
 import { clientInfo, recordLoginAttempt } from "@/lib/auth/login-attempts";
 import { sendMailStrict, sendMail } from "@/lib/notifications/mailer";
 import { notifySystemEvent } from "@/lib/notifications/notify";
+import { getLocale, getTranslations } from "next-intl/server";
+import { isLocale } from "@/lib/i18n/locales";
+
+// Emails go out in the recipient's chosen language, else the language of
+// the browser making the request.
+async function emailTranslator(userLocale: string | null) {
+  const locale = isLocale(userLocale) ? userLocale : await getLocale();
+  return getTranslations({ locale, namespace: "passwordReset.email" });
+}
 
 // "Forgot password" by emailed link. Completing a reset also clears a sign-in
 // lockout (it's recorded as a "password_reset" attempt, which resets the
@@ -59,22 +68,9 @@ export async function requestPasswordReset(email: string) {
   });
 
   const link = `${appUrl()}/login/reset?token=${encodeURIComponent(raw)}`;
+  const t = await emailTranslator(user.locale);
   try {
-    await sendMailStrict(
-      user.email,
-      "Reset your Backup Hub password",
-      [
-        `Hi ${user.name},`,
-        "",
-        "Someone asked to reset the password for your Backup Hub account. To choose a new one, open this link:",
-        "",
-        link,
-        "",
-        `It works once and expires in ${TOKEN_MINUTES} minutes. Resetting also lifts a sign-in lockout.`,
-        "",
-        "If this wasn't you, ignore this email — your password stays as it is.",
-      ].join("\n")
-    );
+    await sendMailStrict(user.email, t("resetSubject"), t("resetBody", { name: user.name, link, minutes: TOKEN_MINUTES }));
   } catch (err) {
     console.error("[auth] could not send password reset email:", err);
   }
@@ -84,7 +80,7 @@ export async function requestPasswordReset(email: string) {
 export async function findResetToken(raw: string) {
   if (!raw) return null;
   const [row] = await db
-    .select({ id: passwordResetToken.id, userId: passwordResetToken.userId, email: appUser.email, name: appUser.name })
+    .select({ id: passwordResetToken.id, userId: passwordResetToken.userId, email: appUser.email, name: appUser.name, locale: appUser.locale })
     .from(passwordResetToken)
     .innerJoin(appUser, eq(appUser.id, passwordResetToken.userId))
     .where(
@@ -121,11 +117,8 @@ export async function completePasswordReset(raw: string, newPassword: string) {
   await db.delete(session).where(eq(session.userId, token.userId));
   await recordLoginAttempt({ userId: token.userId, email: token.email, method: "password", outcome: "password_reset" });
 
-  sendMail(
-    token.email,
-    "Your Backup Hub password was changed",
-    `Hi ${token.name},\n\nThe password for your Backup Hub account was just reset using an emailed link, and you've been signed out everywhere.\n\nIf this wasn't you, contact your Backup Hub admin straight away.`
-  ).catch(() => {});
+  const t = await emailTranslator(token.locale);
+  sendMail(token.email, t("changedSubject"), t("changedBody", { name: token.name })).catch(() => {});
   notifySystemEvent("security_reset", `${token.name} (${token.email}) reset their password via an emailed link.`).catch(
     (err) => console.error("[notify] password reset notification failed:", err)
   );

@@ -1,5 +1,6 @@
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { listUsers } from "./actions";
+import { getTranslations } from "next-intl/server";
 import { createUser } from "./actions";
 import { getCurrentUser, requireAdmin } from "@/lib/auth/session";
 import { DeleteUserButton } from "@/components/ui/users/DeleteUserButton";
@@ -16,41 +17,41 @@ export default async function UsersPage() {
   await requireAdmin();
   const [users, me] = await Promise.all([listUsers(), getCurrentUser()]);
 
+  const t = await getTranslations("users");
+  const tCommon = await getTranslations("common");
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-ink mb-1">Users</h1>
+        <h1 className="text-xl font-semibold text-ink mb-1">{t("title")}</h1>
         <p className="text-sm text-muted">
-          Admins manage users and system notifications. Backup tasks are private to their owner: admins can see how
-          many tasks a user has, but not the tasks themselves unless the owner shares them. Deleting a user also
-          deletes all of their tasks and backups.
+          {t("intro")}
         </p>
       </div>
 
       <AddableSection
         id="users"
-        title="All users"
+        title={t("allUsers")}
         icon={<LuUsers />}
         count={users.length}
-        description="Everyone who can sign in to this server."
+        description={t("allUsersDescription")}
         canAdd
-        addLabel="Add user"
-        panelTitle="New user"
+        addLabel={t("addUser")}
+        panelTitle={t("newUser")}
         tabs={[
           {
             key: "new",
-            label: "Create new",
+            label: t("createNew"),
             content: (
-              <ActionForm action={createUser} success="User created" resetOnSuccess className="space-y-4 max-w-xl">
+              <ActionForm action={createUser} success={t("userCreated")} resetOnSuccess className="space-y-4 max-w-xl">
                 <div>
                   <label className="block text-sm text-ink mb-1" htmlFor="name">
-                    Name
+                    {t("name")}
                   </label>
                   <input id="name" name="name" required className="w-full border border-line px-3 py-2 text-sm" />
                 </div>
                 <div>
                   <label className="block text-sm text-ink mb-1" htmlFor="email">
-                    Email
+                    {t("email")}
                   </label>
                   <input
                     id="email"
@@ -62,7 +63,7 @@ export default async function UsersPage() {
                 </div>
                 <div>
                   <label className="block text-sm text-ink mb-1" htmlFor="password">
-                    Temporary password
+                    {t("tempPassword")}
                   </label>
                   <input
                     id="password"
@@ -75,19 +76,19 @@ export default async function UsersPage() {
                 </div>
                 <div>
                   <label className="block text-sm text-ink mb-1" htmlFor="role">
-                    Role
+                    {t("role")}
                   </label>
                   <select id="role" name="role" className="w-full border border-line px-3 py-2 text-sm bg-white">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">{t("roleUser")}</option>
+                    <option value="admin">{t("roleAdmin")}</option>
                   </select>
                 </div>
-                <StandardSubmitButton title="Create user" />
+                <StandardSubmitButton title={t("createUser")} />
               </ActionForm>
             ),
           },
         ]}
-        emptyMessage="No users."
+        emptyMessage={t("noUsers")}
       >
         <StandardEntryList>
           {users.map((user) => {
@@ -97,23 +98,23 @@ export default async function UsersPage() {
                 key={user.id}
                 title={
                   <>
-                    {user.name} {isMe && <span className="font-normal text-muted">(you)</span>}
+                    {user.name} {isMe && <span className="font-normal text-muted">{t("you")}</span>}
                   </>
                 }
                 meta={
                   <>
-                    {user.email} · {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
+                    {user.email} · {t("taskCount", { count: user.taskCount })}
                   </>
                 }
                 badges={
                   <StandardBadge tone={user.role === "admin" ? "primary" : "neutral"}>
-                    {user.role === "admin" ? "Admin" : "User"}
+                    {user.role === "admin" ? t("roleAdmin") : t("roleUser")}
                   </StandardBadge>
                 }
                 actions={
                   !isMe && (
                     <>
-                      <StandardLinkButton href={`/users/${user.id}`} title="Edit" compact />
+                      <StandardLinkButton href={`/users/${user.id}`} title={t("edit")} compact />
                       <DeleteUserButton userId={user.id} />
                     </>
                   )

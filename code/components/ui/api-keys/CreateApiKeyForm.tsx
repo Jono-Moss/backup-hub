@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { createApiKey } from "@/app/api-keys/actions";
-import { SCOPE_OPTIONS } from "@/components/ui/api-keys/scopeOptions";
+import { useScopes } from "@/components/ui/api-keys/scopeOptions";
+import { useTranslations } from "next-intl";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { useAddPanel } from "@/components/ui/common/AddableSection";
@@ -15,29 +16,31 @@ export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string 
   const panel = useAddPanel();
   const toast = useToast();
   const run = useActionFeedback();
+  const t = useTranslations("apiKeys");
+  const scopes = useScopes();
 
   async function handleSubmit(formData: FormData) {
     await run(async () => {
       const result = await createApiKey(formData);
       if (result.ok) setIssuedKey(result.key);
       return result;
-    }, { success: "API key created — copy it now" });
+    }, { success: t("created") });
   }
 
   if (issuedKey) {
     return (
       <div className="border border-primary bg-primary-light p-5 rounded-md">
         <p className="text-sm font-medium text-ink mb-2">
-          Key created — copy it now, it won&apos;t be shown again.
+          {t("createdBanner")}
         </p>
         <code className="block bg-white border border-line px-3 py-2 text-xs font-mono break-all mb-2">{issuedKey}</code>
         <StandardActionButton
           action={() => {
             setIssuedKey(null);
             panel?.close();
-            toast.success("Key saved. You can revoke it from this page at any time.");
+            toast.success(t("savedToast"));
           }}
-          title="Done"
+          title={t("done")}
         />
       </div>
     );
@@ -47,23 +50,23 @@ export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string 
     <form action={handleSubmit} className="space-y-5">
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="name">
-          Key name
+          {t("keyName")}
         </label>
         <input
           id="name"
           name="name"
           required
-          placeholder="Main app server"
+          placeholder={t("keyNamePlaceholder")}
           className="w-full border border-line px-3 py-2 text-sm"
         />
       </div>
 
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="taskId">
-          Scope to a single task (optional)
+          {t("scopeTask")}
         </label>
         <select id="taskId" name="taskId" className="w-full border border-line px-3 py-2 text-sm bg-white">
-          <option value="">All tasks</option>
+          <option value="">{t("allTasks")}</option>
           {tasks.map((t) => (
             <option key={t.id} value={t.id}>
               {t.name}
@@ -73,9 +76,9 @@ export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string 
       </div>
 
       <div>
-        <p className="text-sm text-ink mb-2">Permissions</p>
+        <p className="text-sm text-ink mb-2">{t("permissions")}</p>
         <div className="space-y-2">
-          {SCOPE_OPTIONS.map((scope) => (
+          {scopes.options.map((scope) => (
             <label key={scope.value} className="flex items-start gap-2">
               <input type="checkbox" name="scopes" value={scope.value} className="mt-0.5" />
               <span className="text-sm">
@@ -88,8 +91,8 @@ export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string 
       </div>
 
       <StandardSubmitButton
-        title="Create key"
-        pendingTitle="Creating…"
+        title={t("create")}
+        pendingTitle={t("creating")}
       />
     </form>
   );

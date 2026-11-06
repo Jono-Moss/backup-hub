@@ -3,10 +3,11 @@
 import { useState } from "react";
 import {
   describeCron,
-  DAYS_OF_WEEK,
+  daysOfWeek,
   parseCron,
   ScheduleType,
 } from "@/lib/cron/cronUtils";
+import { useLocale, useTranslations } from "next-intl";
 
 type SchedulePickerProps = {
   name?: string;
@@ -17,6 +18,9 @@ export function CronSchedulePicker({
   name = "cronExpression",
   defaultValue = "0 3 * * *",
 }: SchedulePickerProps) {
+  const t = useTranslations("schedule");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const initial = parseCron(defaultValue);
 
   const [open, setOpen] = useState(false);
@@ -66,7 +70,7 @@ export function CronSchedulePicker({
     setType(value);
   }
 
-  const description = describeCron(cronExpression);
+  const description = describeCron(cronExpression, t, locale);
 
   return (
     <>
@@ -74,7 +78,7 @@ export function CronSchedulePicker({
 
       <div>
         <label className="block text-sm text-ink mb-1">
-          Schedule
+          {t("label")}
         </label>
 
         <button
@@ -92,7 +96,7 @@ export function CronSchedulePicker({
         </button>
 
         <p className="text-xs text-muted mt-1">
-          Backups run according to the server&apos;s local time.
+          {t("serverTime")}
         </p>
       </div>
 
@@ -100,7 +104,7 @@ export function CronSchedulePicker({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
-            aria-label="Close schedule dialog"
+            aria-label={t("closeDialog")}
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/40"
           />
@@ -117,11 +121,11 @@ export function CronSchedulePicker({
                   id="schedule-title"
                   className="text-lg font-semibold text-ink"
                 >
-                  Backup schedule
+                  {t("dialogTitle")}
                 </h2>
 
                 <p className="text-sm text-muted mt-1">
-                  Choose when backups should run.
+                  {t("dialogIntro")}
                 </p>
               </div>
 
@@ -129,7 +133,7 @@ export function CronSchedulePicker({
                 type="button"
                 onClick={() => setOpen(false)}
                 className="text-muted hover:text-ink text-xl leading-none"
-                aria-label="Close"
+                aria-label={t("close")}
               >
                 x
               </button>
@@ -141,7 +145,7 @@ export function CronSchedulePicker({
                   htmlFor="schedule-type"
                   className="block text-sm text-ink mb-1"
                 >
-                  Run
+                  {t("run")}
                 </label>
 
                 <select
@@ -155,27 +159,27 @@ export function CronSchedulePicker({
                   className="w-full border border-line bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="minutes">
-                    Every few minutes
+                    {t("optMinutes")}
                   </option>
 
                   <option value="hours">
-                    Every few hours
+                    {t("optHours")}
                   </option>
 
                   <option value="daily">
-                    Every day
+                    {t("optDaily")}
                   </option>
 
                   <option value="weekly">
-                    Every week
+                    {t("optWeekly")}
                   </option>
 
                   <option value="monthly">
-                    Every month
+                    {t("optMonthly")}
                   </option>
 
                   <option value="custom">
-                    Custom cron expression
+                    {t("optCustom")}
                   </option>
                 </select>
               </div>
@@ -186,7 +190,7 @@ export function CronSchedulePicker({
                     htmlFor="schedule-minutes"
                     className="block text-sm text-ink mb-1"
                   >
-                    Every
+                    {t("every")}
                   </label>
 
                   <div className="flex items-center gap-2">
@@ -221,7 +225,7 @@ export function CronSchedulePicker({
                       htmlFor="schedule-hours"
                       className="block text-sm text-ink mb-1"
                     >
-                      Every
+                      {t("every")}
                     </label>
 
                     <div className="flex items-center gap-2">
@@ -253,7 +257,7 @@ export function CronSchedulePicker({
                       htmlFor="schedule-hour-minute"
                       className="block text-sm text-ink mb-1"
                     >
-                      At minute
+                      {t("atMinute")}
                     </label>
 
                     <input
@@ -277,8 +281,7 @@ export function CronSchedulePicker({
                     />
 
                     <p className="text-xs text-muted mt-1">
-                      For example, 15 means 15 minutes past
-                      the hour.
+                      {t("atMinuteHint")}
                     </p>
                   </div>
                 </div>
@@ -294,7 +297,7 @@ export function CronSchedulePicker({
                         htmlFor="schedule-day"
                         className="block text-sm text-ink mb-1"
                       >
-                        Day of the week
+                        {t("dayOfWeek")}
                       </label>
 
                       <select
@@ -305,7 +308,7 @@ export function CronSchedulePicker({
                         }
                         className="w-full border border-line bg-white px-3 py-2 text-sm"
                       >
-                        {DAYS_OF_WEEK.map((day) => (
+                        {daysOfWeek(locale).map((day) => (
                           <option
                             key={day.value}
                             value={day.value}
@@ -323,7 +326,7 @@ export function CronSchedulePicker({
                         htmlFor="schedule-day-of-month"
                         className="block text-sm text-ink mb-1"
                       >
-                        Day of the month
+                        {t("dayOfMonth")}
                       </label>
 
                       <select
@@ -347,15 +350,14 @@ export function CronSchedulePicker({
                       </select>
 
                       <p className="text-xs text-muted mt-1">
-                        Days 1–28 are available so the schedule
-                        works in every month.
+                        {t("dayOfMonthHint")}
                       </p>
                     </div>
                   )}
 
                   <div>
                     <label className="block text-sm text-ink mb-1">
-                      Time
+                      {t("time")}
                     </label>
 
                     <div className="flex items-center gap-2">
@@ -411,7 +413,7 @@ export function CronSchedulePicker({
                     htmlFor="custom-cron"
                     className="block text-sm text-ink mb-1"
                   >
-                    Cron expression
+                    {t("cronExpression")}
                   </label>
 
                   <input
@@ -425,19 +427,18 @@ export function CronSchedulePicker({
                   />
 
                   <p className="text-xs text-muted mt-1">
-                    Advanced users can enter a standard 5-part
-                    cron expression.
+                    {t("cronHint")}
                   </p>
                 </div>
               )}
 
               <div className="border border-line bg-gray-50 px-4 py-3">
                 <div className="text-xs text-muted mb-1">
-                  Schedule preview
+                  {t("preview")}
                 </div>
 
                 <div className="text-sm font-medium text-ink">
-                  {describeCron(generateCron())}
+                  {describeCron(generateCron(), t, locale)}
                 </div>
 
                 <div className="text-xs font-mono text-muted mt-1">
@@ -452,7 +453,7 @@ export function CronSchedulePicker({
                 onClick={() => setOpen(false)}
                 className="border border-line px-4 py-2 text-sm text-ink hover:bg-gray-50"
               >
-                Cancel
+                {tCommon("cancel")}
               </button>
 
               <button
@@ -460,7 +461,7 @@ export function CronSchedulePicker({
                 onClick={applySchedule}
                 className="bg-primary text-white px-4 py-2 text-sm hover:opacity-90"
               >
-                Apply schedule
+                {t("apply")}
               </button>
             </div>
           </div>

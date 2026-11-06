@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useDefinitionText } from "@/components/ui/common/useDefinitionText";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { testEditedChannel, updateChannel } from "@/app/notification-channels/actions";
@@ -21,18 +23,21 @@ export function EditChannelForm({
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
   const update = updateChannel.bind(null, channel.id);
   const definition = NOTIFICATION_CHANNEL_DEFINITIONS[channel.channel];
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
+  const text = useDefinitionText("channels");
 
   return (
     <ActionForm
       formRef={formRef}
       action={update}
-      success="Channel updated"
+      success={t("channelUpdated")}
       onSuccess={() => router.push("/notification-channels")}
       className="space-y-4"
     >
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="channel-label">
-          Name
+          {t("name")}
         </label>
         <input
           id="channel-label"
@@ -49,7 +54,7 @@ export function EditChannelForm({
         return (
           <div key={field.name}>
             <label className="block text-sm text-ink mb-1" htmlFor={`channel-${field.name}`}>
-              {field.label}
+              {text(`${channel.channel}.fields.${field.name}.label`, field.label)}
               {field.required && !(secret && isSet) && <span className="text-danger"> *</span>}
             </label>
             <input
@@ -59,10 +64,10 @@ export function EditChannelForm({
               autoComplete="off"
               required={field.required && !(secret && isSet)}
               defaultValue={secret ? "" : channel.values[field.name] ?? ""}
-              placeholder={secret && isSet ? "Saved — leave blank to keep it" : field.placeholder}
+              placeholder={secret && isSet ? t("secretSaved") : text(`${channel.channel}.fields.${field.name}.placeholder`, field.placeholder)}
               className="w-full border border-line px-3 py-2 text-sm"
             />
-            {field.helpText && <p className="text-xs text-muted mt-1">{field.helpText}</p>}
+            {field.helpText && <p className="text-xs text-muted mt-1">{text(`${channel.channel}.fields.${field.name}.helpText`, field.helpText)}</p>}
           </div>
         );
       })}
@@ -73,17 +78,21 @@ export function EditChannelForm({
             if (formRef.current) setResult(await testEditedChannel(channel.id, new FormData(formRef.current)));
           }}
           variant="outline"
-          title="Send test"
-          pendingTitle="Sending…"
+          title={t("sendTest")}
+          pendingTitle={t("sending")}
         />
-        <StandardSubmitButton title="Save changes" />
+        <StandardSubmitButton title={t("saveChanges")} />
         <a href="/notification-channels" className="text-sm text-muted hover:text-ink">
-          Cancel
+          {tCommon("cancel")}
         </a>
       </div>
       {result && (
         <p className={`text-sm ${result.ok ? "text-primary" : "text-danger"}`}>
-          {result.ok ? `Test notification sent${result.message ? ` — ${result.message}` : ""}` : `Failed: ${result.message ?? "unknown error"}`}
+          {result.ok
+            ? result.message
+              ? t("testSentDetail", { detail: result.message })
+              : t("testSent")
+            : t("failedWhy", { reason: result.message ?? t("unknownError") })}
         </p>
       )}
     </ActionForm>

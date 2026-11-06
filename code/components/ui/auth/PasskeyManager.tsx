@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { startRegistration } from "@simplewebauthn/browser";
@@ -27,10 +28,14 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
   const [error, setError] = useState<string | null>(null);
   const { confirm } = useModal();
   const toast = useToast();
+  const t = useTranslations("passkeys");
+  const tCommon = useTranslations("common");
+  const tAuth = useTranslations("auth");
+  const time = (value: Date | string) => () => <LocalTime value={value} options={DATE_OPTIONS} />;
 
   function addPasskey() {
     setError(null);
-    const name = window.prompt("Name this passkey (e.g. \"MacBook\", \"YubiKey\"):", "Passkey");
+    const name = window.prompt(t("namePrompt"), t("defaultName"));
     if (name === null) return; // cancelled
 
     startTransition(async () => {
@@ -39,29 +44,29 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
         const response = await startRegistration({ optionsJSON: options });
         const result = await finishPasskeyRegistration(name, response);
         if (isActionFailure(result)) return setError(result.message);
-        toast.success("Passkey added");
+        toast.success(t("added"));
         router.refresh();
       } catch (err: any) {
         // Errors from the browser's passkey prompt (not the server) keep their own message.
-        setError(err?.name === "NotAllowedError" ? "Cancelled." : err?.message ?? "Couldn't add that passkey.");
+        setError(err?.name === "NotAllowedError" ? tAuth("passkeyCancelled") : err?.message ?? t("addFailed"));
       }
     });
   }
 
   async function removePasskey(id: string) {
     const confirmed = await confirm({
-      message: "Remove this passkey? You'll no longer be able to sign in with it.",
+      message: t("removeConfirm"),
       danger: true,
-      confirmLabel: "Remove",
+      confirmLabel: tCommon("remove"),
     });
     if (!confirmed) return;
     startTransition(async () => {
       try {
         await deletePasskey(id);
-        toast.success("Passkey removed");
+        toast.success(t("removed"));
         router.refresh();
       } catch {
-        toast.error("Couldn't remove that passkey — please try again.");
+        toast.error(t("removeFailed"));
       }
     });
   }
@@ -76,15 +81,9 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
               title={p.name}
               meta={
                 <>
-                  Added <LocalTime value={p.createdAt} options={DATE_OPTIONS} />
-                  {p.lastUsedAt ? (
-                    <>
-                      {" · last used "}
-                      <LocalTime value={p.lastUsedAt} options={DATE_OPTIONS} />
-                    </>
-                  ) : (
-                    " · never used"
-                  )}
+                  {t.rich("addedOn", { time: time(p.createdAt) })}
+                  {" · "}
+                  {p.lastUsedAt ? t.rich("lastUsed", { time: time(p.lastUsedAt) }) : t("neverUsed")}
                 </>
               }
               actions={
@@ -93,7 +92,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                   disabled={isPending}
                   className="text-danger text-sm hover:underline disabled:opacity-50"
                 >
-                  Remove
+                  {tCommon("remove")}
                 </button>
               }
             />
@@ -101,7 +100,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
         </StandardEntryList>
       ) : (
         <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
-          No passkeys yet.
+          {t("none")}
         </div>
       )}
 
@@ -114,7 +113,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
         className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white border-b-2 border-b-primary-dark hover:border-b-transparent shadow-inner disabled:opacity-50"
       >
         <LuPlus size={16} aria-hidden="true" />
-        {isPending ? "Working…" : "Add a passkey"}
+        {isPending ? t("working") : t("add")}
       </button>
     </div>
   );

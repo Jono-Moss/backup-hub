@@ -1,16 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { runNow } from "@/app/tasks/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
 export function RunNowButton({ taskId }: { taskId: string }) {
+  const t = useTranslations("task");
+  const tCommon = useTranslations("common");
   return (
     <StandardActionButton
-      title="Run backup now"
-      shortTitle="Run now"
-      pendingTitle="Running…"
+      title={t("runNow")}
+      shortTitle={t("runNowShort")}
+      pendingTitle={t("running")}
       action={() => runNow(taskId)}
-      successMessage="Backup completed"
+      successMessage={t("backupCompleted")}
       fullWidth
     />
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { LuDatabaseZap, LuShieldCheck, LuTrash2 } from "react-icons/lu";
 import { clearFailedBackupRuns, testRestoreAllBackupRuns, verifyAllBackupRuns } from "@/app/tasks/actions";
@@ -31,17 +32,19 @@ export function BulkRunActions({
   const [isPending, startTransition] = useTransition();
   const { confirm } = useModal();
   const feedback = useActionFeedback();
+  const t = useTranslations("runs");
+  const tCommon = useTranslations("common");
 
-  const testAllMessage = `Test-restore all ${completedCount} backup${completedCount === 1 ? "" : "s"}? Each one is restored into a temporary database on the test-restore server, one after another, so this can take a while and puts load on that server.`;
-  const clearMessage = "Remove all failed backup records for this task? This cannot be undone.";
+  const testAllMessage = t("testAllConfirm", { count: completedCount });
+  const clearMessage = t("clearConfirm");
 
   const verifyAll = () => verifyAllBackupRuns(taskId);
   const testRestoreAll = () => testRestoreAllBackupRuns(taskId);
   const removeFailed = () => clearFailedBackupRuns(taskId);
-  const verifyAllMessage = "Checks started for every backup — results show in the history";
-  const testRestoreAllMessage = "Test restores started — results show in the history";
+  const verifyAllMessage = t("verifyAllStarted");
+  const testRestoreAllMessage = t("testAllStarted");
   const removedMessage = (count: unknown) =>
-    count === 0 ? "No failed backups to remove" : `Removed ${count} failed backup${count === 1 ? "" : "s"}`;
+    count === 0 ? t("noFailed") : t("removedFailed", { count: Number(count) });
 
   const showVerify = can.trigger && completedCount > 0;
   const showTestRestore = showVerify && testRestore;
@@ -56,28 +59,28 @@ export function BulkRunActions({
     });
   const actions: MenuAction[] = [];
   if (showVerify) {
-    actions.push({ key: "verify-all", label: "Verify all", icon: LuShieldCheck, description: "Check every backup is intact and reads back completely", onSelect: () => run(verifyAll, verifyAllMessage) });
+    actions.push({ key: "verify-all", label: t("verifyAll"), icon: LuShieldCheck, description: t("verifyAllDescription"), onSelect: () => run(verifyAll, verifyAllMessage) });
   }
   if (showTestRestore) {
     actions.push({
       key: "test-restore-all",
-      label: "Test-restore all",
+      label: t("testAll"),
       icon: LuDatabaseZap,
-      description: "Restore each backup into a temporary database, one at a time",
+      description: t("testAllDescription"),
       onSelect: async () => {
-        if (await confirm({ title: "Test-restore all backups?", message: testAllMessage, confirmLabel: "Test-restore all" })) run(testRestoreAll, testRestoreAllMessage);
+        if (await confirm({ title: t("testAllTitle"), message: testAllMessage, confirmLabel: t("testAll") })) run(testRestoreAll, testRestoreAllMessage);
       },
     });
   }
   if (showRemoveFailed) {
     actions.push({
       key: "remove-failed",
-      label: "Remove failed backups",
+      label: t("removeFailedMenu"),
       icon: LuTrash2,
-      description: `Clear ${failedCount} failed backup record${failedCount === 1 ? "" : "s"}`,
+      description: t("clearDescription", { count: failedCount }),
       danger: true,
       onSelect: async () => {
-        if (await confirm({ message: clearMessage, confirmLabel: "Remove", danger: true })) run(removeFailed, removedMessage);
+        if (await confirm({ message: clearMessage, confirmLabel: tCommon("remove"), danger: true })) run(removeFailed, removedMessage);
       },
     });
   }
@@ -90,9 +93,9 @@ export function BulkRunActions({
             variant="outline"
             compact
             icon={LuShieldCheck}
-            title="Verify all"
-            pendingTitle="Queuing…"
-            tooltip="Check every backup is intact and reads back completely"
+            title={t("verifyAll")}
+            pendingTitle={t("queuing")}
+            tooltip={t("verifyAllDescription")}
             action={verifyAll}
             successMessage={verifyAllMessage}
           />
@@ -102,9 +105,9 @@ export function BulkRunActions({
             variant="outline"
             compact
             icon={LuDatabaseZap}
-            title="Test-restore all"
-            pendingTitle="Queuing…"
-            tooltip="Restore each backup into a temporary database, one at a time"
+            title={t("testAll")}
+            pendingTitle={t("queuing")}
+            tooltip={t("testAllDescription")}
             confirmMessage={testAllMessage}
             action={testRestoreAll}
             successMessage={testRestoreAllMessage}
@@ -115,9 +118,9 @@ export function BulkRunActions({
             variant="outline"
             compact
             icon={LuTrash2}
-            title="Remove failed"
-            pendingTitle="Removing…"
-            tooltip={`Clear ${failedCount} failed backup record${failedCount === 1 ? "" : "s"}`}
+            title={t("removeFailed")}
+            pendingTitle={t("removing")}
+            tooltip={t("clearDescription", { count: failedCount })}
             confirmMessage={clearMessage}
             action={removeFailed}
             successMessage={removedMessage}
@@ -128,9 +131,9 @@ export function BulkRunActions({
         <ActionMenu
           actions={actions}
           variant="sheet"
-          label="Actions for all backups"
-          title="All backups"
-          summary={`${completedCount} backup${completedCount === 1 ? "" : "s"}${failedCount ? ` · ${failedCount} failed` : ""}`}
+          label={t("allActionsLabel")}
+          title={t("allBackups")}
+          summary={`${t("summaryCount", { count: completedCount })}${failedCount ? ` · ${t("summaryFailed", { count: failedCount })}` : ""}`}
           busy={isPending}
         />
       </div>

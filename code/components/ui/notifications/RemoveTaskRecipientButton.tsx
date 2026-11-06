@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { removeTaskRecipient } from "@/app/tasks/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
@@ -12,20 +13,22 @@ export function RemoveTaskRecipientButton({
   recipientId: string;
   taskOnly: boolean;
 }) {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const bound = removeTaskRecipient.bind(null, taskId, recipientId);
 
   return (
     <StandardActionButton
       action={bound}
-      successMessage="Notification removed"
-      title="Remove"
+      successMessage={t("notificationRemoved")}
+      title={tCommon("remove")}
       variant="danger"
       compact
-      pendingTitle="Removing..."
+      pendingTitle={t("removing")}
       confirmMessage={
         taskOnly
-          ? "Remove this notification channel? It's task-only, so it and its saved settings are deleted."
-          : "Stop this task using this notification channel? It stays saved in the owner's account for their other tasks."
+          ? t("removeTaskOnlyConfirm")
+          : t("removeSavedConfirm")
       }
     />
   );

@@ -1,4 +1,6 @@
 import { listMyChannels } from "./actions";
+import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { AddAccountChannelForm } from "@/components/ui/notifications/AddAccountChannelForm";
 import { DeleteChannelButton, MakeChannelReusableButton, TestChannelButton } from "@/components/ui/notifications/ChannelActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
@@ -14,10 +16,11 @@ export const dynamic = "force-dynamic";
 type Channel = Awaited<ReturnType<typeof listMyChannels>>[number];
 
 function UsedBy({ channel }: { channel: Channel }) {
-  if (channel.usedBy.length === 0) return <>not used by any task</>;
+  const t = useTranslations("usage");
+  if (channel.usedBy.length === 0) return <>{t("notUsed")}</>;
   return (
     <>
-      used by{" "}
+      {t("usedBy")}{" "}
       {channel.usedBy.map((t, i) => (
         <span key={t.id}>
           {i > 0 && ", "}
@@ -31,6 +34,8 @@ function UsedBy({ channel }: { channel: Channel }) {
 }
 
 function ChannelRow({ channel }: { channel: Channel }) {
+  const t = useTranslations("usage");
+  const tPage = useTranslations("channelsPage");
   // Push channels' summary already starts with the type ("ntfy · host / topic").
   const target = channel.target.startsWith(channel.channelLabel)
     ? channel.target.slice(channel.channelLabel.length).replace(/^ · /, "")
@@ -42,14 +47,14 @@ function ChannelRow({ channel }: { channel: Channel }) {
         <>
           {target && target !== channel.label && <>{target} · </>}
           <UsedBy channel={channel} />
-          {channel.addedByName && <> · added by {channel.addedByName}</>}
+          {channel.addedByName && <> · {t("addedBy", { name: channel.addedByName })}</>}
         </>
       }
       badges={<StandardBadge tone="primary">{channel.channelLabel}</StandardBadge>}
       actions={
         <>
           <TestChannelButton id={channel.id} />
-          {channel.addedByMe && <StandardLinkButton href={`/notification-channels/${channel.id}`} title="Edit" compact />}
+          {channel.addedByMe && <StandardLinkButton href={`/notification-channels/${channel.id}`} title={tPage("edit")} compact />}
           {channel.taskOnly && channel.addedByMe && <MakeChannelReusableButton id={channel.id} />}
           <DeleteChannelButton id={channel.id} usedByCount={channel.usedBy.length} />
         </>
@@ -62,31 +67,28 @@ export default async function NotificationChannelsPage() {
   const channels = await listMyChannels();
   const reusable = channels.filter((c) => !c.taskOnly);
   const taskOnly = channels.filter((c) => c.taskOnly);
+  const t = await getTranslations("channelsPage");
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-ink mb-1">Notifications</h1>
+        <h1 className="text-xl font-semibold text-ink mb-1">{t("title")}</h1>
         <p className="text-sm text-muted">
-          Your notification channels: where your tasks send backup success/failure alerts — email, ntfy, Telegram or
-          Discord. Saved
-          channels can be used by any of your tasks: set them up once, pick them from a task&apos;s page, and changing
-          them here updates every task that uses them. Task-only channels belong to a single task. Nobody else, admins
-          included, can see these.
+          {t("intro")}
         </p>
       </div>
 
       <AddableSection
         id="saved"
-        title="Saved channels"
+        title={t("savedTitle")}
         icon={<LuBell />}
         count={reusable.length}
-        description="Reusable across your tasks."
+        description={t("savedDescription")}
         canAdd
-        addLabel="Add channel"
-        panelTitle="New notification channel"
-        tabs={[{ key: "new", label: "Create new", content: <AddAccountChannelForm /> }]}
-        emptyMessage="No saved channels yet — add one, or make a task-only channel reusable."
+        addLabel={t("addChannel")}
+        panelTitle={t("newChannel")}
+        tabs={[{ key: "new", label: t("createNew"), content: <AddAccountChannelForm /> }]}
+        emptyMessage={t("noSaved")}
       >
         <StandardEntryList>
           {reusable.map((c) => (
@@ -97,14 +99,14 @@ export default async function NotificationChannelsPage() {
 
       <StandardSection id="task-only">
         <StandardSectionHeader
-          title="Task-only channels"
+          title={t("taskOnlyTitle")}
           icon={<LuLink />}
           count={taskOnly.length}
-          description="Tied to one of your tasks. Channels someone you shared a task with added are listed too: you can remove them, but only they can change their settings."
+          description={t("taskOnlyDescription")}
         />
         {taskOnly.length === 0 ? (
           <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
-            No task-only channels.
+            {t("noTaskOnly")}
           </div>
         ) : (
           <StandardEntryList>

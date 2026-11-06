@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useDefinitionText } from "@/components/ui/common/useDefinitionText";
 import { useRef, useState } from "react";
 import { sendTestNotification } from "@/app/tasks/actions";
 import { NOTIFICATION_CHANNELS, type NotificationChannel } from "@/db/schema";
@@ -14,6 +16,8 @@ export function NotificationChannelFields({ idPrefix, showLabel = false }: { idP
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const definition = NOTIFICATION_CHANNEL_DEFINITIONS[channel];
+  const t = useTranslations("notifications");
+  const text = useDefinitionText("channels");
 
   async function handleTest() {
     const form = wrapperRef.current?.closest("form");
@@ -26,7 +30,7 @@ export function NotificationChannelFields({ idPrefix, showLabel = false }: { idP
     <div ref={wrapperRef} className="space-y-4">
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor={`${idPrefix}-channel`}>
-          Send via
+          {t("sendVia")}
         </label>
         <select
           id={`${idPrefix}-channel`}
@@ -40,7 +44,7 @@ export function NotificationChannelFields({ idPrefix, showLabel = false }: { idP
         >
           {NOTIFICATION_CHANNELS.map((c) => (
             <option key={c} value={c}>
-              {NOTIFICATION_CHANNEL_DEFINITIONS[c].label}
+              {text(`${c}.label`, NOTIFICATION_CHANNEL_DEFINITIONS[c].label)}
             </option>
           ))}
         </select>
@@ -49,12 +53,12 @@ export function NotificationChannelFields({ idPrefix, showLabel = false }: { idP
       {showLabel && (
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor={`${idPrefix}-label`}>
-            Name (optional)
+            {t("nameOptional")}
           </label>
           <input
             id={`${idPrefix}-label`}
             name="label"
-            placeholder={channel === "email" ? "The email address" : definition.label}
+            placeholder={channel === "email" ? t("emailPlaceholder") : text(`${channel}.label`, definition.label)}
             className="w-full border border-line px-3 py-2 text-sm"
           />
         </div>
@@ -63,7 +67,7 @@ export function NotificationChannelFields({ idPrefix, showLabel = false }: { idP
       {definition.fields.map((field) => (
         <div key={`${channel}-${field.name}`}>
           <label className="block text-sm text-ink mb-1" htmlFor={`${idPrefix}-${field.name}`}>
-            {field.label}
+            {text(`${channel}.fields.${field.name}.label`, field.label)}
             {field.required && <span className="text-danger"> *</span>}
           </label>
           <input
@@ -71,20 +75,24 @@ export function NotificationChannelFields({ idPrefix, showLabel = false }: { idP
             name={field.name}
             type={field.type}
             required={field.required}
-            placeholder={field.placeholder}
+            placeholder={text(`${channel}.fields.${field.name}.placeholder`, field.placeholder)}
             defaultValue={field.defaultValue}
             autoComplete="off"
             className="w-full border border-line px-3 py-2 text-sm"
           />
-          {field.helpText && <p className="text-xs text-muted mt-1">{field.helpText}</p>}
+          {field.helpText && <p className="text-xs text-muted mt-1">{text(`${channel}.fields.${field.name}.helpText`, field.helpText)}</p>}
         </div>
       ))}
 
       <div className="flex flex-wrap items-center gap-3">
-        <StandardActionButton action={handleTest} variant="outline" title="Send test" pendingTitle="Sending…" compact />
+        <StandardActionButton action={handleTest} variant="outline" title={t("sendTest")} pendingTitle={t("sending")} compact />
         {result && (
           <span className={`text-sm ${result.ok ? "text-primary" : "text-danger"}`}>
-            {result.ok ? `Test notification sent${result.message ? ` — ${result.message}` : ""}` : `Failed: ${result.message ?? "unknown error"}`}
+            {result.ok
+            ? result.message
+              ? t("testSentDetail", { detail: result.message })
+              : t("testSent")
+            : t("failedWhy", { reason: result.message ?? t("unknownError") })}
           </span>
         )}
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { dryRunBackup } from "@/app/tasks/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
@@ -10,6 +11,7 @@ function formatBytes(bytes: number) {
 }
 
 export function DryRunButton() {
+  const t = useTranslations("newTask");
   const [result, setResult] = useState<{ ok: boolean; message?: string; sizeBytes?: number } | null>(null);
 
   async function handleClick() {
@@ -25,14 +27,14 @@ export function DryRunButton() {
       <StandardActionButton
         action={handleClick}
         variant="outline"
-        title="Dry run"
-        pendingTitle="Running backup…"
+        title={t("dryRun")}
+        pendingTitle={t("dryRunning")}
       />
       {result && (
         <span className={`text-sm ${result.ok ? "text-primary" : "text-danger"}`}>
           {result.ok
-            ? `Backup succeeded (${formatBytes(result.sizeBytes ?? 0)}, discarded)`
-            : `Failed: ${result.message ?? "unknown error"}`}
+            ? t("dryRunOk", { size: formatBytes(result.sizeBytes ?? 0) })
+            : t("failedWhy", { reason: result.message ?? t("unknownError") })}
         </span>
       )}
     </div>

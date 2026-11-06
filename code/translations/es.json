@@ -1,0 +1,1052 @@
+{
+  "meta": {
+    "description": "Copias de seguridad programadas y cifradas de bases de datos MySQL, MariaDB, PostgreSQL y MongoDB."
+  },
+  "nav": {
+    "tasks": "Tareas",
+    "saveLocations": "Ubicaciones",
+    "notifications": "Notificaciones",
+    "users": "Usuarios",
+    "systemNotifications": "Notificaciones del sistema",
+    "myAccount": "Mi cuenta",
+    "apiKeys": "Claves de API",
+    "admin": "Admin",
+    "signOut": "Cerrar sesión",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "logoAlt": "Logotipo de Backup Hub"
+  },
+  "footer": {
+    "productBy": "Un producto de",
+    "tryAccounting": "Prueba nuestro software de contabilidad",
+    "openSource": "Código abierto",
+    "license": "Licencia MIT",
+    "tagline": "Respalda el mundo"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "ok": "Aceptar",
+    "dismiss": "Cerrar",
+    "processing": "Procesando…",
+    "moreActions": "Más acciones",
+    "delete": "Eliminar",
+    "deleting": "Eliminando…",
+    "remove": "Quitar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "add": "Añadir",
+    "adding": "Añadiendo…",
+    "genericError": "Algo salió mal; inténtalo de nuevo.",
+    "stalePage": "Esta página está desactualizada; recárgala e inténtalo de nuevo.",
+    "eraseFilesCheckbox": "Eliminar también de forma permanente los archivos de copia del disco",
+    "eraseFilesWarning": "Los archivos de copia se borrarán y no se podrán recuperar.",
+    "confirmAndErase": "{label} y borrar archivos"
+  },
+  "auth": {
+    "subtitle": "Inicia sesión para gestionar las tareas de copia de seguridad.",
+    "passwordChanged": "Tu contraseña se ha cambiado. Inicia sesión con la nueva contraseña.",
+    "lockedOut": "Demasiados intentos de inicio de sesión fallidos. Vuelve a intentarlo en {minutes, plural, one {# minuto} other {# minutos}}, <link>restablece tu contraseña</link> o pide a un administrador que desbloquee tu cuenta.",
+    "lockedOutSoon": "Demasiados intentos de inicio de sesión fallidos. Vuelve a intentarlo en unos minutos, <link>restablece tu contraseña</link> o pide a un administrador que desbloquee tu cuenta.",
+    "incorrect": "Correo o contraseña incorrectos.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotLink": "¿Has olvidado la contraseña?",
+    "signIn": "Iniciar sesión",
+    "or": "o",
+    "passkeySignIn": "Iniciar sesión con una llave de acceso",
+    "passkeyWaiting": "Esperando la llave de acceso…",
+    "passkeyCancelled": "Cancelado.",
+    "passkeyFailed": "El inicio de sesión con llave de acceso ha fallado.",
+    "passkeyExpired": "Este intento de inicio de sesión ha caducado; inténtalo de nuevo.",
+    "passkeyLockedNetwork": "Demasiados intentos fallidos desde tu red. Vuelve a intentarlo en {minutes, plural, one {# minuto} other {# minutos}}.",
+    "passkeyUnknown": "Esa llave de acceso no está registrada en ninguna cuenta.",
+    "passkeyVerifyFailed": "La verificación de la llave de acceso ha fallado.",
+    "accountGone": "Esa cuenta ya no existe.",
+    "twoFactorTitle": "Verificación en dos pasos",
+    "twoFactorRecoveryPrompt": "Introduce uno de tus códigos de recuperación sin usar.",
+    "twoFactorCodePrompt": "Introduce el código de 6 dígitos de tu aplicación de autenticación.",
+    "twoFactorRecoveryInvalid": "Ese código de recuperación no es válido o ya se ha usado.",
+    "twoFactorCodeInvalid": "Ese código no coincide.",
+    "recoveryCode": "Código de recuperación",
+    "authCode": "Código de verificación",
+    "verify": "Verificar",
+    "useAuthenticator": "Usar la aplicación de autenticación",
+    "useRecoveryCode": "Usar un código de recuperación",
+    "setupTitle": "Te damos la bienvenida a Backup Hub",
+    "setupSubtitle": "Crea la primera cuenta de administrador para empezar.",
+    "yourName": "Tu nombre",
+    "passwordHint": "Al menos 8 caracteres.",
+    "createAdmin": "Crear cuenta de administrador"
+  },
+  "passwordReset": {
+    "forgotTitle": "¿Has olvidado la contraseña?",
+    "noEmail": "El correo no está configurado en este servidor, así que no se pueden enviar enlaces de restablecimiento. Pide a un administrador que te asigne una nueva contraseña desde la página de usuarios. Si no puedes entrar por demasiados intentos fallidos, espera a que termine el bloqueo o inicia sesión con una llave de acceso.",
+    "sent": "Si ese correo pertenece a una cuenta, te hemos enviado un enlace. Funciona una vez y caduca en 30 minutos; revisa la carpeta de spam si no llega.",
+    "forgotIntro": "Introduce el correo de tu cuenta y te enviaremos un enlace para elegir una nueva contraseña. Restablecerla también levanta un bloqueo de inicio de sesión.",
+    "sendLink": "Enviar enlace",
+    "sending": "Enviando…",
+    "backToSignIn": "Volver a iniciar sesión",
+    "resetTitle": "Elige una nueva contraseña",
+    "invalidLink": "Este enlace no es válido, ha caducado o ya se ha usado.",
+    "sendNewLink": "Enviar un enlace nuevo",
+    "resetIntro": "Para {email}. Se cerrará tu sesión en todas partes y, si usas una aplicación de autenticación, la seguirás necesitando para entrar.",
+    "mismatch": "Las dos contraseñas no coinciden.",
+    "weak": "Usa al menos 8 caracteres.",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "setPassword": "Guardar nueva contraseña",
+    "saving": "Guardando…",
+    "email": {
+      "resetSubject": "Restablece tu contraseña de Backup Hub",
+      "resetBody": "Hola, {name}:\n\nAlguien ha pedido restablecer la contraseña de tu cuenta de Backup Hub. Para elegir una nueva, abre este enlace:\n\n{link}\n\nFunciona una vez y caduca en {minutes} minutos. Restablecerla también levanta un bloqueo de inicio de sesión.\n\nSi no has sido tú, ignora este correo; tu contraseña no cambia.",
+      "changedSubject": "Tu contraseña de Backup Hub ha cambiado",
+      "changedBody": "Hola, {name}:\n\nSe acaba de restablecer la contraseña de tu cuenta de Backup Hub mediante un enlace enviado por correo, y se ha cerrado tu sesión en todas partes.\n\nSi no has sido tú, contacta de inmediato con el administrador de Backup Hub."
+    }
+  },
+  "schedule": {
+    "everyMinutes": "{count, plural, one {Cada minuto} other {Cada # minutos}}",
+    "everyHourAt": "Cada hora, a los {minute} minutos",
+    "everyHoursAt": "Cada {count} horas, a los {minute} minutos",
+    "everyDayAt": "Todos los días a las {time}",
+    "everyWeekdayAt": "Cada {day} a las {time}",
+    "monthlyAt": "Cada mes el día {day} a las {time}",
+    "noSchedule": "Sin programación",
+    "selectedDay": "día elegido",
+    "label": "Programación",
+    "serverTime": "Las copias se ejecutan según la hora local del servidor.",
+    "closeDialog": "Cerrar la programación",
+    "close": "Cerrar",
+    "dialogTitle": "Programación de copias",
+    "dialogIntro": "Elige cuándo deben ejecutarse las copias.",
+    "run": "Ejecutar",
+    "optMinutes": "Cada pocos minutos",
+    "optHours": "Cada pocas horas",
+    "optDaily": "Todos los días",
+    "optWeekly": "Cada semana",
+    "optMonthly": "Cada mes",
+    "optCustom": "Expresión cron personalizada",
+    "every": "Cada",
+    "atMinute": "En el minuto",
+    "atMinuteHint": "Por ejemplo, 15 significa 15 minutos después de la hora en punto.",
+    "dayOfWeek": "Día de la semana",
+    "dayOfMonth": "Día del mes",
+    "dayOfMonthHint": "Solo se ofrecen los días 1–28 para que la programación funcione todos los meses.",
+    "time": "Hora",
+    "cronExpression": "Expresión cron",
+    "cronHint": "Los usuarios avanzados pueden introducir una expresión cron estándar de 5 partes.",
+    "preview": "Vista previa",
+    "apply": "Aplicar programación"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Cómo han ido tus copias, y las tareas que has creado o que se han compartido contigo.",
+    "newTask": "Nueva tarea",
+    "twoFactorWarning": "Alguien introdujo tu contraseña correcta pero un código 2FA incorrecto {count, plural, one {# vez} other {# veces}} en los últimos {days} días.",
+    "twoFactorWarningAction": "Si no has sido tú, cambia tu contraseña ahora.",
+    "succeeded": "Correcta",
+    "failed": "Fallida",
+    "running": "En curso",
+    "compactSucceeded": "Correctas",
+    "compactFailed": "Fallidas",
+    "compactCopyFailed": "Copias fallidas",
+    "compactBadSignIns": "Accesos fallidos",
+    "lastDays": "Últimos {days} días",
+    "problemsBanner": "{count, plural, one {# problema necesita atención} other {# problemas necesitan atención}}",
+    "statSuccessful": "Copias correctas",
+    "statFailed": "Copias fallidas",
+    "statCopyFailures": "Copias externas fallidas",
+    "statSignIns": "Inicios de sesión fallidos",
+    "statSignInsHint": "En tu cuenta, últimos {days} días",
+    "attentionTitle": "Necesita atención",
+    "attentionDescription": "Problemas con la copia más reciente de cada tarea.",
+    "allGood": "Todo bien: la última copia de cada tarea fue correcta.",
+    "recentTitle": "Actividad reciente",
+    "recentDescription": "Las últimas copias de todas tus tareas.",
+    "noBackupsYet": "Todavía no se ha ejecutado ninguna copia.",
+    "tasksTitle": "Tareas de copia",
+    "tasksDescription": "Cada tarea tiene su propia conexión a una base de datos, su programación y su retención.",
+    "noTasks": "Todavía no hay tareas de copia.",
+    "createFirst": "Crea tu primera tarea",
+    "scheduleActive": "Programación activa",
+    "scheduleDisabled": "Programación desactivada",
+    "paused": "(en pausa)",
+    "keep": "conservar {count}",
+    "encrypted": "cifrada",
+    "sharedBy": "compartida por {name}",
+    "neverRun": "Nunca ejecutada",
+    "signInTitle": "Actividad de inicio de sesión",
+    "signInDescription": "Inicios de sesión en tu cuenta en los últimos {days} días.",
+    "fullHistory": "Historial completo",
+    "failedCountBadge": "{count} fallidos",
+    "previousSignIn": "Inicio de sesión anterior {when} · {device}",
+    "noEarlierSignIns": "No hay inicios de sesión anteriores registrados.",
+    "noFailedSignIns": "No hay inicios de sesión fallidos en tu cuenta.",
+    "wholeServer": "Todo el servidor (admin)",
+    "serverFailed": "{count, plural, one {# inicio de sesión fallido} other {# inicios de sesión fallidos}}",
+    "serverUnknown": "{count} de cuentas desconocidas",
+    "serverBlocked": "{count} bloqueados",
+    "mostFailuresFrom": "Más fallos desde",
+    "accountsMostFailures": "Cuentas con más fallos",
+    "stripLabel": "Últimas {count} copias: {ok} correctas, {failed} fallidas",
+    "stripEmpty": "Todavía no hay copias",
+    "stripSucceeded": "Correcta",
+    "stripFailed": "Fallida",
+    "stripRunning": "En curso",
+    "badge": {
+      "auth": "Credenciales",
+      "connection": "Sin conexión",
+      "other": "Fallida",
+      "upload": "Copia externa",
+      "verify": "Comprobación fallida"
+    },
+    "attention": {
+      "runAuth": "La última copia no pudo autenticarse en la base de datos",
+      "runConnection": "La última copia no pudo conectar con la base de datos",
+      "runFailed": "La última copia ha fallado",
+      "uploadAuth": "No se pudo iniciar sesión en «{location}»; vuelve a conectarlo",
+      "uploadFailed": "La copia a «{location}» ha fallado",
+      "verifyRestore": "La copia más reciente no superó su restauración de prueba",
+      "verifyCheck": "La copia más reciente no superó su comprobación",
+      "unnamedLocation": "ubicación"
+    }
+  },
+  "runs": {
+    "trigger": {
+      "cron": "Programada",
+      "manual": "Manual",
+      "api": "API"
+    },
+    "status": {
+      "completed": "Completada",
+      "failed": "Fallida",
+      "running": "En curso"
+    },
+    "upload": {
+      "completed": "subida",
+      "failed": "fallida",
+      "skipped": "omitida",
+      "skippedWhy": "omitida: {reason}",
+      "uploading": "subiendo…",
+      "line": "{location}: {status}",
+      "unknownLocation": "destino"
+    },
+    "showingAll": "Mostrando las {total} copias",
+    "perPage": "Mostrar {count} por página",
+    "showingRange": "{from}–{to} de {total}",
+    "newer": "Más recientes",
+    "older": "Más antiguas",
+    "pageOf": "Página {page} de {pages}",
+    "showAll": "Mostrar todas",
+    "checkQueued": "Comprobación en cola…",
+    "checking": "Comprobando…",
+    "testRestored": "Restauración probada",
+    "verified": "Verificada",
+    "testRestoreFailed": "Restauración de prueba fallida",
+    "checkFailed": "Comprobación fallida",
+    "notChecked": "Sin comprobar todavía",
+    "restoreWarning": "La restauración sobrescribirá el contenido actual de la base de datos en producción con los datos de esta copia. No se puede deshacer.",
+    "restoreTitle": "¿Restaurar esta copia?",
+    "restore": "Restaurar",
+    "restoreMenu": "Restaurar…",
+    "restoreDescription": "Sobrescribir la base de datos en producción con esta copia",
+    "restoreDone": "Restauración completada correctamente",
+    "download": "Descargar",
+    "verifyFile": "Verificar archivo",
+    "verifyDescription": "Comprobar que está intacto y se lee entero",
+    "checkStarted": "Comprobación iniciada; el resultado aparecerá bajo esta copia",
+    "testRestore": "Restauración de prueba",
+    "testRestoreDescription": "Restaurar en una base de datos temporal, comprobarla y borrarla",
+    "testRestoreStarted": "Restauración de prueba iniciada; el resultado aparecerá bajo esta copia",
+    "deleteMenu": "Eliminar…",
+    "deleteDescription": "Quitar este archivo de copia",
+    "deleteTitle": "¿Eliminar esta copia?",
+    "deleteMessage": "Se eliminará el archivo de copia. No se puede deshacer.",
+    "deleted": "Copia eliminada",
+    "actionsLabel": "Acciones de la copia",
+    "passwordNeeded": "Introduce la contraseña de cifrado de la copia.",
+    "encryptionPassword": "Contraseña de cifrado",
+    "passwordPlaceholder": "La contraseña de cifrado de esta copia",
+    "passwordHint": "Es la contraseña que tenía la tarea cuando se hizo esta copia; no tiene por qué ser la actual si se ha cambiado desde entonces.",
+    "restoring": "Restaurando…",
+    "testAllConfirm": "¿Probar la restauración de {count, plural, one {# copia} other {las # copias}}? Cada una se restaura por turnos en una base de datos temporal del servidor de pruebas, así que puede tardar y carga ese servidor.",
+    "clearConfirm": "¿Quitar todos los registros de copias fallidas de esta tarea? No se puede deshacer.",
+    "verifyAllStarted": "Comprobación de todas las copias iniciada; los resultados aparecerán en el historial",
+    "testAllStarted": "Restauraciones de prueba iniciadas; los resultados aparecerán en el historial",
+    "noFailed": "No hay copias fallidas que quitar",
+    "removedFailed": "{count, plural, one {Se quitó # copia fallida} other {Se quitaron # copias fallidas}}",
+    "verifyAll": "Verificar todas",
+    "verifyAllDescription": "Comprobar que cada copia está intacta y se lee entera",
+    "testAll": "Probar todas",
+    "testAllDescription": "Restaurar cada copia en una base de datos temporal, de una en una",
+    "testAllTitle": "¿Probar la restauración de todas las copias?",
+    "removeFailedMenu": "Quitar copias fallidas",
+    "removeFailed": "Quitar fallidas",
+    "clearDescription": "{count, plural, one {Quitar # registro de copia fallida} other {Quitar # registros de copias fallidas}}",
+    "queuing": "Poniendo en cola…",
+    "removing": "Quitando…",
+    "allActionsLabel": "Acciones para todas las copias",
+    "allBackups": "Todas las copias",
+    "summaryCount": "{count, plural, one {# copia} other {# copias}}",
+    "summaryFailed": "{count} fallidas"
+  },
+  "signIns": {
+    "unknownDevice": "Dispositivo desconocido",
+    "script": "Script",
+    "browser": "Navegador",
+    "browserOnOs": "{browser} en {os}",
+    "outcome": {
+      "success": "Sesión iniciada",
+      "bad_password": "Contraseña incorrecta",
+      "unknown_user": "Cuenta desconocida",
+      "bad_2fa": "Código 2FA incorrecto",
+      "passkey_failed": "Llave de acceso rechazada",
+      "locked_out": "Bloqueado",
+      "unlocked": "Desbloqueada por un administrador",
+      "password_reset": "Contraseña restablecida por correo"
+    },
+    "method": {
+      "password": "Contraseña",
+      "totp": "Contraseña + aplicación de autenticación",
+      "recovery_code": "Contraseña + código de recuperación",
+      "passkey": "Llave de acceso"
+    }
+  },
+  "account": {
+    "title": "Tu cuenta",
+    "profileTitle": "Perfil y contraseña",
+    "profileDescription": "Tu nombre visible, tu idioma y tu contraseña de acceso.",
+    "name": "Nombre",
+    "language": "Idioma",
+    "languageAuto": "Automático (idioma del navegador)",
+    "languageHint": "El idioma en el que se muestra Backup Hub. Los correos que recibas (como los de restablecer la contraseña) también lo usan.",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "currentPasswordPlaceholder": "Solo necesaria si estableces una nueva contraseña",
+    "newPassword": "Nueva contraseña",
+    "newPasswordPlaceholder": "Déjalo vacío para conservar la contraseña actual",
+    "saveChanges": "Guardar cambios",
+    "profileSaved": "Perfil guardado",
+    "passwordChanged": "Contraseña cambiada",
+    "passwordChangedSignedOut": "Contraseña cambiada; se cerró {count, plural, one {# otra sesión} other {# otras sesiones}}",
+    "twoFactorTitle": "Verificación en dos pasos",
+    "twoFactorDescription": "Pedir un código de una aplicación de autenticación además de la contraseña al iniciar sesión.",
+    "enabled": "Activada",
+    "notEnabled": "No activada",
+    "recoveryRemaining": "{count, plural, one {Queda # código de recuperación sin usar.} other {Quedan # códigos de recuperación sin usar.}}",
+    "passkeysTitle": "Llaves de acceso",
+    "passkeysDescription": "Inicia sesión con Touch ID, Face ID, Windows Hello o una llave de seguridad: sin contraseña, y cuenta por sí sola como segundo factor.",
+    "sessionsTitle": "Sesiones activas",
+    "sessionsDescription": "Todos los sitios donde tienes la sesión iniciada ahora mismo. Si no reconoces alguno, o su IP ha cambiado de forma inesperada, ciérralo y cambia tu contraseña. Cambiar la contraseña cierra automáticamente todas las demás sesiones.",
+    "signOutOthers": "Cerrar sesión en todos los demás",
+    "onlyThisDevice": "Solo tienes la sesión iniciada en este dispositivo",
+    "signOutOthersConfirm": "¿Cerrar {count, plural, one {la otra sesión} other {las otras # sesiones}}? Este dispositivo seguirá con la sesión iniciada.",
+    "sessionSignedIn": "Sesión iniciada <time>date</time>",
+    "sessionSignedInFrom": "Sesión iniciada <time>date</time> desde {ip}",
+    "sessionLastActive": "última actividad <time>date</time>",
+    "sessionLastActiveFrom": "última actividad <time>date</time> desde {ip}",
+    "thisDevice": "Este dispositivo",
+    "ipChanged": "La dirección IP cambió",
+    "signOut": "Cerrar sesión",
+    "sessionSignedOut": "Sesión cerrada",
+    "historyTitle": "Actividad reciente de inicio de sesión",
+    "historyDescription": "Los últimos intentos de iniciar sesión en tu cuenta, correctos o no. Se conservan 90 días. Si no reconoces alguno, cambia tu contraseña.",
+    "noSignIns": "Todavía no hay inicios de sesión registrados.",
+    "noOtherSessions": "No hay otras sesiones que cerrar",
+    "signedOutOthers": "{count, plural, one {Se cerró # otra sesión} other {Se cerraron # otras sesiones}}",
+    "thatsThisDevice": "Es este dispositivo; usa «Cerrar sesión» en su lugar."
+  },
+  "twoFactor": {
+    "setUp": "Configurar aplicación de autenticación",
+    "scanIntro": "Escanéalo con tu aplicación de autenticación (1Password, Google Authenticator, Authy, etc.) y luego introduce el código de 6 dígitos que muestre.",
+    "qrAlt": "Código QR de autenticación",
+    "cantScan": "¿No puedes escanearlo? Introduce esta clave manualmente:",
+    "verifyEnable": "Verificar y activar",
+    "codesIntro": "La verificación en dos pasos está activada. Guarda estos códigos de recuperación en un lugar seguro: cada uno funciona una vez y no se volverán a mostrar. Usa uno si pierdes el acceso a tu aplicación de autenticación.",
+    "savedThese": "Ya los he guardado",
+    "isOn": "La verificación en dos pasos está activada",
+    "verifyFailed": "No se pudo verificar ese código; inténtalo de nuevo.",
+    "disableLink": "Desactivar la verificación en dos pasos",
+    "disablePrompt": "Introduce tu contraseña para desactivar la verificación en dos pasos.",
+    "disable": "Desactivar",
+    "disabling": "Desactivando…",
+    "turnedOff": "Verificación en dos pasos desactivada",
+    "newCodes": "Nuevos códigos de recuperación: guárdalos ahora, no se volverán a mostrar.",
+    "done": "Listo",
+    "regenerate": "Regenerar códigos de recuperación",
+    "generating": "Generando…",
+    "regenerateConfirm": "¿Generar nuevos códigos de recuperación? Tus códigos actuales dejarán de funcionar.",
+    "startFirst": "Primero inicia la configuración",
+    "codeMismatch": "Ese código no coincide; revisa tu aplicación de autenticación e inténtalo de nuevo.",
+    "incorrectPassword": "Contraseña incorrecta",
+    "notEnabled": "La verificación en dos pasos no está activada",
+    "verifying": "Verificando…"
+  },
+  "passkeys": {
+    "namePrompt": "Nombre de esta llave de acceso (p. ej., «MacBook», «YubiKey»):",
+    "defaultName": "Llave de acceso",
+    "added": "Llave de acceso añadida",
+    "addFailed": "No se pudo añadir esa llave de acceso.",
+    "removeConfirm": "¿Quitar esta llave de acceso? Ya no podrás iniciar sesión con ella.",
+    "removed": "Llave de acceso quitada",
+    "removeFailed": "No se pudo quitar esa llave de acceso; inténtalo de nuevo.",
+    "addedOn": "Añadida <time>date</time>",
+    "lastUsed": "último uso <time>date</time>",
+    "neverUsed": "nunca usada",
+    "none": "Todavía no hay llaves de acceso.",
+    "working": "Un momento…",
+    "add": "Añadir una llave de acceso",
+    "registrationExpired": "Este intento de registro ha caducado; inténtalo de nuevo.",
+    "registrationFailed": "El registro de la llave de acceso ha fallado"
+  },
+  "errors": {
+    "nameRequired": "El nombre es obligatorio",
+    "nameEmailPasswordRequired": "El nombre, el correo y la contraseña son obligatorios",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "newPasswordTooShort": "La nueva contraseña debe tener al menos 8 caracteres",
+    "currentPasswordIncorrect": "La contraseña actual es incorrecta",
+    "ownAdminRole": "No puedes quitarte tu propio rol de administrador",
+    "deleteSelf": "No puedes eliminar tu propia cuenta",
+    "setupDone": "La configuración ya se completó",
+    "setupFieldsRequired": "El nombre, el correo y la contraseña son obligatorios",
+    "apiKeyFields": "Se necesita un nombre y al menos un permiso",
+    "testRestoreUnavailable": "Las restauraciones de prueba no están configuradas en este servidor",
+    "channelAlreadyUsed": "Esta tarea ya usa ese canal de notificación",
+    "locationAlreadyUsed": "Esta tarea ya usa esa ubicación",
+    "eventRequired": "Se necesita al menos un evento",
+    "connectFirst": "Primero inicia sesión en tu cuenta con el botón «Conectar».",
+    "backupFailed": "La copia ha fallado: {reason}",
+    "shareEmailRequired": "Introduce el correo del usuario con quien compartir.",
+    "shareNoUser": "No hay ningún usuario con ese correo.",
+    "shareOwnTask": "Ya eres el propietario de esta tarea.",
+    "destinationNotFound": "No se encontró la ubicación.",
+    "connectionFailedHidden": "la conexión falló (los detalles solo los ve el propietario de la tarea)",
+    "noSignInSupport": "Este proveedor no admite el inicio de sesión.",
+    "signInNotSetUp": "El inicio de sesión aún no está configurado en este servidor: pide a un administrador que lo configure (consulta el README) o usa tus propias credenciales en «Avanzado».",
+    "signInTampered": "Sesión de inicio no válida o manipulada. Vuelve a empezar.",
+    "signInOtherTask": "Esta sesión de inicio pertenece a otra tarea. Vuelve a empezar.",
+    "codeExpired": "El código caducó antes de aprobarse. Inténtalo de nuevo."
+  },
+  "task": {
+    "navBackups": "Copias",
+    "navNotifications": "Notificaciones",
+    "navLocations": "Ubicaciones",
+    "navSharing": "Compartir",
+    "navSettings": "Ajustes",
+    "useSavedChannel": "Usar un canal guardado",
+    "createNew": "Crear nuevo",
+    "useSavedLocation": "Usar una ubicación guardada",
+    "scheduleActive": "Programación activa",
+    "scheduleDisabled": "Programación desactivada",
+    "sharedBy": "compartida por {name}",
+    "historyTitle": "Historial de copias",
+    "historyDescription": "Todas las copias de esta tarea, de la más reciente a la más antigua.",
+    "noBackups": "Todavía no hay copias: ejecuta una ahora o espera a la próxima ejecución programada.",
+    "failedBackup": "Copia fallida",
+    "colFile": "Archivo",
+    "colStarted": "Inicio",
+    "colStatus": "Estado",
+    "notificationsTitle": "Notificaciones",
+    "notificationsDescription": "Adónde se envían los resultados de las copias de esta tarea: correo (requiere SMTP, ver .env), ntfy, Telegram o Discord.",
+    "addNotification": "Añadir notificación",
+    "newNotification": "Nueva notificación",
+    "noNotifications": "Sin notificaciones: nadie se entera de si las copias de esta tarea salen bien o mal.",
+    "ownerOnlyDetails": "(los detalles solo los ve el propietario de la tarea)",
+    "onSuccess": "Si sale bien",
+    "onFailure": "Si falla",
+    "noEvents": "Ningún evento elegido",
+    "taskOnly": "Solo de esta tarea",
+    "fromSavedChannels": "De tus canales guardados",
+    "savedChannel": "Canal guardado",
+    "locationsTitle": "Ubicaciones remotas",
+    "locationsDescription": "Cada copia completada se conserva siempre en local. Las ubicaciones copian además cada archivo fuera del servidor; cada una se intenta por separado, así que si una falla no afecta a las demás ni a la copia local.",
+    "addLocation": "Añadir ubicación",
+    "newLocation": "Nueva ubicación",
+    "noLocations": "Sin ubicaciones remotas: las copias solo se guardan en este servidor.",
+    "subfolder": "Subcarpeta <code>{folder}</code>",
+    "disabled": "Desactivada",
+    "fromSavedLocations": "De tus ubicaciones guardadas",
+    "savedLocation": "Ubicación guardada",
+    "sharingTitle": "Compartir",
+    "sharingDescription": "Esta tarea es tuya. Solo tú y las personas de abajo podéis verla; ni siquiera los administradores.",
+    "shareTask": "Compartir tarea",
+    "shareWith": "Compartir con alguien",
+    "share": "Compartir",
+    "notShared": "No se comparte con nadie.",
+    "settingsTitle": "Ajustes",
+    "settingsDescription": "Programación, retención y cifrado de esta tarea.",
+    "settingsSaved": "Ajustes guardados",
+    "taskName": "Nombre de la tarea",
+    "backupsToKeep": "Copias que conservar",
+    "encrypt": "Cifrar los archivos de copia",
+    "encryptionPassword": "Contraseña de cifrado",
+    "keepPassword": "Déjalo vacío para conservar la contraseña actual",
+    "setPassword": "Establece una contraseña",
+    "testRestoreEach": "Probar la restauración de cada copia nueva",
+    "testRestoreHint": "Cada copia ya se comprueba para asegurar que se lee entera. Esto además la restaura en una base de datos temporal del servidor de pruebas, la comprueba y la borra; es más lento y avisa a los destinatarios de fallos de la tarea si falla.",
+    "connectionNotEditable": "Los datos de conexión a la base de datos aún no se pueden editar aquí: elimina y vuelve a crear la tarea para cambiarlos, o usa <code>PATCH /api/v1/tasks/:id</code>.",
+    "saveSettings": "Guardar ajustes",
+    "sectionsLabel": "Secciones de la tarea",
+    "sectionPrefix": "Sección:",
+    "disableSchedule": "Desactivar programación",
+    "enableSchedule": "Activar programación",
+    "disableShort": "Desactivar",
+    "enableShort": "Activar",
+    "scheduleDisabledToast": "Programación desactivada",
+    "scheduleEnabledToast": "Programación activada",
+    "runNow": "Copiar ahora",
+    "runNowShort": "Ejecutar",
+    "running": "Ejecutando…",
+    "backupCompleted": "Copia completada",
+    "deleteTask": "Eliminar tarea",
+    "deleteTaskHeading": "¿Eliminar esta tarea?",
+    "deleteTaskDescription": "Su programación se detiene de inmediato, y la tarea, su historial, los destinatarios de notificaciones y los permisos compartidos se quitan de la aplicación.",
+    "deleteTaskKeepNote": "Los archivos de copia se quedan en el servidor, en una carpeta llamada {id} dentro del directorio de copias, así que aún puedes recuperarlos a mano. Ya no aparecerán en la aplicación.",
+    "taskDeleted": "Tarea eliminada",
+    "accessRemoved": "Acceso quitado",
+    "removing": "Quitando…",
+    "revokeShareConfirm": "¿Dejar de compartir esta tarea con este usuario? Las claves de API que haya creado para ella también dejarán de funcionar."
+  },
+  "channels": {
+    "email": {
+      "label": "Correo",
+      "fields": {
+        "email": {
+          "label": "Correo electrónico",
+          "helpText": "Requiere que SMTP esté configurado en el servidor (ver .env)."
+        }
+      }
+    },
+    "ntfy": {
+      "label": "ntfy",
+      "fields": {
+        "serverUrl": {
+          "label": "URL del servidor",
+          "helpText": "Usa https://ntfy.sh o tu propio servidor ntfy."
+        },
+        "topic": {
+          "label": "Tema",
+          "helpText": "En el servidor público ntfy.sh cualquiera que conozca el nombre del tema puede leerlo, así que elige algo difícil de adivinar."
+        },
+        "accessToken": {
+          "label": "Token de acceso (opcional)",
+          "helpText": "Solo hace falta para temas que requieren inicio de sesión."
+        }
+      }
+    },
+    "telegram": {
+      "label": "Telegram",
+      "fields": {
+        "botToken": {
+          "label": "Token del bot",
+          "helpText": "Crea un bot escribiendo a @BotFather en Telegram."
+        },
+        "chatId": {
+          "label": "ID del chat",
+          "placeholder": "123456789 o -100123456789",
+          "helpText": "Primero envía un mensaje a tu bot (o añádelo a un grupo): los bots no pueden iniciar una conversación."
+        }
+      }
+    },
+    "discord": {
+      "label": "Discord",
+      "fields": {
+        "webhookUrl": {
+          "label": "URL del webhook",
+          "helpText": "Ajustes del canal → Integraciones → Webhooks → Nuevo webhook → Copiar URL del webhook."
+        }
+      }
+    }
+  },
+  "scopes": {
+    "tasks_read": {
+      "label": "Ver tareas",
+      "hint": "Listar tareas e historial"
+    },
+    "tasks_write": {
+      "label": "Gestionar tareas",
+      "hint": "Crear, modificar y eliminar tareas"
+    },
+    "runs_trigger": {
+      "label": "Lanzar copias",
+      "hint": "Iniciar una copia manual"
+    },
+    "runs_download": {
+      "label": "Descargar copias",
+      "hint": "Descargar archivos de copia"
+    },
+    "runs_delete": {
+      "label": "Eliminar copias",
+      "hint": "Eliminar archivos de copia"
+    }
+  },
+  "systemEvents": {
+    "user_login": "Inicios de sesión",
+    "user_created": "Usuario creado",
+    "user_deleted": "Usuario eliminado",
+    "task_created": "Tarea de copia creada",
+    "task_deleted": "Tarea de copia eliminada",
+    "security_reset": "2FA/llaves de acceso restablecidas o cuenta desbloqueada"
+  },
+  "notifications": {
+    "channelSaved": "Canal guardado",
+    "addChannel": "Añadir canal",
+    "recipientAdded": "Destinatario añadido",
+    "notifyFor": "Notificar para",
+    "addRecipient": "Añadir destinatario",
+    "notificationAdded": "Notificación añadida",
+    "onSuccess": "Si sale bien",
+    "onFailure": "Si falla",
+    "saveToAccount": "Guardar en mi cuenta para que mis otras tareas puedan usarlo",
+    "saveToAccountHint": "Si no lo marcas, será solo de esta tarea: estos ajustes solo podrá usarlos esta tarea.",
+    "add": "Añadir",
+    "adding": "Añadiendo…",
+    "noOtherSaved": "No hay otros canales guardados en tu cuenta. Marca «Guardar en mi cuenta» al añadir uno, o añádelos en la página <link>Notificaciones</link>, para reutilizarlos entre tareas.",
+    "channelAddedToTask": "Canal añadido a esta tarea",
+    "savedChannel": "Canal guardado",
+    "useThisChannel": "Usar este canal",
+    "sendTest": "Enviar prueba",
+    "sending": "Enviando…",
+    "sent": "Enviado",
+    "failedWhy": "Error: {reason}",
+    "unknownError": "error desconocido",
+    "testSent": "Notificación de prueba enviada",
+    "testSentDetail": "Notificación de prueba enviada: {detail}",
+    "channelDeleted": "Canal eliminado",
+    "deleting": "Eliminando…",
+    "madeReusable": "Canal guardado en tu cuenta: tus otras tareas ya pueden usarlo",
+    "makeReusable": "Hacer reutilizable",
+    "saving": "Guardando…",
+    "makeReusableConfirm": "¿Guardar este canal en tu cuenta para que tus otras tareas también puedan usarlo? No se puede deshacer: cuando otras tareas lo usen, no podrá volver a ser solo de una tarea.",
+    "channelUpdated": "Canal actualizado",
+    "name": "Nombre",
+    "secretSaved": "Guardado: déjalo vacío para conservarlo",
+    "saveChanges": "Guardar cambios",
+    "sendVia": "Enviar por",
+    "nameOptional": "Nombre (opcional)",
+    "emailPlaceholder": "La dirección de correo",
+    "recipientRemoved": "Destinatario quitado",
+    "notificationRemoved": "Notificación quitada",
+    "removing": "Quitando…",
+    "removeTaskOnlyConfirm": "¿Quitar este canal de notificación? Es solo de esta tarea, así que se borrarán el canal y sus ajustes.",
+    "removeSavedConfirm": "¿Dejar de usar este canal en esta tarea? Seguirá guardado en la cuenta del propietario para sus otras tareas.",
+    "deleteConfirm": "¿Eliminar este canal? Las tareas que lo usan dejarán de enviarle notificaciones.",
+    "deleteUsedConfirm": "¿Eliminar este canal de notificación y sus ajustes? {count, plural, one {# tarea dejará} other {# tareas dejarán}} de notificarle.",
+    "deleteUnusedConfirm": "¿Eliminar este canal de notificación y sus ajustes?"
+  },
+  "sharing": {
+    "saved": "Uso compartido guardado",
+    "userEmail": "Correo del usuario",
+    "note": "Restaurar una copia en la base de datos nunca se puede compartir: solo puedes hacerlo tú. Vuelve a compartir con el mismo correo para cambiar los permisos de alguien.",
+    "share": "Compartir",
+    "sharing": "Compartiendo…"
+  },
+  "destinations": {
+    "s3": {
+      "label": "S3 (AWS / Backblaze / Wasabi / R2 / MinIO / otros compatibles con S3)",
+      "fields": {
+        "bucket": {
+          "label": "Bucket"
+        },
+        "region": {
+          "label": "Región",
+          "helpText": "Usa «auto» para proveedores que no usan regiones de AWS (p. ej., R2)."
+        },
+        "accessKeyId": {
+          "label": "ID de clave de acceso"
+        },
+        "secretAccessKey": {
+          "label": "Clave de acceso secreta"
+        },
+        "endpoint": {
+          "label": "URL de endpoint personalizada",
+          "helpText": "Déjalo vacío para el AWS S3 real."
+        },
+        "forcePathStyle": {
+          "label": "Forzar direccionamiento por ruta",
+          "helpText": "Suele ser necesario en proveedores compatibles con S3 que no son AWS."
+        },
+        "pathPrefix": {
+          "label": "Prefijo de ruta (opcional)"
+        }
+      }
+    },
+    "google_drive": {
+      "label": "Google Drive",
+      "fields": {
+        "folderId": {
+          "label": "ID de carpeta (opcional)",
+          "helpText": "El ID largo al final de la URL de una carpeta de Drive. Déjalo vacío para subir a la raíz de Drive."
+        },
+        "clientId": {
+          "label": "ID de cliente OAuth"
+        },
+        "clientSecret": {
+          "label": "Secreto de cliente OAuth"
+        },
+        "refreshToken": {
+          "label": "Token de actualización OAuth",
+          "helpText": "Se obtiene mediante el flujo de consentimiento OAuth de Google con el alcance drive.file; consulta el README."
+        }
+      }
+    },
+    "onedrive": {
+      "label": "OneDrive",
+      "fields": {
+        "folderPath": {
+          "label": "Ruta de carpeta (opcional)",
+          "helpText": "Se crea si no existe. Déjalo vacío para subir a la raíz de OneDrive."
+        },
+        "clientId": {
+          "label": "ID de aplicación (cliente)"
+        },
+        "clientSecret": {
+          "label": "Secreto de cliente (opcional)",
+          "helpText": "Solo para un registro de aplicación de cliente confidencial. Déjalo vacío para un cliente público."
+        },
+        "refreshToken": {
+          "label": "Token de actualización OAuth",
+          "helpText": "Se obtiene mediante el flujo de consentimiento OAuth de Microsoft con los alcances Files.ReadWrite y offline_access; consulta el README."
+        },
+        "tenantId": {
+          "label": "ID de inquilino",
+          "helpText": "«common» para cuentas personales de Microsoft, o el ID de tu inquilino de Azure AD para cuentas profesionales o educativas."
+        }
+      }
+    },
+    "email": {
+      "label": "Correo (adjuntar el archivo de copia)",
+      "fields": {
+        "to": {
+          "label": "Enviar a",
+          "helpText": "Separa varias direcciones con comas. Es independiente de los destinatarios de notificaciones de la tarea."
+        },
+        "maxSizeMb": {
+          "label": "Tamaño máximo del archivo (MB)",
+          "helpText": "Las copias más grandes se omiten en lugar de enviarse, y el historial las muestra como omitidas. Revisa el límite de adjuntos de tu proveedor de correo (muchos rondan los 25 MB, y el correo añade ~33 %)."
+        }
+      }
+    },
+    "opencloud": {
+      "label": "OpenCloud",
+      "fields": {
+        "webdavUrl": {
+          "label": "URL WebDAV de la carpeta"
+        },
+        "username": {
+          "label": "Nombre de usuario"
+        },
+        "appToken": {
+          "label": "Token de aplicación"
+        },
+        "pathPrefix": {
+          "label": "Prefijo de ruta (opcional)"
+        }
+      }
+    },
+    "ftp": {
+      "label": "FTP (sin cifrar)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Puerto",
+          "helpText": "Déjalo vacío para el valor predeterminado."
+        },
+        "username": {
+          "label": "Nombre de usuario"
+        },
+        "password": {
+          "label": "Contraseña"
+        },
+        "pathPrefix": {
+          "label": "Carpeta remota (opcional)",
+          "helpText": "Se crea si no existe. Empieza con «/» para una ruta absoluta; si no, es relativa a la carpeta de inicio de sesión."
+        }
+      }
+    },
+    "ftps": {
+      "label": "FTPS (FTP sobre TLS)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Puerto",
+          "helpText": "Déjalo vacío para el valor predeterminado.",
+          "placeholder": "21 (990 para TLS implícito)"
+        },
+        "username": {
+          "label": "Nombre de usuario"
+        },
+        "password": {
+          "label": "Contraseña"
+        },
+        "implicitTls": {
+          "label": "Usar TLS implícito",
+          "helpText": "Solo para servidores antiguos que esperan TLS desde el principio (normalmente el puerto 990). La mayoría usa TLS explícito: déjalo sin marcar."
+        },
+        "allowSelfSigned": {
+          "label": "Permitir certificados autofirmados o no confiables",
+          "helpText": "La conexión sigue cifrada, pero no se verifica la identidad del servidor."
+        },
+        "pathPrefix": {
+          "label": "Carpeta remota (opcional)",
+          "helpText": "Se crea si no existe. Empieza con «/» para una ruta absoluta; si no, es relativa a la carpeta de inicio de sesión."
+        }
+      }
+    },
+    "sftp": {
+      "label": "SFTP (transferencia de archivos por SSH)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Puerto",
+          "helpText": "Déjalo vacío para el valor predeterminado."
+        },
+        "username": {
+          "label": "Nombre de usuario"
+        },
+        "password": {
+          "label": "Contraseña",
+          "helpText": "Déjalo vacío si usas una clave privada."
+        },
+        "privateKey": {
+          "label": "Clave privada (opcional)",
+          "helpText": "Pega la clave completa en formato OpenSSH o PEM. Se guarda cifrada.",
+          "placeholder": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+        },
+        "passphrase": {
+          "label": "Frase de contraseña de la clave (opcional)"
+        },
+        "hostFingerprint": {
+          "label": "Huella de la clave del servidor (recomendado)",
+          "helpText": "Pulsa «Probar conexión» para ver la huella del servidor. Una vez establecida, se rechazan las conexiones a un servidor con otra clave."
+        },
+        "pathPrefix": {
+          "label": "Carpeta remota (opcional)",
+          "helpText": "Se crea si no existe. Empieza con «/» para una ruta absoluta; si no, es relativa a la carpeta personal del usuario."
+        }
+      }
+    }
+  },
+  "locations": {
+    "added": "Ubicación añadida",
+    "provider": "Proveedor",
+    "label": "Etiqueta",
+    "noOneClick": "El inicio de sesión con un clic no está configurado en este servidor, así que tendrás que introducir tus propias credenciales OAuth abajo. (Un administrador puede activarlo configurando el ID de cliente del proveedor en el entorno del servidor; consulta el README.)",
+    "saveToAccount": "Guardar en mi cuenta para que mis otras tareas puedan usarla",
+    "saveToAccountHint": "Si no lo marcas, será solo de esta tarea: estas credenciales solo podrá usarlas esta tarea.",
+    "openAndSignIn": "1. Abre <link>{url}</link> e inicia sesión.",
+    "enterCode": "2. Introduce este código: <mono>{code}</mono>",
+    "waiting": "Esperando tu aprobación… esta página se actualiza sola.",
+    "connectedAs": "Conectado como {account}. Se ha añadido la ubicación.",
+    "connectedToast": "{account} conectado: ubicación añadida",
+    "yourAccount": "tu cuenta",
+    "codeExpired": "El código caducó antes de aprobarse. Inténtalo de nuevo.",
+    "connect": "Conectar {provider}",
+    "starting": "Iniciando…",
+    "testConnection": "Probar conexión",
+    "testing": "Probando…",
+    "addLocation": "Añadir ubicación",
+    "useSignIn": "Usar inicio de sesión",
+    "useOwnCredentials": "Avanzado: usar mis propias credenciales",
+    "connected": "Conexión correcta",
+    "failedWhy": "Error: {reason}",
+    "unknownError": "error desconocido",
+    "ok": "Correcto",
+    "noOtherSaved": "No hay otras ubicaciones guardadas en tu cuenta. Marca «Guardar en mi cuenta» al añadir una, o añádelas en la página <link>Ubicaciones</link>, para reutilizarlas entre tareas.",
+    "addedToTask": "Ubicación añadida a esta tarea",
+    "savedLocation": "Ubicación guardada",
+    "subfolder": "Subcarpeta para esta tarea (opcional)",
+    "subfolderHint": "Se añade dentro de la carpeta de la ubicación, para que las tareas que la comparten no mezclen sus archivos. Vacíalo para usar la carpeta tal cual.",
+    "useThis": "Usar esta ubicación",
+    "updated": "Ubicación actualizada",
+    "secretSaved": "Guardado: déjalo vacío para conservarlo",
+    "saveChanges": "Guardar cambios",
+    "test": "Probar",
+    "deleted": "Ubicación eliminada",
+    "deleting": "Eliminando…",
+    "deleteUsedConfirm": "¿Eliminar esta ubicación y sus credenciales? {count, plural, one {# tarea dejará} other {# tareas dejarán}} de copiar aquí. Los archivos ya subidos al proveedor no se eliminan.",
+    "deleteUnusedConfirm": "¿Eliminar esta ubicación y sus credenciales? Los archivos ya subidos al proveedor no se eliminan.",
+    "madeReusable": "Ubicación guardada en tu cuenta: tus otras tareas ya pueden usarla",
+    "makeReusable": "Hacer reutilizable",
+    "saving": "Guardando…",
+    "makeReusableConfirm": "¿Guardar esta ubicación en tu cuenta para que tus otras tareas también puedan usarla? No se puede deshacer: cuando otras tareas la usen, no podrá volver a ser solo de una tarea.",
+    "disable": "Desactivar",
+    "enable": "Activar",
+    "disabledForTask": "Ubicación desactivada para esta tarea",
+    "enabledForTask": "Ubicación activada para esta tarea",
+    "removedFromTask": "Ubicación quitada de esta tarea",
+    "removing": "Quitando…",
+    "removeTaskOnlyConfirm": "¿Quitar esta ubicación? Es solo de esta tarea, así que se borrarán la ubicación y sus credenciales. Las próximas ejecuciones dejarán de copiar aquí; no se borra nada de lo ya subido al proveedor.",
+    "removeSavedConfirm": "¿Dejar de usar esta ubicación en esta tarea? Seguirá guardada en la cuenta del propietario para sus otras tareas. No se borra nada de lo ya subido al proveedor."
+  },
+  "apiKeys": {
+    "created": "Clave de API creada: cópiala ahora",
+    "createdBanner": "Clave creada: cópiala ahora, no se volverá a mostrar.",
+    "savedToast": "Clave guardada. Puedes revocarla desde esta página cuando quieras.",
+    "done": "Listo",
+    "keyName": "Nombre de la clave",
+    "keyNamePlaceholder": "Servidor de la aplicación principal",
+    "allTasks": "Todas las tareas",
+    "permissions": "Permisos",
+    "create": "Crear clave",
+    "creating": "Creando…",
+    "revoke": "Revocar",
+    "revoking": "Revocando…",
+    "revokeConfirm": "¿Revocar esta clave de API? Cualquier aplicación que la use perderá el acceso de inmediato.",
+    "revoked": "Clave de API revocada",
+    "scopeTask": "Limitar a una sola tarea (opcional)"
+  },
+  "users": {
+    "deleteHeading": "¿Eliminar este usuario?",
+    "deleteDescription": "Sus sesiones se revocan de inmediato, y todas sus tareas de copia, su historial, sus destinatarios y sus claves de API se quitan de la aplicación. No se puede deshacer.",
+    "deleteKeepNote": "Los archivos de copia de sus tareas se quedan en el servidor, cada uno en una carpeta con el ID de su tarea dentro del directorio de copias, así que aún puedes recuperarlos a mano.",
+    "deleteUser": "Eliminar usuario",
+    "deleted": "Usuario eliminado",
+    "title": "Usuarios",
+    "intro": "Los administradores gestionan los usuarios y las notificaciones del sistema. Las tareas de copia son privadas: los administradores ven cuántas tareas tiene un usuario, pero no las tareas, salvo que el propietario las comparta. Eliminar un usuario elimina también todas sus tareas y copias.",
+    "allUsers": "Todos los usuarios",
+    "allUsersDescription": "Todas las personas que pueden iniciar sesión en este servidor.",
+    "addUser": "Añadir usuario",
+    "newUser": "Nuevo usuario",
+    "createNew": "Crear nuevo",
+    "userCreated": "Usuario creado",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "tempPassword": "Contraseña temporal",
+    "role": "Rol",
+    "roleUser": "Usuario",
+    "roleAdmin": "Administrador",
+    "createUser": "Crear usuario",
+    "noUsers": "No hay usuarios.",
+    "you": "(tú)",
+    "taskCount": "{count, plural, one {# tarea} other {# tareas}}",
+    "edit": "Editar",
+    "ownsTasks": "tiene {count, plural, one {# tarea} other {# tareas}}",
+    "locked": "<strong>Acceso bloqueado</strong> tras varios intentos fallidos, hasta <time>date</time>. Las llaves de acceso siguen funcionando.",
+    "unlock": "Desbloquear ahora",
+    "unlocked": "Cuenta desbloqueada",
+    "detailsTitle": "Datos de la cuenta",
+    "detailsDescription": "Nombre, rol y una nueva contraseña si se ha quedado bloqueado.",
+    "changesSaved": "Cambios guardados",
+    "ownRole": "No puedes cambiar tu propio rol.",
+    "resetPassword": "Restablecer contraseña",
+    "keepPassword": "Déjalo vacío para conservar la contraseña actual",
+    "saveChanges": "Guardar cambios",
+    "securityTitle": "Verificación en dos pasos y llaves de acceso",
+    "securityDescription": "Restablécelas si el usuario ha perdido su aplicación de autenticación o su llave de seguridad.",
+    "authenticatorOn": "Aplicación de autenticación activada",
+    "authenticatorOff": "Sin aplicación de autenticación",
+    "passkeyCount": "{count, plural, one {# llave de acceso} other {# llaves de acceso}}",
+    "resetFactors": "Restablecer 2FA y llaves de acceso",
+    "resetFactorsConfirm": "¿Quitar toda la verificación en dos pasos y las llaves de acceso de {name}? Después podrá entrar solo con su contraseña y tendrá que volver a configurarlas desde su propia página de cuenta.",
+    "factorsReset": "2FA y llaves de acceso restablecidas",
+    "noFactors": "No hay aplicación de autenticación ni llaves de acceso: este usuario entra solo con contraseña."
+  },
+  "newTask": {
+    "testConnection": "Probar conexión",
+    "testing": "Probando…",
+    "connected": "Conexión correcta",
+    "failedWhy": "Error: {reason}",
+    "unknownError": "error desconocido",
+    "dryRun": "Prueba en seco",
+    "dryRunning": "Haciendo la copia…",
+    "dryRunOk": "Copia correcta ({size}, descartada)",
+    "engine": "Motor de base de datos",
+    "authSource": "Base de datos de autenticación (opcional)",
+    "authSourceHint": "La base de datos donde se creó el usuario. Déjalo vacío para «admin», que es lo correcto en MongoDB Atlas y la mayoría de los servidores.",
+    "title": "Nueva tarea de copia",
+    "subtitle": "Los datos de conexión se guardan cifrados y no se vuelven a mostrar después de guardarlos.",
+    "taskName": "Nombre de la tarea",
+    "taskNamePlaceholder": "Copia de la base de datos de la tienda",
+    "host": "Host",
+    "port": "Puerto",
+    "portPlaceholder": "Vacío = predeterminado del motor",
+    "user": "Usuario",
+    "password": "Contraseña",
+    "database": "Nombre de la base de datos",
+    "requireSsl": "Exigir SSL",
+    "dryRunHint": "La prueba en seco hace una copia real con estos ajustes y descarta el resultado al momento: tarda lo mismo y carga la base de datos igual que una copia programada real, pero no guarda nada.",
+    "backupsToKeep": "Copias que conservar",
+    "encrypt": "Cifrar los archivos de copia",
+    "encryptionPassword": "Contraseña de cifrado",
+    "encryptionPlaceholder": "Solo se usa si el cifrado está activado arriba",
+    "encryptionHint": "Guárdala tú en un lugar seguro: Backup Hub no puede recuperarla si se pierde.",
+    "create": "Crear tarea"
+  },
+  "engines": {
+    "compatibility": {
+      "mysql": "También servicios compatibles con MySQL como Amazon RDS / Aurora MySQL, PlanetScale y TiDB.",
+      "postgres": "También servicios compatibles con Postgres como Supabase, Neon, Amazon RDS / Aurora PostgreSQL y TimescaleDB.",
+      "mongodb": "MongoDB autoalojado y MongoDB Atlas: para Atlas, introduce el host del clúster (p. ej., cluster0.abcde.mongodb.net); se conecta con TLS automáticamente."
+    }
+  },
+  "usage": {
+    "notUsed": "no la usa ninguna tarea",
+    "usedBy": "usada por",
+    "addedBy": "añadida por {name}",
+    "taskOnly": "solo de una tarea"
+  },
+  "locationsPage": {
+    "title": "Ubicaciones",
+    "intro": "Lugares externos adonde se copian tus copias de seguridad. Las ubicaciones guardadas las puede usar cualquiera de tus tareas: introduce las credenciales una vez, elígelas en la página de una tarea, y cambiarlas aquí actualiza todas las tareas que las usan. Las ubicaciones de una sola tarea pertenecen a esa tarea y no se pueden usar en ningún otro sitio. Nadie más, ni siquiera los administradores, puede verlas.",
+    "savedTitle": "Ubicaciones guardadas",
+    "savedDescription": "Reutilizables entre tus tareas.",
+    "addLocation": "Añadir ubicación",
+    "newLocation": "Nueva ubicación",
+    "createNew": "Crear nueva",
+    "noSaved": "Todavía no hay ubicaciones guardadas: añade una o haz reutilizable una de una sola tarea.",
+    "taskOnlyTitle": "Ubicaciones de una sola tarea",
+    "taskOnlyDescription": "Vinculadas a una de tus tareas. También se muestran las que añadió alguien con quien compartes una tarea: puedes quitarlas, pero solo esa persona puede cambiar sus credenciales.",
+    "noTaskOnly": "No hay ubicaciones de una sola tarea.",
+    "edit": "Editar",
+    "editTitle": "Editar {name}",
+    "editIntroTaskOnly": "{provider} · de una sola tarea. Los cambios se aplican a la tarea que la usa a partir de la próxima copia.",
+    "editIntroSaved": "{provider} · ubicación guardada. Los cambios se aplican a todas las tareas que la usan a partir de la próxima copia."
+  },
+  "channelsPage": {
+    "title": "Notificaciones",
+    "intro": "Tus canales de notificación: adónde envían tus tareas los avisos de copias correctas o fallidas (correo, ntfy, Telegram o Discord). Los canales guardados los puede usar cualquiera de tus tareas: configúralos una vez, elígelos en la página de una tarea, y cambiarlos aquí actualiza todas las tareas que los usan. Los canales de una sola tarea pertenecen a esa tarea. Nadie más, ni siquiera los administradores, puede verlos.",
+    "savedTitle": "Canales guardados",
+    "savedDescription": "Reutilizables entre tus tareas.",
+    "addChannel": "Añadir canal",
+    "newChannel": "Nuevo canal de notificación",
+    "createNew": "Crear nuevo",
+    "noSaved": "Todavía no hay canales guardados: añade uno o haz reutilizable uno de una sola tarea.",
+    "taskOnlyTitle": "Canales de una sola tarea",
+    "taskOnlyDescription": "Vinculados a una de tus tareas. También se muestran los que añadió alguien con quien compartes una tarea: puedes quitarlos, pero solo esa persona puede cambiar sus ajustes.",
+    "noTaskOnly": "No hay canales de una sola tarea.",
+    "edit": "Editar",
+    "editTitle": "Editar {name}",
+    "editIntroTaskOnly": "{type} · de una sola tarea. Los cambios se aplican a la tarea que lo usa.",
+    "editIntroSaved": "{type} · canal guardado. Los cambios se aplican a todas las tareas que lo usan."
+  },
+  "systemPage": {
+    "title": "Notificaciones del sistema",
+    "intro": "Avisos de todo el servidor sobre eventos de cuentas y tareas (correo, ntfy, Telegram o Discord), gestionados por los administradores. Los avisos de copias correctas o fallidas van aparte: cada usuario los configura en <link>Notificaciones</link> y en la página de cada tarea.",
+    "recipientsTitle": "Destinatarios",
+    "recipientsDescription": "Quién recibe avisos de eventos de cuentas y tareas, y de cuáles.",
+    "addRecipient": "Añadir destinatario",
+    "newRecipient": "Nuevo destinatario del sistema",
+    "createNew": "Crear nuevo",
+    "noRecipients": "Todavía no hay destinatarios de notificaciones del sistema."
+  },
+  "apiKeysPage": {
+    "title": "Claves de API",
+    "intro": "Las usan aplicaciones externas para llamar a la API REST en <code>/api/v1/*</code>. Cada clave tiene sus propios permisos y se puede limitar a una sola tarea. Una clave actúa en tu nombre: nunca puede hacer más que tú en una tarea, y deja de funcionar en una tarea si se deja de compartir contigo.",
+    "keysTitle": "Tus claves de API",
+    "keysDescription": "Revoca una clave en cuanto la aplicación que la usa deje de necesitarla.",
+    "createKey": "Crear clave",
+    "newKey": "Nueva clave de API",
+    "createNew": "Crear nueva",
+    "noKeys": "Todavía no hay claves de API.",
+    "oneTask": "Una tarea",
+    "allTasks": "Todas las tareas"
+  }
+}

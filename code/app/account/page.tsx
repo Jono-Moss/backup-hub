@@ -14,7 +14,9 @@ import { LuFingerprint, LuLaptop, LuLogIn, LuShieldCheck, LuUser } from "react-i
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { LocalTime } from "@/components/ui/common/LocalTime";
 import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
-import { METHOD_LABEL, OUTCOME_LABEL, describeUserAgent } from "@/components/ui/auth/loginAttemptLabels";
+import { getLoginLabels } from "@/components/ui/auth/loginAttemptLabels";
+import { getTranslations } from "next-intl/server";
+import { LOCALES, LOCALE_NAMES } from "@/lib/i18n/locales";
 
 export const dynamic = "force-dynamic";
 
@@ -27,24 +29,27 @@ export default async function AccountPage() {
     listMySessions(),
   ]);
   const otherSessions = sessions.filter((s) => !s.current).length;
+  const t = await getTranslations("account");
+  const { outcome, method, describeUserAgent } = await getLoginLabels();
+  const time = (value: Date) => () => <LocalTime value={value} />;
 
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-ink mb-1">Your account</h1>
+        <h1 className="text-xl font-semibold text-ink mb-1">{t("title")}</h1>
         <p className="text-sm text-muted">{me.email}</p>
       </div>
 
       <StandardSection id="profile">
         <StandardSectionHeader
-          title="Profile & password"
+          title={t("profileTitle")}
           icon={<LuUser />}
-          description="Your display name, and your sign-in password."
+          description={t("profileDescription")}
         />
-        <ActionForm action={updateOwnProfile} success="Profile saved" resetOnSuccess className="space-y-5 max-w-md">
+        <ActionForm action={updateOwnProfile} resetOnSuccess className="space-y-5 max-w-md">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
-              Name
+              {t("name")}
             </label>
             <input
               id="name"
@@ -55,56 +60,76 @@ export default async function AccountPage() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm text-ink mb-1" htmlFor="locale">
+              {t("language")}
+            </label>
+            <select
+              id="locale"
+              name="locale"
+              defaultValue={me.locale ?? ""}
+              className="w-full border border-line px-3 py-2 text-sm bg-white"
+            >
+              <option value="">{t("languageAuto")}</option>
+              {LOCALES.map((l) => (
+                <option key={l} value={l} lang={l}>
+                  {LOCALE_NAMES[l]}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted mt-1">{t("languageHint")}</p>
+          </div>
+
           <hr className="border-line" />
 
-          <p className="text-sm font-semibold text-ink">Change password</p>
+          <p className="text-sm font-semibold text-ink">{t("changePassword")}</p>
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="currentPassword">
-              Current password
+              {t("currentPassword")}
             </label>
             <input
               id="currentPassword"
               name="currentPassword"
               type="password"
-              placeholder="Required only if setting a new password"
+              placeholder={t("currentPasswordPlaceholder")}
               className="w-full border border-line px-3 py-2 text-sm"
             />
           </div>
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="newPassword">
-              New password
+              {t("newPassword")}
             </label>
             <input
               id="newPassword"
               name="newPassword"
               type="password"
-              placeholder="Leave blank to keep current password"
+              placeholder={t("newPasswordPlaceholder")}
               minLength={8}
               className="w-full border border-line px-3 py-2 text-sm"
             />
           </div>
 
-          <StandardSubmitButton title="Save changes" />
+          <StandardSubmitButton title={t("saveChanges")} />
         </ActionForm>
       </StandardSection>
 
       <StandardSection id="two-factor">
         <StandardSectionHeader
-          title="Two-factor authentication"
+          title={t("twoFactorTitle")}
           icon={<LuShieldCheck />}
-          description="Require a code from an authenticator app in addition to your password when signing in."
+          description={t("twoFactorDescription")}
           action={
             totpStatus.enabled ? (
-              <StandardBadge tone="primary">Enabled</StandardBadge>
+              <StandardBadge tone="primary">{t("enabled")}</StandardBadge>
             ) : (
-              <StandardBadge tone="warn">Not enabled</StandardBadge>
+              <StandardBadge tone="warn">{t("notEnabled")}</StandardBadge>
             )
           }
         />
 
         {totpStatus.enabled ? (
           <div className="space-y-3">
-            <p className="text-sm text-ink">{totpStatus.unusedRecoveryCodes} unused recovery codes remaining.</p>
+            <p className="text-sm text-ink">{t("recoveryRemaining", { count: totpStatus.unusedRecoveryCodes })}</p>
             <RegenerateRecoveryCodesButton />
             <div>
               <DisableTotpForm />
@@ -117,30 +142,30 @@ export default async function AccountPage() {
 
       <StandardSection id="passkeys">
         <StandardSectionHeader
-          title="Passkeys"
+          title={t("passkeysTitle")}
           icon={<LuFingerprint />}
           count={passkeys.length}
-          description="Sign in with Touch ID, Face ID, Windows Hello, or a security key — no password needed, and it counts as your second factor on its own."
+          description={t("passkeysDescription")}
         />
         <PasskeyManager passkeys={passkeys} />
       </StandardSection>
 
       <StandardSection id="sessions">
         <StandardSectionHeader
-          title="Active sessions"
+          title={t("sessionsTitle")}
           icon={<LuLaptop />}
           count={sessions.length}
-          description="Everywhere you're signed in right now. If you don't recognise one — or its IP has changed unexpectedly — sign it out and change your password. Changing your password signs out every other session automatically."
+          description={t("sessionsDescription")}
           action={
             // Always shown so people know it exists; disabled when there's
             // nothing to sign out.
             <StandardActionButton
-              title="Sign out everywhere else"
+              title={t("signOutOthers")}
               variant="outline"
               compact
               disabled={otherSessions === 0}
-              tooltip={otherSessions === 0 ? "You're only signed in on this device" : undefined}
-              confirmMessage={`Sign out of the other ${otherSessions} session${otherSessions === 1 ? "" : "s"}? This device stays signed in.`}
+              tooltip={otherSessions === 0 ? t("onlyThisDevice") : undefined}
+              confirmMessage={t("signOutOthersConfirm", { count: otherSessions })}
               action={endAllOtherSessions}
             />
           }
@@ -154,13 +179,15 @@ export default async function AccountPage() {
                 title={describeUserAgent(s.userAgent)}
                 meta={
                   <>
-                    Signed in <LocalTime value={s.createdAt} />
-                    {s.createdIp && <> from {s.createdIp}</>}
+                    {s.createdIp
+                      ? t.rich("sessionSignedInFrom", { time: time(s.createdAt), ip: s.createdIp })
+                      : t.rich("sessionSignedIn", { time: time(s.createdAt) })}
                     {s.lastSeenAt && (
                       <>
-                        {" · last active "}
-                        <LocalTime value={s.lastSeenAt} />
-                        {ipChanged && <> from {s.lastSeenIp}</>}
+                        {" · "}
+                        {ipChanged
+                          ? t.rich("sessionLastActiveFrom", { time: time(s.lastSeenAt), ip: s.lastSeenIp ?? "" })
+                          : t.rich("sessionLastActive", { time: time(s.lastSeenAt) })}
                       </>
                     )}
                   </>
@@ -168,19 +195,19 @@ export default async function AccountPage() {
                 badges={
                   (s.current || ipChanged) && (
                     <>
-                      {s.current && <StandardBadge tone="primary">This device</StandardBadge>}
-                      {ipChanged && <StandardBadge tone="warn">IP address changed</StandardBadge>}
+                      {s.current && <StandardBadge tone="primary">{t("thisDevice")}</StandardBadge>}
+                      {ipChanged && <StandardBadge tone="warn">{t("ipChanged")}</StandardBadge>}
                     </>
                   )
                 }
                 actions={
                   !s.current && (
                     <StandardActionButton
-                      title="Sign out"
+                      title={t("signOut")}
                       variant="danger"
                       compact
                       action={endSession.bind(null, s.id)}
-                      successMessage="Session signed out"
+                      successMessage={t("sessionSignedOut")}
                     />
                   )
                 }
@@ -192,14 +219,14 @@ export default async function AccountPage() {
 
       <StandardSection id="sign-ins">
         <StandardSectionHeader
-          title="Recent sign-in activity"
+          title={t("historyTitle")}
           icon={<LuLogIn />}
           count={attempts.length}
-          description="The latest attempts to sign in to your account, successful or not. Kept for 90 days. If you don't recognise one, change your password."
+          description={t("historyDescription")}
         />
         {attempts.length === 0 ? (
           <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
-            No sign-ins recorded yet.
+            {t("noSignIns")}
           </div>
         ) : (
           <StandardEntryList>
@@ -212,10 +239,10 @@ export default async function AccountPage() {
                     <LocalTime value={a.createdAt} />
                     {a.ipAddress && <> · {a.ipAddress}</>}
                     {" · "}
-                    {METHOD_LABEL[a.method]}
+                    {method(a.method)}
                   </>
                 }
-                badges={<StandardBadge tone={OUTCOME_LABEL[a.outcome].tone}>{OUTCOME_LABEL[a.outcome].text}</StandardBadge>}
+                badges={<StandardBadge tone={outcome(a.outcome).tone}>{outcome(a.outcome).text}</StandardBadge>}
               />
             ))}
           </StandardEntryList>

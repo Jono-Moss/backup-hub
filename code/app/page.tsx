@@ -1,5 +1,7 @@
 import { ENGINE_LABELS } from "@/lib/backup/engines/labels";
 import Link from "next/link";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import {
   LuCircleCheck,
   LuCircleX,
@@ -17,14 +19,14 @@ import {
 } from "react-icons/lu";
 import { getDashboardSummary, type AttentionItem } from "./tasks/actions";
 import { getSignInSummary } from "./account/actions";
-import { OUTCOME_LABEL, describeUserAgent } from "@/components/ui/auth/loginAttemptLabels";
+import { useLoginLabels } from "@/components/ui/auth/loginAttemptLabels";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
 import { StandardBadge } from "@/components/ui/standard/StandardBadge";
 import { StatTile } from "@/components/ui/dashboard/StatTile";
 import { RunStrip } from "@/components/ui/dashboard/RunStrip";
-import { timeAgo } from "@/components/ui/dashboard/timeAgo";
+import { useTimeAgo } from "@/components/ui/dashboard/timeAgo";
 import { describeCron } from "@/lib/cron/cronUtils";
 
 export const dynamic = "force-dynamic";
@@ -45,36 +47,43 @@ const attentionIcon: Record<AttentionItem["kind"], React.ReactNode> = {
   verify: <LuShieldAlert />,
 };
 
-const attentionBadge: Record<AttentionItem["kind"], { text: string; tone: "danger" | "warn" }> = {
-  auth: { text: "Credentials", tone: "danger" },
-  connection: { text: "Can't connect", tone: "danger" },
-  other: { text: "Failed", tone: "danger" },
-  upload: { text: "Off-site copy", tone: "warn" },
-  verify: { text: "Check failed", tone: "warn" },
+const attentionTone: Record<AttentionItem["kind"], "danger" | "warn"> = {
+  auth: "danger",
+  connection: "danger",
+  other: "danger",
+  upload: "warn",
+  verify: "warn",
 };
 
 function RunStatus({ status }: { status: string }) {
+  const t = useTranslations("dashboard");
   if (status === "completed")
     return (
       <span className="inline-flex items-center gap-1 text-primary-dark">
-        <LuCircleCheck size={14} aria-hidden="true" /> Succeeded
+        <LuCircleCheck size={14} aria-hidden="true" /> {t("succeeded")}
       </span>
     );
   if (status === "failed")
     return (
       <span className="inline-flex items-center gap-1 text-danger">
-        <LuCircleX size={14} aria-hidden="true" /> Failed
+        <LuCircleX size={14} aria-hidden="true" /> {t("failed")}
       </span>
     );
   return (
     <span className="inline-flex items-center gap-1 text-warn">
-      <LuLoaderCircle size={14} className="animate-spin" aria-hidden="true" /> Running
+      <LuLoaderCircle size={14} className="animate-spin" aria-hidden="true" /> {t("running")}
     </span>
   );
 }
 
 export default async function DashboardPage() {
   const [{ tasks, stats, attention, recent, days }, signIn] = await Promise.all([getDashboardSummary(), getSignInSummary()]);
+  const t = await getTranslations("dashboard");
+  const tSchedule = await getTranslations("schedule");
+  const locale = await getLocale();
+  const format = await getFormatter();
+  const now = new Date();
+  const timeAgo = (d: Date | string) => format.relativeTime(new Date(d), now);
 
   // Phones get a compact layout so the task list isn't pushed off the first
   // screen: one slim row of counts, a "needs attention" banner only when
@@ -84,13 +93,13 @@ export default async function DashboardPage() {
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-ink">Dashboard</h1>
+          <h1 className="text-xl font-semibold text-ink">{t("title")}</h1>
           <p className="text-sm text-muted mt-1">
-            How your backups have been doing, and the tasks you created or that were shared with you.
+            {t("subtitle")}
           </p>
         </div>
         <div className="shrink-0">
-          <StandardLinkButton href="/tasks/new" title="New task" variant="standard" />
+          <StandardLinkButton href="/tasks/new" title={t("newTask")} variant="standard" />
         </div>
       </div>
 
@@ -102,10 +111,9 @@ export default async function DashboardPage() {
           <LuShieldX size={18} className="mt-0.5 shrink-0 text-danger" aria-hidden="true" />
           <span>
             <span className="font-semibold">
-              Someone entered your correct password but the wrong 2FA code {signIn.mine.secondFactorFailures} time
-              {signIn.mine.secondFactorFailures === 1 ? "" : "s"} in the last {signIn.days} days.
+              {t("twoFactorWarning", { count: signIn.mine.secondFactorFailures, days: signIn.days })}
             </span>{" "}
-            If that wasn&apos;t you, change your password now.
+            {t("twoFactorWarningAction")}
           </span>
         </Link>
       )}
@@ -115,12 +123,12 @@ export default async function DashboardPage() {
           {/* Phones: counts in one row */}
           <div className="sm:hidden">
             <div className="grid grid-cols-4 divide-x divide-line rounded-md border border-line bg-white">
-              <CompactStat icon={<LuCircleCheck />} value={stats.completed} label="Succeeded" tone={stats.completed > 0 ? "good" : "neutral"} />
-              <CompactStat icon={<LuCircleX />} value={stats.failed} label="Failed" tone={stats.failed > 0 ? "bad" : "neutral"} />
-              <CompactStat icon={<LuCloudOff />} value={stats.uploadFailed} label="Copy failed" tone={stats.uploadFailed > 0 ? "warn" : "neutral"} />
-              <CompactStat icon={<LuLogIn />} value={signIn.mine.failedCount} label="Bad sign-ins" tone={signIn.mine.failedCount > 0 ? "warn" : "neutral"} />
+              <CompactStat icon={<LuCircleCheck />} value={stats.completed} label={t("compactSucceeded")} tone={stats.completed > 0 ? "good" : "neutral"} />
+              <CompactStat icon={<LuCircleX />} value={stats.failed} label={t("compactFailed")} tone={stats.failed > 0 ? "bad" : "neutral"} />
+              <CompactStat icon={<LuCloudOff />} value={stats.uploadFailed} label={t("compactCopyFailed")} tone={stats.uploadFailed > 0 ? "warn" : "neutral"} />
+              <CompactStat icon={<LuLogIn />} value={signIn.mine.failedCount} label={t("compactBadSignIns")} tone={signIn.mine.failedCount > 0 ? "warn" : "neutral"} />
             </div>
-            <p className="mt-1 text-xs text-muted">Last {days} days</p>
+            <p className="mt-1 text-xs text-muted">{t("lastDays", { days })}</p>
           </div>
 
           {/* Phones: only when something's wrong */}
@@ -128,7 +136,7 @@ export default async function DashboardPage() {
             <details className="sm:hidden group rounded-md border border-warn bg-warn-light">
               <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
                 <LuTriangleAlert size={16} className="shrink-0 text-warn" aria-hidden="true" />
-                {attention.length} {attention.length === 1 ? "problem needs" : "problems need"} attention
+                {t("problemsBanner", { count: attention.length })}
                 <LuChevronDown size={16} aria-hidden="true" className="ml-auto text-muted transition-transform group-open:rotate-180" />
               </summary>
               <div className="border-t border-warn/40 bg-white p-3">
@@ -140,51 +148,51 @@ export default async function DashboardPage() {
           {/* Wider screens: full overview */}
           <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatTile
-              label="Successful backups"
+              label={t("statSuccessful")}
               value={stats.completed}
               icon={<LuCircleCheck />}
               tone={stats.completed > 0 ? "good" : "neutral"}
               hint={`Last ${days} days`}
             />
             <StatTile
-              label="Failed backups"
+              label={t("statFailed")}
               value={stats.failed}
               icon={<LuCircleX />}
               tone={stats.failed > 0 ? "bad" : "neutral"}
               hint={`Last ${days} days`}
             />
             <StatTile
-              label="Off-site copy failures"
+              label={t("statCopyFailures")}
               value={stats.uploadFailed}
               icon={<LuCloudOff />}
               tone={stats.uploadFailed > 0 ? "warn" : "neutral"}
               hint={`Last ${days} days`}
             />
             <StatTile
-              label="Failed sign-ins"
+              label={t("statSignIns")}
               value={signIn.mine.failedCount}
               icon={<LuLogIn />}
               tone={signIn.mine.failedCount > 0 ? "warn" : "neutral"}
-              hint={`To your account, last ${signIn.days} days`}
+              hint={t("statSignInsHint", { days: signIn.days })}
             />
           </div>
 
           <div className="hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-8">
             <StandardSection>
               <StandardSectionHeader
-                title="Needs attention"
+                title={t("attentionTitle")}
                 icon={<LuTriangleAlert />}
                 count={attention.length}
-                description="Problems with each task's most recent backup."
+                description={t("attentionDescription")}
               />
               <AttentionList attention={attention} />
             </StandardSection>
 
             <StandardSection>
               <StandardSectionHeader
-                title="Recent activity"
+                title={t("recentTitle")}
                 icon={<LuActivity />}
-                description="The latest backups across all your tasks."
+                description={t("recentDescription")}
               />
               <RecentList recent={recent} />
             </StandardSection>
@@ -194,16 +202,16 @@ export default async function DashboardPage() {
 
       <StandardSection>
         <StandardSectionHeader
-          title="Backup tasks"
+          title={t("tasksTitle")}
           icon={<LuDatabase />}
           count={tasks.length}
-          description="Each task owns one database connection, its own schedule, and retention."
+          description={t("tasksDescription")}
         />
         {tasks.length === 0 ? (
           <div className="rounded-md border border-dashed border-line p-10 text-center">
-            <p className="text-sm text-muted">No backup tasks yet.</p>
+            <p className="text-sm text-muted">{t("noTasks")}</p>
             <Link href="/tasks/new" className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-              Create your first task
+              {t("createFirst")}
             </Link>
           </div>
         ) : (
@@ -217,18 +225,19 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-3 min-w-0">
                     <span
                       className={`mt-1.5 size-2 shrink-0 rounded-full ${task.enabled ? "bg-primary" : "bg-muted"}`}
-                      title={task.enabled ? "Schedule active" : "Schedule disabled"}
+                      title={task.enabled ? t("scheduleActive") : t("scheduleDisabled")}
                     />
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-ink">
                         {task.name}
-                        {!task.enabled && <span className="font-normal text-muted"> (paused)</span>}
+                        {!task.enabled && <span className="font-normal text-muted"> {t("paused")}</span>}
                       </p>
                       <p className="text-xs text-muted mt-0.5">
-                        {engineLabel[task.engine]} · <span className="font-mono">{describeCron(task.cronExpression)}</span>{" "}
-                        · keep {task.retentionCount}
-                        {task.encryptionEnabled ? " · encrypted" : ""}
-                        {!task.isOwner ? ` · shared by ${task.ownerName}` : ""}
+                        {engineLabel[task.engine]} ·{" "}
+                        <span className="font-mono">{describeCron(task.cronExpression, tSchedule, locale)}</span> ·{" "}
+                        {t("keep", { count: task.retentionCount })}
+                        {task.encryptionEnabled ? ` · ${t("encrypted")}` : ""}
+                        {!task.isOwner ? ` · ${t("sharedBy", { name: task.ownerName })}` : ""}
                       </p>
                     </div>
                   </div>
@@ -240,7 +249,7 @@ export default async function DashboardPage() {
                           <span className="block text-muted">{timeAgo(task.lastRun.startedAt)}</span>
                         </>
                       ) : (
-                        <span className="text-muted">Never run</span>
+                        <span className="text-muted">{t("neverRun")}</span>
                       )}
                     </div>
                     <RunStrip runs={task.strip} />
@@ -255,18 +264,18 @@ export default async function DashboardPage() {
       {/* Phones: activity sections collapsed under the tasks */}
       <div className="sm:hidden space-y-3">
         {tasks.length > 0 && (
-          <MobileCollapsible title="Recent activity" icon={<LuActivity />}>
+          <MobileCollapsible title={t("recentTitle")} icon={<LuActivity />}>
             <RecentList recent={recent} />
           </MobileCollapsible>
         )}
         <MobileCollapsible
-          title="Sign-in activity"
+          title={t("signInTitle")}
           icon={<LuLogIn />}
-          note={signIn.mine.failedCount > 0 ? `${signIn.mine.failedCount} failed` : undefined}
+          note={signIn.mine.failedCount > 0 ? t("failedCountBadge", { count: signIn.mine.failedCount }) : undefined}
         >
           <SignInActivity signIn={signIn} />
           <Link href="/account#sign-ins" className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
-            Full history
+            {t("fullHistory")}
           </Link>
         </MobileCollapsible>
       </div>
@@ -274,12 +283,12 @@ export default async function DashboardPage() {
       <div className="hidden sm:block">
         <StandardSection>
           <StandardSectionHeader
-            title="Sign-in activity"
+            title={t("signInTitle")}
             icon={<LuLogIn />}
-            description={`Sign-ins to your account over the last ${signIn.days} days.`}
+            description={t("signInDescription", { days: signIn.days })}
             action={
               <Link href="/account#sign-ins" className="text-sm font-medium text-primary hover:underline">
-                Full history
+                {t("fullHistory")}
               </Link>
             }
           />
@@ -353,11 +362,13 @@ function MobileCollapsible({
 }
 
 function AttentionList({ attention }: { attention: Summary["attention"] }) {
+  const t = useTranslations("dashboard");
+  const timeAgo = useTimeAgo();
   if (attention.length === 0) {
     return (
       <div className="flex items-center gap-2 rounded-md border border-dashed border-line px-4 py-6 text-sm text-muted justify-center">
         <LuCircleCheck size={16} className="text-primary" aria-hidden="true" />
-        All good — every task&apos;s latest backup succeeded.
+        {t("allGood")}
       </div>
     );
   }
@@ -372,7 +383,7 @@ function AttentionList({ attention }: { attention: Summary["attention"] }) {
             <span
               aria-hidden="true"
               className={`mt-0.5 shrink-0 [&>svg]:size-4 ${
-                attentionBadge[item.kind].tone === "danger" ? "text-danger" : "text-warn"
+                attentionTone[item.kind] === "danger" ? "text-danger" : "text-warn"
               }`}
             >
               {attentionIcon[item.kind]}
@@ -380,9 +391,11 @@ function AttentionList({ attention }: { attention: Summary["attention"] }) {
             <span className="min-w-0 space-y-1">
               <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="text-sm font-medium text-ink">{item.taskName}</span>
-                <StandardBadge tone={attentionBadge[item.kind].tone}>{attentionBadge[item.kind].text}</StandardBadge>
+                <StandardBadge tone={attentionTone[item.kind]}>{t(`badge.${item.kind}`)}</StandardBadge>
               </span>
-              <span className="block text-sm text-ink">{item.title}</span>
+              <span className="block text-sm text-ink">
+                {t(`attention.${item.titleKey}`, { location: item.location ?? t("attention.unnamedLocation") })}
+              </span>
               {item.message && (
                 <span className="block text-xs text-muted line-clamp-2 break-words" title={item.message}>
                   {item.message}
@@ -398,10 +411,13 @@ function AttentionList({ attention }: { attention: Summary["attention"] }) {
 }
 
 function RecentList({ recent }: { recent: Summary["recent"] }) {
+  const t = useTranslations("dashboard");
+  const tRuns = useTranslations("runs");
+  const timeAgo = useTimeAgo();
   if (recent.length === 0) {
     return (
       <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
-        No backups have run yet.
+        {t("noBackupsYet")}
       </div>
     );
   }
@@ -416,8 +432,7 @@ function RecentList({ recent }: { recent: Summary["recent"] }) {
             <span className="min-w-0">
               <span className="block font-medium text-ink truncate">{run.taskName}</span>
               <span className="block text-xs text-muted">
-                {timeAgo(run.startedAt)} · {formatBytes(run.sizeBytes)} ·{" "}
-                <span className="capitalize">{run.triggeredBy}</span>
+                {timeAgo(run.startedAt)} · {formatBytes(run.sizeBytes)} · {tRuns(`trigger.${run.triggeredBy}`)}
               </span>
             </span>
             <span className="shrink-0 text-xs font-medium">
@@ -431,26 +446,31 @@ function RecentList({ recent }: { recent: Summary["recent"] }) {
 }
 
 function SignInActivity({ signIn }: { signIn: SignIn }) {
+  const t = useTranslations("dashboard");
+  const timeAgo = useTimeAgo();
+  const { outcome, describeUserAgent } = useLoginLabels();
   return (
     <div className={`grid grid-cols-1 gap-6 ${signIn.server ? "lg:grid-cols-2" : ""}`}>
       <div className="space-y-3">
         <p className="text-sm text-ink">
           {signIn.mine.previousSuccess ? (
             <>
-              Previous sign-in {timeAgo(signIn.mine.previousSuccess.createdAt)} ·{" "}
-              {describeUserAgent(signIn.mine.previousSuccess.userAgent)}
+              {t("previousSignIn", {
+                when: timeAgo(signIn.mine.previousSuccess.createdAt),
+                device: describeUserAgent(signIn.mine.previousSuccess.userAgent),
+              })}
               {signIn.mine.previousSuccess.ipAddress && (
                 <span className="text-muted"> · {signIn.mine.previousSuccess.ipAddress}</span>
               )}
             </>
           ) : (
-            <span className="text-muted">No earlier sign-ins recorded.</span>
+            <span className="text-muted">{t("noEarlierSignIns")}</span>
           )}
         </p>
         {signIn.mine.recentFailures.length === 0 ? (
           <div className="flex items-center gap-2 rounded-md border border-dashed border-line px-4 py-4 text-sm text-muted">
             <LuCircleCheck size={16} className="text-primary" aria-hidden="true" />
-            No failed sign-ins to your account.
+            {t("noFailedSignIns")}
           </div>
         ) : (
           <ul className="divide-y divide-line">
@@ -463,7 +483,7 @@ function SignInActivity({ signIn }: { signIn: SignIn }) {
                     {a.ipAddress && <> · {a.ipAddress}</>}
                   </span>
                 </span>
-                <StandardBadge tone={OUTCOME_LABEL[a.outcome].tone}>{OUTCOME_LABEL[a.outcome].text}</StandardBadge>
+                <StandardBadge tone={outcome(a.outcome).tone}>{outcome(a.outcome).text}</StandardBadge>
               </li>
             ))}
           </ul>
@@ -472,21 +492,21 @@ function SignInActivity({ signIn }: { signIn: SignIn }) {
 
       {signIn.server && (
         <div className="space-y-3 lg:border-l lg:border-line lg:pl-6">
-          <p className="text-sm font-semibold text-ink">Whole server (admin)</p>
+          <p className="text-sm font-semibold text-ink">{t("wholeServer")}</p>
           <div className="flex flex-wrap gap-1.5">
             <StandardBadge tone={signIn.server.failedCount > 0 ? "warn" : "neutral"}>
-              {signIn.server.failedCount} failed sign-in{signIn.server.failedCount === 1 ? "" : "s"}
+              {t("serverFailed", { count: signIn.server.failedCount })}
             </StandardBadge>
             <StandardBadge tone={signIn.server.unknownAccountCount > 0 ? "warn" : "neutral"}>
-              {signIn.server.unknownAccountCount} for unknown accounts
+              {t("serverUnknown", { count: signIn.server.unknownAccountCount })}
             </StandardBadge>
             <StandardBadge tone={signIn.server.blockedCount > 0 ? "danger" : "neutral"}>
-              {signIn.server.blockedCount} blocked by lockout
+              {t("serverBlocked", { count: signIn.server.blockedCount })}
             </StandardBadge>
           </div>
           {signIn.server.topIps.length > 0 && (
             <div>
-              <p className="text-xs text-muted mb-1">Most failures from</p>
+              <p className="text-xs text-muted mb-1">{t("mostFailuresFrom")}</p>
               <ul className="text-sm space-y-0.5">
                 {signIn.server.topIps.map((r) => (
                   <li key={r.ip} className="flex justify-between gap-3">
@@ -499,7 +519,7 @@ function SignInActivity({ signIn }: { signIn: SignIn }) {
           )}
           {signIn.server.topAccounts.length > 0 && (
             <div>
-              <p className="text-xs text-muted mb-1">Accounts with most failures</p>
+              <p className="text-xs text-muted mb-1">{t("accountsMostFailures")}</p>
               <ul className="text-sm space-y-0.5">
                 {signIn.server.topAccounts.map((r) => (
                   <li key={r.email} className="flex justify-between gap-3">

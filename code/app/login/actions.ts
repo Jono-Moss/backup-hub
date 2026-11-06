@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { appUser, userTotp, userPasskey } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -80,7 +81,7 @@ export async function startPasskeyLogin() {
 export async function finishPasskeyLogin(response: AuthenticationResponseJSON) {
   const challenge = await consumeChallengeCookie();
   if (!challenge) {
-    return { ok: false as const, error: "This login attempt expired — try again." };
+    return { ok: false as const, error: (await getTranslations("auth"))("passkeyExpired") };
   }
 
   // Passkeys skip the per-account lock (see lib/auth/lockout.ts), only the per-IP one applies.
@@ -90,14 +91,14 @@ export async function finishPasskeyLogin(response: AuthenticationResponseJSON) {
     const minutes = minutesLeft(lock.until);
     return {
       ok: false as const,
-      error: `Too many failed sign-in attempts from your network. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+      error: (await getTranslations("auth"))("passkeyLockedNetwork", { minutes }),
     };
   }
 
   const [passkey] = await db.select().from(userPasskey).where(eq(userPasskey.credentialId, response.id)).limit(1);
   if (!passkey) {
     await recordLoginAttempt({ userId: null, email: null, method: "passkey", outcome: "passkey_failed" });
-    return { ok: false as const, error: "That passkey isn't registered with any account here." };
+    return { ok: false as const, error: (await getTranslations("auth"))("passkeyUnknown") };
   }
 
   let verification;
@@ -116,12 +117,12 @@ export async function finishPasskeyLogin(response: AuthenticationResponseJSON) {
     });
   } catch (err: any) {
     await recordLoginAttempt({ userId: passkey.userId, email: null, method: "passkey", outcome: "passkey_failed" });
-    return { ok: false as const, error: err.message ?? "Passkey verification failed" };
+    return { ok: false as const, error: err.message ?? (await getTranslations("auth"))("passkeyVerifyFailed") };
   }
 
   if (!verification.verified) {
     await recordLoginAttempt({ userId: passkey.userId, email: null, method: "passkey", outcome: "passkey_failed" });
-    return { ok: false as const, error: "Passkey verification failed" };
+    return { ok: false as const, error: (await getTranslations("auth"))("passkeyVerifyFailed") };
   }
 
   await db
@@ -131,7 +132,7 @@ export async function finishPasskeyLogin(response: AuthenticationResponseJSON) {
 
   const [user] = await db.select().from(appUser).where(eq(appUser.id, passkey.userId)).limit(1);
   if (!user) {
-    return { ok: false as const, error: "That account no longer exists." };
+    return { ok: false as const, error: (await getTranslations("auth"))("accountGone") };
   }
 
   // A passkey is itself phishing-resistant multi-factor authentication —

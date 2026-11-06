@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   removeTaskDestination,
@@ -20,11 +21,13 @@ export function ToggleTaskDestinationButton({
   linkId: string;
   enabled: boolean;
 }) {
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
   return (
     <StandardActionButton
-      title={enabled ? "Disable" : "Enable"}
+      title={enabled ? t("disable") : t("enable")}
       action={() => toggleTaskDestinationEnabled(taskId, linkId, !enabled)}
-      successMessage={enabled ? "Save location disabled for this task" : "Save location enabled for this task"}
+      successMessage={enabled ? t("disabledForTask") : t("enabledForTask")}
       variant="outline"
       compact
     />
@@ -40,18 +43,20 @@ export function RemoveTaskDestinationButton({
   linkId: string;
   taskOnly: boolean;
 }) {
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
   const bound = removeTaskDestination.bind(null, taskId, linkId);
   return (
     <StandardActionButton
       action={bound}
-      successMessage="Save location removed from this task"
-      title="Remove"
+      successMessage={t("removedFromTask")}
+      title={tCommon("remove")}
       variant="danger"
-      pendingTitle="Removing..."
+      pendingTitle={t("removing")}
       confirmMessage={
         taskOnly
-          ? "Remove this save location? It's task-only, so it and its saved credentials are deleted. Future runs will stop copying files here — this doesn't delete anything already uploaded to the provider."
-          : "Stop this task using this save location? It stays saved in the owner's account for their other tasks. This doesn't delete anything already uploaded to the provider."
+          ? t("removeTaskOnlyConfirm")
+          : t("removeSavedConfirm")
       }
       compact
     />
@@ -59,6 +64,8 @@ export function RemoveTaskDestinationButton({
 }
 
 export function TestTaskDestinationButton({ taskId, linkId }: { taskId: string; linkId: string }) {
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
 
   async function handleClick() {
@@ -67,10 +74,10 @@ export function TestTaskDestinationButton({ taskId, linkId }: { taskId: string; 
 
   return (
     <div className="flex items-center gap-2">
-      <StandardActionButton action={handleClick} title="Test" variant="outline" pendingTitle="Testing…" compact />
+      <StandardActionButton action={handleClick} title={t("test")} variant="outline" pendingTitle={t("testing")} compact />
       {result && (
         <span className={`text-xs ${result.ok ? "text-primary" : "text-danger"}`}>
-          {result.ok ? result.message ?? "OK" : `Failed: ${result.message ?? "unknown error"}`}
+          {result.ok ? result.message ?? t("ok") : t("failedWhy", { reason: result.message ?? t("unknownError") })}
         </span>
       )}
     </div>

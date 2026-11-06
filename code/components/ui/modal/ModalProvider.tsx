@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 // Replaces window.confirm/window.alert app-wide. Browsers let a user check
@@ -37,6 +38,7 @@ type ModalContextValue = {
 const ModalContext = createContext<ModalContextValue | null>(null);
 
 export function ModalProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("common");
   const [pending, setPending] = useState<Pending | null>(null);
 
   const confirm = useCallback((optsOrMessage: ConfirmOptions | string) => {
@@ -86,7 +88,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                     autoFocus
                     className="rounded-md border border-line text-ink text-sm font-medium px-4 py-2 hover:border-primary transition-colors"
                   >
-                    {pending.opts.cancelLabel ?? "Cancel"}
+                    {pending.opts.cancelLabel ?? t("cancel")}
                   </button>
                   <button
                     type="button"
@@ -97,7 +99,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                         : "bg-primary border-b-primary-dark"
                     }`}
                   >
-                    {pending.opts.confirmLabel ?? "Confirm"}
+                    {pending.opts.confirmLabel ?? t("confirm")}
                   </button>
                 </>
               ) : (
@@ -107,7 +109,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                   autoFocus
                   className="rounded-md bg-primary text-white text-sm font-medium px-4 py-2 border-b-2 border-b-primary-dark hover:border-b-transparent transition-colors"
                 >
-                  OK
+                  {t("ok")}
                 </button>
               )}
             </div>

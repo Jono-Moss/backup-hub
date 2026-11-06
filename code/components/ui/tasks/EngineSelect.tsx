@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { Engine } from "@/db/schema";
-import { ENGINE_COMPATIBILITY, ENGINE_LABELS } from "@/lib/backup/engines/labels";
+import { ENGINE_LABELS } from "@/lib/backup/engines/labels";
+import { useTranslations } from "next-intl";
 
 const ENGINE_OPTIONS = Object.keys(ENGINE_LABELS) as Engine[];
 
@@ -11,11 +12,13 @@ const ENGINE_OPTIONS = Object.keys(ENGINE_LABELS) as Engine[];
 // database" the user is defined in (sent as authSource).
 export function EngineSelect() {
   const [engine, setEngine] = useState<Engine>(ENGINE_OPTIONS[0]);
+  const t = useTranslations("newTask");
+  const tCompat = useTranslations("engines.compatibility");
 
   return (
     <div>
       <label className="block text-sm text-ink mb-1" htmlFor="engine">
-        Database engine
+        {t("engine")}
       </label>
       <select
         id="engine"
@@ -32,13 +35,13 @@ export function EngineSelect() {
         ))}
       </select>
       <p id="engine-compatibility" className="mt-1 text-xs text-muted">
-        {ENGINE_COMPATIBILITY[engine]}
+        {tCompat(engine)}
       </p>
 
       {engine === "mongodb" && (
         <div className="mt-4">
           <label className="block text-sm text-ink mb-1" htmlFor="authSource">
-            Auth database (optional)
+            {t("authSource")}
           </label>
           <input
             id="authSource"
@@ -48,8 +51,7 @@ export function EngineSelect() {
             className="w-full border border-line px-3 py-2 text-sm"
           />
           <p className="mt-1 text-xs text-muted">
-            The database the user was created in. Leave blank for &ldquo;admin&rdquo;, which is right for MongoDB Atlas
-            and most servers.
+            {t("authSourceHint")}
           </p>
         </div>
       )}

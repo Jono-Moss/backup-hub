@@ -10,6 +10,7 @@ Standalone, self-hostable scheduled backups for MySQL, MariaDB, PostgreSQL and M
 - **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password. Every save, add and delete confirms with a short success or error message.
 - **Dashboard** — the home page summarises the last 7 days (successful and failed backups, off-site copy failures, failed sign-ins to your account), lists anything that **needs attention** (a task whose latest backup failed, couldn't sign in to its database or save location, failed to copy off-site, or failed its check), shows recent activity across all your tasks, and gives each task a strip of its last 14 results.
 - **Sign-in security** — every sign-in attempt is recorded (with IP and browser) and shown to the account owner; repeated failures **lock the account** for a while (configurable); users can **reset a forgotten password by email**; and the Account page lists your **active sessions** so you can sign out any you don't recognise. See [Sign-in security](#sign-in-security).
+- **Languages** — the UI is available in English, Spanish, German, French and Simplified Chinese, picked from the browser's language or a per-user setting on the Account page. See [Languages](#languages).
 - **Notifications** by email, [ntfy](https://ntfy.sh), Telegram or Discord — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured or a push service is unreachable, everything else keeps working and the notification is skipped (and logged).
 - **Off-site save locations** — a task can copy each completed backup to any number of remote destinations (S3-compatible storage, Google Drive, OneDrive, OpenCloud, FTP, FTPS, SFTP) on top of the always-kept local copy. Google Drive and OneDrive connect with a one-click sign-in, and small enough backups can be emailed to any address as an attachment. Pluggable like the DB engines: implement `BackupDestination` in `lib/backup/destinations/` to add a new provider.
 - **REST API** at `/api/v1/*`, authenticated with scoped API keys (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`), optionally pinned to a single task. This is separate from user accounts — API keys are their own credential type.
@@ -341,6 +342,41 @@ It needs the `SMTP_*` settings, plus **`APP_URL`** — the address people open B
 
 Session cookies are `HttpOnly`, `SameSite=Lax`, `Secure` in production, and only their hash is stored. Sessions last 7 days.
 
+## Languages
+
+The web UI is available in **English, Spanish (`es`), German (`de`), French (`fr`) and Simplified Chinese (`zh`)**, using [next-intl](https://next-intl.dev).
+
+**How the language is chosen**, first match wins:
+
+1. The language set under **Account → Profile & password → Language**. It's saved on the user, so it follows them to any device.
+2. The `bh_locale` cookie, which saving that setting also writes. The cookie means the sign-in pages appear in the same language before anyone signs in.
+3. The browser's `Accept-Language` header, so `de-AT` gets German and `zh-CN` gets Chinese.
+4. English.
+
+Choosing **Automatic** on the Account page clears the setting and the cookie, so the browser's language is used again.
+
+**What gets translated:** every page, form, button, success/error message and the dashboard. Dates, times, relative times ("3 hours ago"), numbers and cron schedule descriptions are formatted for the chosen language. Password-reset emails go out in the recipient's language.
+
+**What stays in English:**
+- error output from the database tools themselves (e.g. a `pg_dump` connection error), which is stored and shown exactly as the tool printed it;
+- backup and system notifications (email, ntfy, Telegram, Discord), because one channel can have several readers;
+- the REST API's error messages;
+- names people type in, such as task, location and channel names.
+
+### Translation files
+
+Each language is a single JSON file in `translations/` (`en.json`, `es.json`, …), grouped by area (`dashboard`, `task`, `account`, …). Messages use ICU syntax for plurals and placeholders, e.g. `"{count, plural, one {# backup} other {# backups}}"`, and tags like `<link>…</link>` for embedded links. `translations/en.json` is the source of truth: the TypeScript types are generated from it (`global.d.ts`), so using a key that doesn't exist is a type error.
+
+Labels and help text for save-location providers and notification channels live in their code definitions (`lib/backup/destinations/`, `lib/notifications/channels/definitions.ts`), and the server uses the English there too. The translation files override them under `destinations.<provider>.fields.<field>.label` / `helpText` / `placeholder` and `channels.<type>…`. Anything without a translation falls back to the definition's English, so a new provider shows up in English until it's translated.
+
+The non-English translations were machine-assisted and would benefit from a native speaker's review — corrections are welcome.
+
+### Adding a language
+
+1. Add its code and name to `LOCALES` and `LOCALE_NAMES` in `lib/i18n/locales.ts`.
+2. Copy `translations/en.json` to `translations/<code>.json` and translate the values. Keep the keys, the `{placeholders}`, the plural keywords (`one`, `other`, …) and the `<tags>` as they are.
+3. Run `npm run build` (or `npx tsc --noEmit`) and open a few pages with the browser set to that language.
+
 ## Encrypted backups
 
 If a task has encryption enabled, downloaded files end in `.enc` (`.sql.gz.enc`, or `.archive.gz.enc` for MongoDB) — Backup Hub never decrypts server-side on download, so the backup password is only ever held in memory during the dump itself. To decrypt locally, the file layout is `[salt(16 bytes)][iv(12 bytes)][ciphertext][authTag(16 bytes)]`, AES-256-GCM, key derived via scrypt from your password + the salt. A small decrypt script would look like:
@@ -360,6 +396,7 @@ If a task has encryption enabled, downloaded files end in `.enc` (`.sql.gz.enc`,
 - **Large encrypted files**: decryption reads the whole ciphertext into memory (fine for typical dumps; swap for chunked authenticated decryption if you expect multi-GB encrypted files).
 - **Password reset needs SMTP** — without `SMTP_*` configured, "Forgot password?" tells users to ask an admin. A server with no SMTP and a single admin who forgets their password has no way back in short of editing the database.
 - **Sessions aren't tied to an IP address** — on purpose: IPs change constantly (mobile networks, VPNs, IPv6 privacy addresses) and `X-Forwarded-For` can be faked without a trusted reverse proxy. Instead, Account → Active sessions flags a session whose IP has changed so you can sign it out.
+- **Notifications aren't translated** — backup and system notifications go out in English, since a shared channel can have readers who use different languages. Only the UI and password-reset emails follow each user's language.
 - **2FA enforcement**: enabling TOTP/passkeys is opt-in per user, not something an admin can mandate account-wide yet.
 - **REST API has no 2FA equivalent** — API keys are a separate credential type from user accounts and aren't affected by a user's 2FA/passkey settings (this is intentional: API keys are meant for machine-to-machine use where an interactive second factor doesn't apply).
 
@@ -383,6 +420,9 @@ lib/auth/login-attempts.ts  records every sign-in attempt (and reads the client 
 lib/auth/lockout.ts         sign-in lockouts, worked out from the sign-in history
 lib/auth/password-reset.ts  "forgot password" email links
 lib/action-result.ts        fail("…") — how server actions report errors the user should see
+lib/i18n/locales.ts         supported languages + browser-language matching
+i18n/request.ts             picks each request's language (account setting → cookie → browser → English)
+translations/               UI text, one JSON file per language (en.json is the source of truth)
 lib/auth/totp.ts            RFC 6238 TOTP implementation (secret gen, code gen/verify, otpauth URI)
 lib/auth/recovery-codes.ts  2FA recovery code generation/hashing
 lib/auth/webauthn.ts        WebAuthn RP config + ephemeral challenge-cookie helpers

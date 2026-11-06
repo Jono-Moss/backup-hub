@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { LuEllipsis } from "react-icons/lu";
 import type { IconType } from "react-icons";
@@ -25,7 +26,7 @@ export interface MenuAction {
 export function ActionMenu({
   actions,
   variant,
-  label = "More actions",
+  label,
   title,
   summary,
   busy = false,
@@ -40,6 +41,8 @@ export function ActionMenu({
   /** Something started from the menu is still running. */
   busy?: boolean;
 }) {
+  const t = useTranslations("common");
+  label = label ?? t("moreActions");
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   if (actions.length === 0) return null;
@@ -213,6 +216,7 @@ function Sheet({
   onSelect: (a: MenuAction) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("common");
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState(0);
   const dragStart = useRef<number | null>(null);
@@ -263,7 +267,7 @@ function Sheet({
         ))}
         <div className="border-t border-line p-3">
           <button type="button" onClick={onClose} className="w-full rounded-md py-2.5 text-sm font-medium text-ink hover:bg-paper">
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </div>

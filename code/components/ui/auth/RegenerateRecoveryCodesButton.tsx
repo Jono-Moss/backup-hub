@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { regenerateRecoveryCodes } from "@/app/account/actions";
@@ -8,12 +9,13 @@ import { StandardActionButton } from "@/components/ui/standard/StandardActionBut
 export function RegenerateRecoveryCodesButton() {
   const router = useRouter();
   const [codes, setCodes] = useState<string[] | null>(null);
+  const t = useTranslations("twoFactor");
 
   if (codes) {
     return (
       <div className="space-y-3 border border-primary bg-primary-light p-4">
         <p className="text-sm font-medium text-ink">
-          New recovery codes — save these now, they won't be shown again.
+          {t("newCodes")}
         </p>
         <div className="grid grid-cols-2 gap-2 bg-white border border-line p-3">
           {codes.map((c) => (
@@ -27,7 +29,7 @@ export function RegenerateRecoveryCodesButton() {
             setCodes(null);
             router.refresh();
           }}
-          title="Done"
+          title={t("done")}
         />
       </div>
     );
@@ -40,9 +42,9 @@ export function RegenerateRecoveryCodesButton() {
         if ("recoveryCodes" in result) setCodes(result.recoveryCodes);
         return result;
       }}
-      title="Regenerate recovery codes"
-      pendingTitle="Generating…"
-      confirmMessage="Generate new recovery codes? Your existing codes will stop working."
+      title={t("regenerate")}
+      pendingTitle={t("generating")}
+      confirmMessage={t("regenerateConfirm")}
     />
   );
 }

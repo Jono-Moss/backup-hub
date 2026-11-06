@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useDefinitionText } from "@/components/ui/common/useDefinitionText";
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { useState } from "react";
 import { attachSavedDestination } from "@/app/tasks/actions";
@@ -25,6 +27,8 @@ export function AttachSavedDestinationForm({
   saved: SavedDestination[];
   providerLabels: Record<string, string>;
 }) {
+  const t = useTranslations("locations");
+  const text = useDefinitionText("destinations");
   const [selectedId, setSelectedId] = useState(saved[0]?.id ?? "");
   const selected = saved.find((d) => d.id === selectedId);
   const bound = attachSavedDestination.bind(null, taskId);
@@ -32,22 +36,23 @@ export function AttachSavedDestinationForm({
   if (saved.length === 0) {
     return (
       <p className="text-sm text-muted">
-        No other saved locations in your account. Tick &ldquo;Save to my account&rdquo; when adding one below, or add
-        them on the{" "}
-        <a href="/locations" className="text-primary underline">
-          Save locations
-        </a>{" "}
-        page, to reuse them across tasks.
+        {t.rich("noOtherSaved", {
+          link: (chunks) => (
+            <a href="/locations" className="text-primary underline">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
     );
   }
 
   return (
-    <ActionForm action={bound} success="Save location added to this task" className="space-y-4">
+    <ActionForm action={bound} success={t("addedToTask")} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="attach-destination">
-            Saved location
+            {t("savedLocation")}
           </label>
           <select
             id="attach-destination"
@@ -58,7 +63,7 @@ export function AttachSavedDestinationForm({
           >
             {saved.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.label} — {providerLabels[d.type] ?? d.type}
+                {d.label} — {text(`${d.type}.label`, providerLabels[d.type] ?? d.type)}
               </option>
             ))}
           </select>
@@ -66,7 +71,7 @@ export function AttachSavedDestinationForm({
         {selected?.supportsSubfolder && (
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="attach-subfolder">
-              Subfolder for this task (optional)
+              {t("subfolder")}
             </label>
             <input
               key={selected.id}
@@ -76,13 +81,12 @@ export function AttachSavedDestinationForm({
               className="w-full border border-line px-3 py-2 text-sm"
             />
             <p className="text-xs text-muted mt-1">
-              Added under the location&apos;s own folder, so tasks sharing it don&apos;t mix their files. Clear it to
-              use the folder as-is.
+              {t("subfolderHint")}
             </p>
           </div>
         )}
       </div>
-      <StandardSubmitButton title="Use this location" />
+      <StandardSubmitButton title={t("useThis")} />
     </ActionForm>
   );
 }

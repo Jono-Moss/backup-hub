@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
 export const RUNS_PAGE_SIZE = 10;
@@ -23,6 +24,7 @@ function href(page: number | "all") {
 }
 
 export function RunsPagination({ page, total }: { page: number | "all"; total: number }) {
+  const t = useTranslations("runs");
   if (total <= RUNS_PAGE_SIZE) return null;
   const pages = Math.ceil(total / RUNS_PAGE_SIZE);
 
@@ -32,9 +34,9 @@ export function RunsPagination({ page, total }: { page: number | "all"; total: n
   if (page === "all") {
     return (
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-sm text-muted">
-        <span>Showing all {total} backups</span>
+        <span>{t("showingAll", { total })}</span>
         <Link href={href(1)} className="text-primary hover:underline">
-          Show {RUNS_PAGE_SIZE} per page
+          {t("perPage", { count: RUNS_PAGE_SIZE })}
         </Link>
       </div>
     );
@@ -46,32 +48,32 @@ export function RunsPagination({ page, total }: { page: number | "all"; total: n
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-sm text-muted">
       <span>
-        Showing {from}–{to} of {total}
+        {t("showingRange", { from, to, total })}
       </span>
       <div className="flex flex-wrap items-center gap-2">
         {page > 1 ? (
           <Link href={href(page - 1)} className={linkStyle}>
-            <LuChevronLeft size={14} aria-hidden="true" /> Newer
+            <LuChevronLeft size={14} aria-hidden="true" /> {t("newer")}
           </Link>
         ) : (
           <span className={disabledStyle}>
-            <LuChevronLeft size={14} aria-hidden="true" /> Newer
+            <LuChevronLeft size={14} aria-hidden="true" /> {t("newer")}
           </span>
         )}
         <span className="px-1">
-          Page {page} of {pages}
+          {t("pageOf", { page, pages })}
         </span>
         {page < pages ? (
           <Link href={href(page + 1)} className={linkStyle}>
-            Older <LuChevronRight size={14} aria-hidden="true" />
+            {t("older")} <LuChevronRight size={14} aria-hidden="true" />
           </Link>
         ) : (
           <span className={disabledStyle}>
-            Older <LuChevronRight size={14} aria-hidden="true" />
+            {t("older")} <LuChevronRight size={14} aria-hidden="true" />
           </span>
         )}
         <Link href={href("all")} className="ml-2 text-primary hover:underline">
-          Show all
+          {t("showAll")}
         </Link>
       </div>
     </div>

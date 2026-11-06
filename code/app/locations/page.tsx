@@ -1,4 +1,6 @@
 import { listMyLocations } from "./actions";
+import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { listDestinationProviders } from "../tasks/actions";
 import { AddTaskDestinationForm } from "@/components/ui/locations/AddTaskDestinationForm";
 import { DeleteLocationButton, MakeReusableButton, TestLocationButton } from "@/components/ui/locations/LocationActions";
@@ -15,10 +17,11 @@ export const dynamic = "force-dynamic";
 type Location = Awaited<ReturnType<typeof listMyLocations>>[number];
 
 function UsedBy({ location }: { location: Location }) {
-  if (location.usedBy.length === 0) return <>not used by any task</>;
+  const t = useTranslations("usage");
+  if (location.usedBy.length === 0) return <>{t("notUsed")}</>;
   return (
     <>
-      used by{" "}
+      {t("usedBy")}{" "}
       {location.usedBy.map((t, i) => (
         <span key={t.id}>
           {i > 0 && ", "}
@@ -32,20 +35,22 @@ function UsedBy({ location }: { location: Location }) {
 }
 
 function LocationRow({ location }: { location: Location }) {
+  const t = useTranslations("usage");
+  const tPage = useTranslations("locationsPage");
   return (
     <StandardEntryCard
       title={location.label}
       meta={
         <>
           <UsedBy location={location} />
-          {location.addedByName && <> · added by {location.addedByName}</>}
+          {location.addedByName && <> · {t("addedBy", { name: location.addedByName })}</>}
         </>
       }
       badges={<StandardBadge tone="primary">{location.typeLabel}</StandardBadge>}
       actions={
         <>
           <TestLocationButton id={location.id} />
-          {location.addedByMe && <StandardLinkButton href={`/locations/${location.id}`} title="Edit" compact />}
+          {location.addedByMe && <StandardLinkButton href={`/locations/${location.id}`} title={tPage("edit")} compact />}
           {location.taskOnly && location.addedByMe && <MakeReusableButton id={location.id} />}
           <DeleteLocationButton id={location.id} usedByCount={location.usedBy.length} />
         </>
@@ -58,30 +63,28 @@ export default async function SaveLocationsPage() {
   const [locations, providers] = await Promise.all([listMyLocations(), listDestinationProviders()]);
   const reusable = locations.filter((l) => !l.taskOnly);
   const taskOnly = locations.filter((l) => l.taskOnly);
+  const t = await getTranslations("locationsPage");
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-ink mb-1">Save locations</h1>
+        <h1 className="text-xl font-semibold text-ink mb-1">{t("title")}</h1>
         <p className="text-sm text-muted">
-          Off-site places your backups get copied to. Saved locations can be used by any of your tasks — enter the
-          credentials once, pick them from a task&apos;s page, and changing them here updates every task that uses
-          them. Task-only locations belong to a single task and can&apos;t be used anywhere else. Nobody else, admins
-          included, can see these.
+          {t("intro")}
         </p>
       </div>
 
       <AddableSection
         id="saved"
-        title="Saved locations"
+        title={t("savedTitle")}
         icon={<LuCloudUpload />}
         count={reusable.length}
-        description="Reusable across your tasks."
+        description={t("savedDescription")}
         canAdd={providers.length > 0}
-        addLabel="Add location"
-        panelTitle="New save location"
-        tabs={[{ key: "new", label: "Create new", content: <AddTaskDestinationForm taskId={null} providers={providers} /> }]}
-        emptyMessage="No saved locations yet — add one, or make a task-only location reusable."
+        addLabel={t("addLocation")}
+        panelTitle={t("newLocation")}
+        tabs={[{ key: "new", label: t("createNew"), content: <AddTaskDestinationForm taskId={null} providers={providers} /> }]}
+        emptyMessage={t("noSaved")}
       >
         <StandardEntryList>
           {reusable.map((l) => (
@@ -92,14 +95,14 @@ export default async function SaveLocationsPage() {
 
       <StandardSection id="task-only">
         <StandardSectionHeader
-          title="Task-only locations"
+          title={t("taskOnlyTitle")}
           icon={<LuLink />}
           count={taskOnly.length}
-          description="Tied to one of your tasks. Locations someone you shared a task with added are listed too: you can remove them, but only they can change their credentials."
+          description={t("taskOnlyDescription")}
         />
         {taskOnly.length === 0 ? (
           <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
-            No task-only locations.
+            {t("noTaskOnly")}
           </div>
         ) : (
           <StandardEntryList>

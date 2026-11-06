@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { startAuthentication } from "@simplewebauthn/browser";
@@ -7,6 +8,7 @@ import { startPasskeyLogin, finishPasskeyLogin } from "@/app/login/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
 export function PasskeyLoginButton({ next }: { next: string }) {
+  const t = useTranslations("auth");
   const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +38,8 @@ export function PasskeyLoginButton({ next }: { next: string }) {
 
       setError(
         err?.name === "NotAllowedError"
-          ? "Cancelled."
-          : err?.message ?? "Passkey sign-in failed."
+          ? t("passkeyCancelled")
+          : err?.message ?? t("passkeyFailed")
       );
     } finally {
       setLoading(false);
@@ -48,8 +50,8 @@ export function PasskeyLoginButton({ next }: { next: string }) {
     <div>
       <StandardActionButton
         action={handleClick}
-        title="Sign in with a passkey"
-        pendingTitle="Waiting for passkey…"
+        title={t("passkeySignIn")}
+        pendingTitle={t("passkeyWaiting")}
         variant="outline"
         fullWidth
       />

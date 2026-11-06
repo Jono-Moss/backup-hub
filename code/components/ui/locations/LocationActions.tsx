@@ -1,23 +1,26 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { deleteLocation, makeLocationReusable, testLocation } from "@/app/locations/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
 export function TestLocationButton({ id }: { id: string }) {
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
   return (
     <div className="flex items-center gap-2">
       <StandardActionButton
         action={async () => setResult(await testLocation(id))}
-        title="Test"
+        title={t("test")}
         variant="outline"
-        pendingTitle="Testing…"
+        pendingTitle={t("testing")}
         compact
       />
       {result && (
         <span className={`text-xs ${result.ok ? "text-primary" : "text-danger"}`}>
-          {result.ok ? result.message ?? "OK" : `Failed: ${result.message ?? "unknown error"}`}
+          {result.ok ? result.message ?? t("ok") : t("failedWhy", { reason: result.message ?? t("unknownError") })}
         </span>
       )}
     </div>
@@ -25,17 +28,19 @@ export function TestLocationButton({ id }: { id: string }) {
 }
 
 export function DeleteLocationButton({ id, usedByCount }: { id: string; usedByCount: number }) {
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
   return (
     <StandardActionButton
       action={() => deleteLocation(id)}
-      successMessage="Save location deleted"
-      title="Delete"
+      successMessage={t("deleted")}
+      title={tCommon("delete")}
       variant="danger"
-      pendingTitle="Deleting…"
+      pendingTitle={t("deleting")}
       confirmMessage={
         usedByCount > 0
-          ? `Delete this save location and its saved credentials? ${usedByCount} task${usedByCount === 1 ? "" : "s"} will stop copying backups here. Files already uploaded to the provider are not deleted.`
-          : "Delete this save location and its saved credentials? Files already uploaded to the provider are not deleted."
+          ? t("deleteUsedConfirm", { count: usedByCount })
+          : t("deleteUnusedConfirm")
       }
       compact
     />
@@ -43,14 +48,16 @@ export function DeleteLocationButton({ id, usedByCount }: { id: string; usedByCo
 }
 
 export function MakeReusableButton({ id }: { id: string }) {
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
   return (
     <StandardActionButton
       action={() => makeLocationReusable(id)}
-      successMessage="Save location saved to your account — your other tasks can use it now"
-      title="Make reusable"
+      successMessage={t("madeReusable")}
+      title={t("makeReusable")}
       variant="outline"
-      pendingTitle="Saving…"
-      confirmMessage="Save this location to your account so your other tasks can use it too? This can't be undone — once other tasks use it, it can't go back to task-only."
+      pendingTitle={t("saving")}
+      confirmMessage={t("makeReusableConfirm")}
       compact
     />
   );

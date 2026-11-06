@@ -15,10 +15,5 @@ export const DEFAULT_PORTS: Record<Engine, number> = {
   mongodb: 27017,
 };
 
-/** Shown under the engine picker on the new-task form, for the selected engine. */
-export const ENGINE_COMPATIBILITY: Record<Engine, string> = {
-  mysql: "Also MySQL-compatible services such as Amazon RDS / Aurora MySQL, PlanetScale and TiDB.",
-  postgres: "Also Postgres-compatible services such as Supabase, Neon, Amazon RDS / Aurora PostgreSQL and TimescaleDB.",
-  mongodb:
-    "Self-hosted MongoDB and MongoDB Atlas — for Atlas, enter the cluster's host (e.g. cluster0.abcde.mongodb.net); it connects with TLS automatically.",
-};
+// The note under the engine picker for each engine is translated: see
+// translations/<locale>.json "engines.compatibility".

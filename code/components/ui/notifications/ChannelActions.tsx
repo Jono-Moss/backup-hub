@@ -1,23 +1,26 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { deleteChannelById, makeChannelReusable, testChannel } from "@/app/notification-channels/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
 export function TestChannelButton({ id }: { id: string }) {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
   return (
     <div className="flex items-center gap-2">
       <StandardActionButton
         action={async () => setResult(await testChannel(id))}
-        title="Send test"
+        title={t("sendTest")}
         variant="outline"
-        pendingTitle="Sending…"
+        pendingTitle={t("sending")}
         compact
       />
       {result && (
         <span className={`text-xs ${result.ok ? "text-primary" : "text-danger"}`}>
-          {result.ok ? "Sent" : `Failed: ${result.message ?? "unknown error"}`}
+          {result.ok ? t("sent") : t("failedWhy", { reason: result.message ?? t("unknownError") })}
         </span>
       )}
     </div>
@@ -25,17 +28,19 @@ export function TestChannelButton({ id }: { id: string }) {
 }
 
 export function DeleteChannelButton({ id, usedByCount }: { id: string; usedByCount: number }) {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   return (
     <StandardActionButton
       action={() => deleteChannelById(id)}
-      successMessage="Channel deleted"
-      title="Delete"
+      successMessage={t("channelDeleted")}
+      title={tCommon("delete")}
       variant="danger"
-      pendingTitle="Deleting…"
+      pendingTitle={t("deleting")}
       confirmMessage={
         usedByCount > 0
-          ? `Delete this notification channel and its saved settings? ${usedByCount} task${usedByCount === 1 ? "" : "s"} will stop notifying it.`
-          : "Delete this notification channel and its saved settings?"
+          ? t("deleteUsedConfirm", { count: usedByCount })
+          : t("deleteUnusedConfirm")
       }
       compact
     />
@@ -43,14 +48,16 @@ export function DeleteChannelButton({ id, usedByCount }: { id: string; usedByCou
 }
 
 export function MakeChannelReusableButton({ id }: { id: string }) {
+  const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   return (
     <StandardActionButton
       action={() => makeChannelReusable(id)}
-      successMessage="Channel saved to your account — your other tasks can use it now"
-      title="Make reusable"
+      successMessage={t("madeReusable")}
+      title={t("makeReusable")}
       variant="outline"
-      pendingTitle="Saving…"
-      confirmMessage="Save this channel to your account so your other tasks can use it too? This can't be undone — once other tasks use it, it can't go back to task-only."
+      pendingTitle={t("saving")}
+      confirmMessage={t("makeReusableConfirm")}
       compact
     />
   );

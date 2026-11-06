@@ -1,18 +1,20 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { revokeApiKey } from "@/app/api-keys/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
 export function RevokeApiKeyButton({ id }: { id: string }) {
+  const t = useTranslations("apiKeys");
   return (
     <StandardActionButton
-      title="Revoke"
+      title={t("revoke")}
       variant="danger"
       compact
-      pendingTitle="Revoking..."
-      confirmMessage="Revoke this API key? Any app using it will immediately lose access."
+      pendingTitle={t("revoking")}
+      confirmMessage={t("revokeConfirm")}
       action={() => revokeApiKey(id)}
-      successMessage="API key revoked"
+      successMessage={t("revoked")}
     />
   );
 }

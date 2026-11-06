@@ -1,37 +1,32 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { addSystemRecipient } from "@/app/notifications/actions";
-import { SYSTEM_NOTIFICATION_EVENTS, type SystemNotificationEvent } from "@/db/schema";
+import { SYSTEM_NOTIFICATION_EVENTS } from "@/db/schema";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { NotificationChannelFields } from "@/components/ui/notifications/NotificationChannelFields";
 
-const EVENT_LABELS: Record<SystemNotificationEvent, string> = {
-  user_login: "User logins",
-  user_created: "User created",
-  user_deleted: "User deleted",
-  task_created: "Backup task created",
-  task_deleted: "Backup task deleted",
-  security_reset: "2FA/passkeys reset",
-};
 
 export function AddSystemRecipientForm() {
+  const t = useTranslations("notifications");
+  const tEvents = useTranslations("systemEvents");
 
   return (
-    <ActionForm action={addSystemRecipient} success="Recipient added" resetOnSuccess className="space-y-4">
+    <ActionForm action={addSystemRecipient} success={t("recipientAdded")} resetOnSuccess className="space-y-4">
       <NotificationChannelFields idPrefix="system-recipient" />
       <div>
-        <p className="text-sm text-ink mb-2">Notify for</p>
+        <p className="text-sm text-ink mb-2">{t("notifyFor")}</p>
         <div className="space-y-2">
           {SYSTEM_NOTIFICATION_EVENTS.map((event) => (
             <label key={event} className="flex items-center gap-2">
               <input type="checkbox" name="events" value={event} />
-              <span className="text-sm text-ink">{EVENT_LABELS[event]}</span>
+              <span className="text-sm text-ink">{tEvents(event)}</span>
             </label>
           ))}
         </div>
       </div>
-      <StandardSubmitButton title="Add recipient" />
+      <StandardSubmitButton title={t("addRecipient")} />
     </ActionForm>
   );
 }

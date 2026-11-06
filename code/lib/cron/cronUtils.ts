@@ -15,15 +15,18 @@ export type ParsedSchedule = {
   dayOfMonth?: number;
 };
 
-export const DAYS_OF_WEEK = [
-  { value: "0", label: "Sunday" },
-  { value: "1", label: "Monday" },
-  { value: "2", label: "Tuesday" },
-  { value: "3", label: "Wednesday" },
-  { value: "4", label: "Thursday" },
-  { value: "5", label: "Friday" },
-  { value: "6", label: "Saturday" },
-];
+/** Weekdays for cron's day-of-week field (0 = Sunday), named in `locale`. */
+export function daysOfWeek(locale: string): { value: string; label: string }[] {
+  const format = new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" });
+  // 1 January 2023 was a Sunday.
+  return Array.from({ length: 7 }, (_, i) => ({ value: String(i), label: format.format(new Date(Date.UTC(2023, 0, 1 + i))) }));
+}
+
+/** The "schedule" messages describeCron needs (pass useTranslations("schedule") / getTranslations("schedule")). */
+export type ScheduleTranslator = (
+  key: "everyMinutes" | "everyHourAt" | "everyHoursAt" | "everyDayAt" | "everyWeekdayAt" | "monthlyAt" | "noSchedule" | "selectedDay",
+  values?: Record<string, string | number>
+) => string;
 
 export function parseCron(cron: string): ParsedSchedule {
   const parts = cron.trim().split(/\s+/);
@@ -125,48 +128,26 @@ export function formatCronTime(hour: number, minute: number): string {
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
-export function describeCron(cron: string): string {
+export function describeCron(cron: string, t: ScheduleTranslator, locale: string): string {
   const parsed = parseCron(cron);
+  const minute = String(parsed.minute ?? 0).padStart(2, "0");
 
   switch (parsed.type) {
     case "minutes":
-      return `Every ${parsed.interval} minute${
-        parsed.interval === 1 ? "" : "s"
-      }`;
-
+      return t("everyMinutes", { count: parsed.interval! });
     case "hours":
-      if (parsed.interval === 1) {
-        return `Every hour at ${String(parsed.minute ?? 0).padStart(2, "0")} minutes past the hour`;
-      }
-
-      return `Every ${parsed.interval} hours at ${String(
-        parsed.minute ?? 0
-      ).padStart(2, "0")} minutes past the hour`;
-
+      return parsed.interval === 1
+        ? t("everyHourAt", { minute })
+        : t("everyHoursAt", { count: parsed.interval!, minute });
     case "daily":
-      return `Every day at ${formatCronTime(
-        parsed.hour!,
-        parsed.minute!
-      )}`;
-
+      return t("everyDayAt", { time: formatCronTime(parsed.hour!, parsed.minute!) });
     case "weekly": {
-      const day =
-        DAYS_OF_WEEK.find(
-          (item) => item.value === parsed.dayOfWeek
-        )?.label ?? "selected day";
-
-      return `Every ${day} at ${formatCronTime(
-        parsed.hour!,
-        parsed.minute!
-      )}`;
+      const day = daysOfWeek(locale).find((d) => d.value === parsed.dayOfWeek)?.label ?? t("selectedDay");
+      return t("everyWeekdayAt", { day, time: formatCronTime(parsed.hour!, parsed.minute!) });
     }
-
     case "monthly":
-      return `Monthly on day ${
-        parsed.dayOfMonth
-      } at ${formatCronTime(parsed.hour!, parsed.minute!)}`;
-
+      return t("monthlyAt", { day: parsed.dayOfMonth!, time: formatCronTime(parsed.hour!, parsed.minute!) });
     default:
-      return cron || "No schedule";
+      return cron || t("noSchedule");
   }
 }

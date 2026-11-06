@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getPendingTwoFactorUser } from "@/lib/auth/session";
 import { verifyTwoFactorLogin, cancelTwoFactorLogin } from "./actions";
 
@@ -12,20 +13,21 @@ export default async function TwoFactorLoginPage({
 
   const params = await searchParams;
   const useRecoveryCode = params.mode === "recovery";
+  const t = await getTranslations("auth");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-paper">
       <div className="w-full max-w-sm border border-line bg-white p-8">
-        <h1 className="text-lg font-semibold text-ink mb-1">Two-factor authentication</h1>
+        <h1 className="text-lg font-semibold text-ink mb-1">{t("twoFactorTitle")}</h1>
         <p className="text-sm text-muted mb-6">
           {useRecoveryCode
-            ? "Enter one of your unused recovery codes."
-            : "Enter the 6-digit code from your authenticator app."}
+            ? t("twoFactorRecoveryPrompt")
+            : t("twoFactorCodePrompt")}
         </p>
 
         {params.error && (
           <p className="mb-4 text-sm text-danger bg-danger-light px-3 py-2">
-            {useRecoveryCode ? "That recovery code isn't valid or was already used." : "That code didn't match."}
+            {useRecoveryCode ? t("twoFactorRecoveryInvalid") : t("twoFactorCodeInvalid")}
           </p>
         )}
 
@@ -34,7 +36,7 @@ export default async function TwoFactorLoginPage({
           <input type="hidden" name="mode" value={useRecoveryCode ? "recovery" : "totp"} />
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="code">
-              {useRecoveryCode ? "Recovery code" : "Authentication code"}
+              {useRecoveryCode ? t("recoveryCode") : t("authCode")}
             </label>
             <input
               id="code"
@@ -50,7 +52,7 @@ export default async function TwoFactorLoginPage({
             type="submit"
             className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 transition-colors"
           >
-            Verify
+            {t("verify")}
           </button>
         </form>
 
@@ -59,11 +61,11 @@ export default async function TwoFactorLoginPage({
             href={`/login/2fa?next=${encodeURIComponent(params.next ?? "/")}${useRecoveryCode ? "" : "&mode=recovery"}`}
             className="text-primary hover:underline"
           >
-            {useRecoveryCode ? "Use your authenticator app instead" : "Use a recovery code instead"}
+            {useRecoveryCode ? t("useAuthenticator") : t("useRecoveryCode")}
           </a>
           <form action={cancelTwoFactorLogin}>
             <button type="submit" className="text-muted hover:text-danger">
-              Cancel
+              {(await getTranslations("common"))("cancel")}
             </button>
           </form>
         </div>

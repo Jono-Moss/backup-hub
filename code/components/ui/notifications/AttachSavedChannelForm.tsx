@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { attachSavedChannel } from "@/app/tasks/actions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
@@ -13,26 +14,28 @@ export function AttachSavedChannelForm({
   taskId: string;
   saved: { id: string; label: string; channelLabel: string }[];
 }) {
+  const t = useTranslations("notifications");
   const bound = attachSavedChannel.bind(null, taskId);
 
   if (saved.length === 0) {
     return (
       <p className="text-sm text-muted">
-        No other saved channels in your account. Tick &ldquo;Save to my account&rdquo; when adding one below, or add
-        them on the{" "}
-        <a href="/notification-channels" className="text-primary underline">
-          Notifications
-        </a>{" "}
-        page, to reuse them across tasks.
+        {t.rich("noOtherSaved", {
+          link: (chunks) => (
+            <a href="/notification-channels" className="text-primary underline">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
     );
   }
 
   return (
-    <ActionForm action={bound} success="Channel added to this task" className="space-y-4 max-w-xl">
+    <ActionForm action={bound} success={t("channelAddedToTask")} className="space-y-4 max-w-xl">
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="attach-channel">
-          Saved channel
+          {t("savedChannel")}
         </label>
         <select
           id="attach-channel"
@@ -49,14 +52,14 @@ export function AttachSavedChannelForm({
       <div className="flex flex-wrap items-center gap-4">
         <label className="flex items-center gap-2 text-sm text-ink">
           <input type="checkbox" name="notifyOnSuccess" />
-          On success
+          {t("onSuccess")}
         </label>
         <label className="flex items-center gap-2 text-sm text-ink">
           <input type="checkbox" name="notifyOnFailure" defaultChecked />
-          On failure
+          {t("onFailure")}
         </label>
       </div>
-      <StandardSubmitButton title="Use this channel" />
+      <StandardSubmitButton title={t("useThisChannel")} />
     </ActionForm>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useActionFeedback } from "@/components/ui/common/useActionFeedback";
 
@@ -11,7 +12,7 @@ export function DeleteWithFilesButton({
   heading,
   description,
   keepNote,
-  confirmLabel = "Delete",
+  confirmLabel: confirmLabelProp,
   onDelete,
   compact = false,
   successMessage,
@@ -32,6 +33,8 @@ export function DeleteWithFilesButton({
   const [deleteFiles, setDeleteFiles] = useState(false);
   const [isPending, startTransition] = useTransition();
   const run = useActionFeedback();
+  const t = useTranslations("common");
+  const confirmLabel = confirmLabelProp ?? t("delete");
 
   const close = () => {
     if (isPending) return;
@@ -70,11 +73,11 @@ export function DeleteWithFilesButton({
                 disabled={isPending}
                 className="mt-0.5"
               />
-              <span className="text-sm text-ink">Also permanently delete the backup files from disk</span>
+              <span className="text-sm text-ink">{t("eraseFilesCheckbox")}</span>
             </label>
             <p className="text-xs text-muted mb-6">
               {deleteFiles
-                ? "The backup files will be erased and cannot be recovered."
+                ? t("eraseFilesWarning")
                 : keepNote}
             </p>
 
@@ -86,7 +89,7 @@ export function DeleteWithFilesButton({
                 disabled={isPending}
                 className="rounded-md border border-line text-ink text-sm font-medium px-4 py-2 hover:border-primary transition-colors disabled:opacity-40"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="button"
@@ -102,7 +105,7 @@ export function DeleteWithFilesButton({
                 }
                 className="rounded-md bg-danger border-b-danger-dark text-white text-sm font-medium px-4 py-2 border-b-2 hover:border-b-transparent transition-colors disabled:opacity-40"
               >
-                {isPending ? "Deleting..." : deleteFiles ? `${confirmLabel} and erase files` : confirmLabel}
+                {isPending ? t("deleting") : deleteFiles ? t("confirmAndErase", { label: confirmLabel }) : confirmLabel}
               </button>
             </div>
           </div>

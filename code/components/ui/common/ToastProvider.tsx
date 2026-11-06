@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { LuCircleCheck, LuCircleX, LuX } from "react-icons/lu";
 
@@ -53,6 +54,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 }
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
+  const t = useTranslations("common");
   useEffect(() => {
     const timer = setTimeout(onDismiss, DURATION[toast.tone]);
     return () => clearTimeout(timer);
@@ -70,7 +72,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         {isError ? <LuCircleX size={18} /> : <LuCircleCheck size={18} />}
       </span>
       <p className="flex-1 text-sm text-ink break-words">{toast.message}</p>
-      <button type="button" onClick={onDismiss} aria-label="Dismiss" className="shrink-0 text-muted hover:text-ink">
+      <button type="button" onClick={onDismiss} aria-label={t("dismiss")} className="shrink-0 text-muted hover:text-ink">
         <LuX size={16} />
       </button>
     </div>

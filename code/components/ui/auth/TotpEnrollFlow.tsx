@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { startTotpEnrollment, confirmTotpEnrollment } from "@/app/account/actions";
@@ -11,6 +12,7 @@ type Step = "idle" | "scanning" | "codes";
 export function TotpEnrollFlow() {
   const router = useRouter();
   const toast = useToast();
+  const t = useTranslations("twoFactor");
   const [step, setStep] = useState<Step>("idle");
   const [error, setError] = useState<string | null>(null);
   const [enrollment, setEnrollment] = useState<{ secret: string; qrDataUrl: string } | null>(null);
@@ -35,13 +37,13 @@ export function TotpEnrollFlow() {
       setRecoveryCodes(result.recoveryCodes);
       setStep("codes");
     } catch {
-      setError("Couldn't verify that code — please try again.");
+      setError(t("verifyFailed"));
     }
 
   }
 
   function finish() {
-    toast.success("Two-factor authentication is on");
+    toast.success(t("isOn"));
     setStep("idle");
     setEnrollment(null);
     setCode("");
@@ -52,7 +54,7 @@ export function TotpEnrollFlow() {
     return (
       <StandardActionButton
         action={begin}
-        title="Set up authenticator app"
+        title={t("setUp")}
         variant="outline"
       />
     );
@@ -62,14 +64,13 @@ export function TotpEnrollFlow() {
     return (
       <div className="rounded-md space-y-4 border border-line p-4">
         <p className="text-sm text-ink">
-          Scan this with your authenticator app (1Password, Google Authenticator, Authy, etc.), then enter the
-          6-digit code it shows.
+          {t("scanIntro")}
         </p>
         <div className="flex justify-center">
-          <img src={enrollment.qrDataUrl} alt="Authenticator QR code" width={240} height={240} />
+          <img src={enrollment.qrDataUrl} alt={t("qrAlt")} width={240} height={240} />
         </div>
         <div>
-          <p className="text-xs text-muted mb-1">Can't scan? Enter this key manually:</p>
+          <p className="text-xs text-muted mb-1">{t("cantScan")}</p>
           <code className="block bg-paper border border-line px-3 py-2 text-xs font-mono break-all">
             {enrollment.secret}
           </code>
@@ -93,8 +94,8 @@ export function TotpEnrollFlow() {
           <StandardActionButton
             action={confirm}
             disabled={code.length < 6}
-            title="Verify & enable"
-            pendingTitle="Verifying…"
+            title={t("verifyEnable")}
+            pendingTitle={t("verifying")}
           />
         </div>
       </div>
@@ -105,8 +106,7 @@ export function TotpEnrollFlow() {
     return (
       <div className="rounded-md space-y-4 border border-primary bg-primary-light p-4">
         <p className="text-sm font-medium text-ink">
-          Two-factor authentication is on. Save these recovery codes somewhere safe — each works once, and they
-          won't be shown again. Use one if you lose access to your authenticator app.
+          {t("codesIntro")}
         </p>
         <div className="grid grid-cols-2 gap-2 bg-white border border-line p-3">
           {recoveryCodes.map((c) => (
@@ -117,7 +117,7 @@ export function TotpEnrollFlow() {
         </div>
         <StandardActionButton
           action={finish}
-          title="I've saved these"
+          title={t("savedThese")}
         />
       </div>
     );

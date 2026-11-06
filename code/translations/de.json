@@ -1,0 +1,1052 @@
+{
+  "meta": {
+    "description": "Geplante, verschlüsselte Datenbank-Backups für MySQL, MariaDB, PostgreSQL und MongoDB."
+  },
+  "nav": {
+    "tasks": "Aufgaben",
+    "saveLocations": "Speicherorte",
+    "notifications": "Benachrichtigungen",
+    "users": "Benutzer",
+    "systemNotifications": "Systembenachrichtigungen",
+    "myAccount": "Mein Konto",
+    "apiKeys": "API-Schlüssel",
+    "admin": "Admin",
+    "signOut": "Abmelden",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "logoAlt": "Backup-Hub-Logo"
+  },
+  "footer": {
+    "productBy": "Ein Produkt von",
+    "tryAccounting": "Probieren Sie unsere Buchhaltungssoftware",
+    "openSource": "Open Source",
+    "license": "MIT-Lizenz",
+    "tagline": "Sichern Sie die Welt"
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "ok": "OK",
+    "dismiss": "Schließen",
+    "processing": "Wird verarbeitet …",
+    "moreActions": "Weitere Aktionen",
+    "delete": "Löschen",
+    "deleting": "Wird gelöscht …",
+    "remove": "Entfernen",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "saving": "Wird gespeichert …",
+    "add": "Hinzufügen",
+    "adding": "Wird hinzugefügt …",
+    "genericError": "Etwas ist schiefgelaufen – bitte versuchen Sie es erneut.",
+    "stalePage": "Diese Seite ist veraltet – laden Sie sie neu und versuchen Sie es erneut.",
+    "eraseFilesCheckbox": "Auch die Backup-Dateien endgültig von der Festplatte löschen",
+    "eraseFilesWarning": "Die Backup-Dateien werden gelöscht und können nicht wiederhergestellt werden.",
+    "confirmAndErase": "{label} und Dateien löschen"
+  },
+  "auth": {
+    "subtitle": "Melden Sie sich an, um Backup-Aufgaben zu verwalten.",
+    "passwordChanged": "Ihr Passwort wurde geändert. Melden Sie sich mit dem neuen Passwort an.",
+    "lockedOut": "Zu viele fehlgeschlagene Anmeldeversuche. Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut, <link>setzen Sie Ihr Passwort zurück</link> oder bitten Sie einen Admin, Ihr Konto zu entsperren.",
+    "lockedOutSoon": "Zu viele fehlgeschlagene Anmeldeversuche. Versuchen Sie es in einigen Minuten erneut, <link>setzen Sie Ihr Passwort zurück</link> oder bitten Sie einen Admin, Ihr Konto zu entsperren.",
+    "incorrect": "E-Mail-Adresse oder Passwort ist falsch.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "forgotLink": "Passwort vergessen?",
+    "signIn": "Anmelden",
+    "or": "oder",
+    "passkeySignIn": "Mit Passkey anmelden",
+    "passkeyWaiting": "Warten auf Passkey …",
+    "passkeyCancelled": "Abgebrochen.",
+    "passkeyFailed": "Anmeldung mit Passkey fehlgeschlagen.",
+    "passkeyExpired": "Dieser Anmeldeversuch ist abgelaufen – versuchen Sie es erneut.",
+    "passkeyLockedNetwork": "Zu viele fehlgeschlagene Anmeldeversuche aus Ihrem Netzwerk. Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut.",
+    "passkeyUnknown": "Dieser Passkey ist hier bei keinem Konto registriert.",
+    "passkeyVerifyFailed": "Passkey-Prüfung fehlgeschlagen.",
+    "accountGone": "Dieses Konto existiert nicht mehr.",
+    "twoFactorTitle": "Zwei-Faktor-Authentifizierung",
+    "twoFactorRecoveryPrompt": "Geben Sie einen Ihrer unbenutzten Wiederherstellungscodes ein.",
+    "twoFactorCodePrompt": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
+    "twoFactorRecoveryInvalid": "Dieser Wiederherstellungscode ist ungültig oder wurde bereits verwendet.",
+    "twoFactorCodeInvalid": "Dieser Code stimmt nicht.",
+    "recoveryCode": "Wiederherstellungscode",
+    "authCode": "Authentifizierungscode",
+    "verify": "Bestätigen",
+    "useAuthenticator": "Stattdessen die Authenticator-App verwenden",
+    "useRecoveryCode": "Stattdessen einen Wiederherstellungscode verwenden",
+    "setupTitle": "Willkommen bei Backup Hub",
+    "setupSubtitle": "Erstellen Sie das erste Admin-Konto, um loszulegen.",
+    "yourName": "Ihr Name",
+    "passwordHint": "Mindestens 8 Zeichen.",
+    "createAdmin": "Admin-Konto erstellen"
+  },
+  "passwordReset": {
+    "forgotTitle": "Passwort vergessen?",
+    "noEmail": "Auf diesem Server ist kein E-Mail-Versand eingerichtet, daher können keine Links zum Zurücksetzen gesendet werden. Bitten Sie einen Admin, auf der Benutzerseite ein neues Passwort für Sie festzulegen. Wenn Sie wegen zu vieler Fehlversuche gesperrt sind, warten Sie, bis die Sperre abläuft, oder melden Sie sich mit einem Passkey an.",
+    "sent": "Wenn diese E-Mail-Adresse zu einem Konto gehört, ist ein Link zum Zurücksetzen unterwegs. Er funktioniert einmal und läuft nach 30 Minuten ab – sehen Sie im Spam-Ordner nach, falls er nicht ankommt.",
+    "forgotIntro": "Geben Sie die E-Mail-Adresse Ihres Kontos ein, und wir senden Ihnen einen Link, mit dem Sie ein neues Passwort wählen können. Das Zurücksetzen hebt auch eine Anmeldesperre auf.",
+    "sendLink": "Link senden",
+    "sending": "Wird gesendet …",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "resetTitle": "Neues Passwort wählen",
+    "invalidLink": "Dieser Link ist ungültig, abgelaufen oder wurde bereits verwendet.",
+    "sendNewLink": "Neuen Link senden",
+    "resetIntro": "Für {email}. Sie werden überall abgemeldet, und falls Sie eine Authenticator-App nutzen, brauchen Sie sie weiterhin zum Anmelden.",
+    "mismatch": "Die beiden Passwörter stimmen nicht überein.",
+    "weak": "Verwenden Sie mindestens 8 Zeichen.",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Neues Passwort bestätigen",
+    "setPassword": "Neues Passwort festlegen",
+    "saving": "Wird gespeichert …",
+    "email": {
+      "resetSubject": "Ihr Backup-Hub-Passwort zurücksetzen",
+      "resetBody": "Hallo {name},\n\njemand hat angefordert, das Passwort für Ihr Backup-Hub-Konto zurückzusetzen. Öffnen Sie diesen Link, um ein neues zu wählen:\n\n{link}\n\nDer Link funktioniert einmal und läuft nach {minutes} Minuten ab. Das Zurücksetzen hebt auch eine Anmeldesperre auf.\n\nWenn Sie das nicht waren, ignorieren Sie diese E-Mail – Ihr Passwort bleibt unverändert.",
+      "changedSubject": "Ihr Backup-Hub-Passwort wurde geändert",
+      "changedBody": "Hallo {name},\n\ndas Passwort für Ihr Backup-Hub-Konto wurde gerade über einen per E-Mail gesendeten Link zurückgesetzt, und Sie wurden überall abgemeldet.\n\nWenn Sie das nicht waren, wenden Sie sich sofort an Ihren Backup-Hub-Admin."
+    }
+  },
+  "schedule": {
+    "everyMinutes": "{count, plural, one {Jede Minute} other {Alle # Minuten}}",
+    "everyHourAt": "Jede Stunde um {minute} Minuten nach",
+    "everyHoursAt": "Alle {count} Stunden um {minute} Minuten nach",
+    "everyDayAt": "Täglich um {time}",
+    "everyWeekdayAt": "Jeden {day} um {time}",
+    "monthlyAt": "Monatlich am {day}. um {time}",
+    "noSchedule": "Kein Zeitplan",
+    "selectedDay": "ausgewählten Tag",
+    "label": "Zeitplan",
+    "serverTime": "Backups laufen nach der Ortszeit des Servers.",
+    "closeDialog": "Zeitplan-Dialog schließen",
+    "close": "Schließen",
+    "dialogTitle": "Backup-Zeitplan",
+    "dialogIntro": "Legen Sie fest, wann Backups laufen sollen.",
+    "run": "Ausführen",
+    "optMinutes": "Alle paar Minuten",
+    "optHours": "Alle paar Stunden",
+    "optDaily": "Täglich",
+    "optWeekly": "Wöchentlich",
+    "optMonthly": "Monatlich",
+    "optCustom": "Eigener Cron-Ausdruck",
+    "every": "Alle",
+    "atMinute": "In Minute",
+    "atMinuteHint": "Zum Beispiel bedeutet 15: 15 Minuten nach der vollen Stunde.",
+    "dayOfWeek": "Wochentag",
+    "dayOfMonth": "Tag im Monat",
+    "dayOfMonthHint": "Nur die Tage 1–28 sind wählbar, damit der Zeitplan in jedem Monat funktioniert.",
+    "time": "Uhrzeit",
+    "cronExpression": "Cron-Ausdruck",
+    "cronHint": "Fortgeschrittene können einen normalen 5-teiligen Cron-Ausdruck eingeben.",
+    "preview": "Vorschau",
+    "apply": "Zeitplan übernehmen"
+  },
+  "dashboard": {
+    "title": "Übersicht",
+    "subtitle": "Wie Ihre Backups gelaufen sind, und die Aufgaben, die Sie erstellt haben oder die mit Ihnen geteilt wurden.",
+    "newTask": "Neue Aufgabe",
+    "twoFactorWarning": "Jemand hat in den letzten {days} Tagen {count, plural, one {einmal} other {# Mal}} Ihr richtiges Passwort, aber einen falschen 2FA-Code eingegeben.",
+    "twoFactorWarningAction": "Wenn Sie das nicht waren, ändern Sie jetzt Ihr Passwort.",
+    "succeeded": "Erfolgreich",
+    "failed": "Fehlgeschlagen",
+    "running": "Läuft",
+    "compactSucceeded": "Erfolgreich",
+    "compactFailed": "Fehlgeschlagen",
+    "compactCopyFailed": "Kopie fehlgeschl.",
+    "compactBadSignIns": "Fehlanmeldungen",
+    "lastDays": "Letzte {days} Tage",
+    "problemsBanner": "{count, plural, one {# Problem erfordert Aufmerksamkeit} other {# Probleme erfordern Aufmerksamkeit}}",
+    "statSuccessful": "Erfolgreiche Backups",
+    "statFailed": "Fehlgeschlagene Backups",
+    "statCopyFailures": "Fehlgeschlagene externe Kopien",
+    "statSignIns": "Fehlgeschlagene Anmeldungen",
+    "statSignInsHint": "Bei Ihrem Konto, letzte {days} Tage",
+    "attentionTitle": "Erfordert Aufmerksamkeit",
+    "attentionDescription": "Probleme mit dem jeweils neuesten Backup jeder Aufgabe.",
+    "allGood": "Alles in Ordnung – das neueste Backup jeder Aufgabe war erfolgreich.",
+    "recentTitle": "Letzte Aktivität",
+    "recentDescription": "Die neuesten Backups aller Ihrer Aufgaben.",
+    "noBackupsYet": "Es wurden noch keine Backups ausgeführt.",
+    "tasksTitle": "Backup-Aufgaben",
+    "tasksDescription": "Jede Aufgabe hat eine eigene Datenbankverbindung, einen eigenen Zeitplan und eine eigene Aufbewahrung.",
+    "noTasks": "Noch keine Backup-Aufgaben.",
+    "createFirst": "Erste Aufgabe erstellen",
+    "scheduleActive": "Zeitplan aktiv",
+    "scheduleDisabled": "Zeitplan deaktiviert",
+    "paused": "(pausiert)",
+    "keep": "{count} behalten",
+    "encrypted": "verschlüsselt",
+    "sharedBy": "geteilt von {name}",
+    "neverRun": "Noch nie ausgeführt",
+    "signInTitle": "Anmeldeaktivität",
+    "signInDescription": "Anmeldungen bei Ihrem Konto in den letzten {days} Tagen.",
+    "fullHistory": "Vollständiger Verlauf",
+    "failedCountBadge": "{count} fehlgeschlagen",
+    "previousSignIn": "Letzte Anmeldung {when} · {device}",
+    "noEarlierSignIns": "Keine früheren Anmeldungen erfasst.",
+    "noFailedSignIns": "Keine fehlgeschlagenen Anmeldungen bei Ihrem Konto.",
+    "wholeServer": "Gesamter Server (Admin)",
+    "serverFailed": "{count, plural, one {# fehlgeschlagene Anmeldung} other {# fehlgeschlagene Anmeldungen}}",
+    "serverUnknown": "{count} für unbekannte Konten",
+    "serverBlocked": "{count} durch Sperre blockiert",
+    "mostFailuresFrom": "Die meisten Fehlversuche von",
+    "accountsMostFailures": "Konten mit den meisten Fehlversuchen",
+    "stripLabel": "Letzte {count} Backups: {ok} erfolgreich, {failed} fehlgeschlagen",
+    "stripEmpty": "Noch keine Backups",
+    "stripSucceeded": "Erfolgreich",
+    "stripFailed": "Fehlgeschlagen",
+    "stripRunning": "Läuft",
+    "badge": {
+      "auth": "Zugangsdaten",
+      "connection": "Keine Verbindung",
+      "other": "Fehlgeschlagen",
+      "upload": "Externe Kopie",
+      "verify": "Prüfung fehlgeschlagen"
+    },
+    "attention": {
+      "runAuth": "Das letzte Backup konnte sich nicht bei der Datenbank anmelden",
+      "runConnection": "Das letzte Backup konnte die Datenbank nicht erreichen",
+      "runFailed": "Das letzte Backup ist fehlgeschlagen",
+      "uploadAuth": "Anmeldung bei „{location}“ fehlgeschlagen – neu verbinden",
+      "uploadFailed": "Kopie nach „{location}“ fehlgeschlagen",
+      "verifyRestore": "Das neueste Backup hat die Testwiederherstellung nicht bestanden",
+      "verifyCheck": "Das neueste Backup hat die Prüfung nicht bestanden",
+      "unnamedLocation": "Speicherort"
+    }
+  },
+  "runs": {
+    "trigger": {
+      "cron": "Geplant",
+      "manual": "Manuell",
+      "api": "API"
+    },
+    "status": {
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "running": "Läuft"
+    },
+    "upload": {
+      "completed": "hochgeladen",
+      "failed": "fehlgeschlagen",
+      "skipped": "übersprungen",
+      "skippedWhy": "übersprungen – {reason}",
+      "uploading": "wird hochgeladen …",
+      "line": "{location}: {status}",
+      "unknownLocation": "Ziel"
+    },
+    "showingAll": "Alle {total} Backups werden angezeigt",
+    "perPage": "{count} pro Seite anzeigen",
+    "showingRange": "{from}–{to} von {total}",
+    "newer": "Neuer",
+    "older": "Älter",
+    "pageOf": "Seite {page} von {pages}",
+    "showAll": "Alle anzeigen",
+    "checkQueued": "Prüfung geplant …",
+    "checking": "Wird geprüft …",
+    "testRestored": "Testweise wiederhergestellt",
+    "verified": "Geprüft",
+    "testRestoreFailed": "Testwiederherstellung fehlgeschlagen",
+    "checkFailed": "Prüfung fehlgeschlagen",
+    "notChecked": "Noch nicht geprüft",
+    "restoreWarning": "Die Wiederherstellung überschreibt den aktuellen Inhalt der Live-Datenbank mit den Daten dieses Backups. Das kann nicht rückgängig gemacht werden.",
+    "restoreTitle": "Dieses Backup wiederherstellen?",
+    "restore": "Wiederherstellen",
+    "restoreMenu": "Wiederherstellen …",
+    "restoreDescription": "Die Live-Datenbank mit diesem Backup überschreiben",
+    "restoreDone": "Wiederherstellung erfolgreich abgeschlossen",
+    "download": "Herunterladen",
+    "verifyFile": "Datei prüfen",
+    "verifyDescription": "Prüfen, ob sie intakt ist und vollständig lesbar",
+    "checkStarted": "Prüfung gestartet – das Ergebnis erscheint unter diesem Backup",
+    "testRestore": "Testwiederherstellung",
+    "testRestoreDescription": "In eine temporäre Datenbank wiederherstellen, prüfen und wieder löschen",
+    "testRestoreStarted": "Testwiederherstellung gestartet – das Ergebnis erscheint unter diesem Backup",
+    "deleteMenu": "Löschen …",
+    "deleteDescription": "Diese Backup-Datei entfernen",
+    "deleteTitle": "Dieses Backup löschen?",
+    "deleteMessage": "Die Backup-Datei wird gelöscht. Das kann nicht rückgängig gemacht werden.",
+    "deleted": "Backup gelöscht",
+    "actionsLabel": "Backup-Aktionen",
+    "passwordNeeded": "Geben Sie das Verschlüsselungspasswort des Backups ein.",
+    "encryptionPassword": "Verschlüsselungspasswort",
+    "passwordPlaceholder": "Das Verschlüsselungspasswort dieses Backups",
+    "passwordHint": "Das ist das Passwort, das bei der Aufgabe eingestellt war, als dieses Backup erstellt wurde – nicht unbedingt das aktuelle, falls es seitdem geändert wurde.",
+    "restoring": "Wird wiederhergestellt …",
+    "testAllConfirm": "{count, plural, one {# Backup} other {Alle # Backups}} testweise wiederherstellen? Jedes wird nacheinander in eine temporäre Datenbank auf dem Testserver wiederhergestellt – das kann eine Weile dauern und belastet diesen Server.",
+    "clearConfirm": "Alle fehlgeschlagenen Backup-Einträge dieser Aufgabe entfernen? Das kann nicht rückgängig gemacht werden.",
+    "verifyAllStarted": "Prüfungen für alle Backups gestartet – die Ergebnisse erscheinen im Verlauf",
+    "testAllStarted": "Testwiederherstellungen gestartet – die Ergebnisse erscheinen im Verlauf",
+    "noFailed": "Keine fehlgeschlagenen Backups zu entfernen",
+    "removedFailed": "{count, plural, one {# fehlgeschlagenes Backup entfernt} other {# fehlgeschlagene Backups entfernt}}",
+    "verifyAll": "Alle prüfen",
+    "verifyAllDescription": "Prüfen, ob jedes Backup intakt und vollständig lesbar ist",
+    "testAll": "Alle testweise wiederherstellen",
+    "testAllDescription": "Jedes Backup nacheinander in eine temporäre Datenbank wiederherstellen",
+    "testAllTitle": "Alle Backups testweise wiederherstellen?",
+    "removeFailedMenu": "Fehlgeschlagene Backups entfernen",
+    "removeFailed": "Fehlgeschlagene entfernen",
+    "clearDescription": "{count, plural, one {# fehlgeschlagenen Backup-Eintrag entfernen} other {# fehlgeschlagene Backup-Einträge entfernen}}",
+    "queuing": "Wird eingeplant …",
+    "removing": "Wird entfernt …",
+    "allActionsLabel": "Aktionen für alle Backups",
+    "allBackups": "Alle Backups",
+    "summaryCount": "{count, plural, one {# Backup} other {# Backups}}",
+    "summaryFailed": "{count} fehlgeschlagen"
+  },
+  "signIns": {
+    "unknownDevice": "Unbekanntes Gerät",
+    "script": "Skript",
+    "browser": "Browser",
+    "browserOnOs": "{browser} unter {os}",
+    "outcome": {
+      "success": "Angemeldet",
+      "bad_password": "Falsches Passwort",
+      "unknown_user": "Unbekanntes Konto",
+      "bad_2fa": "Falscher 2FA-Code",
+      "passkey_failed": "Passkey abgelehnt",
+      "locked_out": "Blockiert – gesperrt",
+      "unlocked": "Von einem Admin entsperrt",
+      "password_reset": "Passwort per E-Mail zurückgesetzt"
+    },
+    "method": {
+      "password": "Passwort",
+      "totp": "Passwort + Authenticator",
+      "recovery_code": "Passwort + Wiederherstellungscode",
+      "passkey": "Passkey"
+    }
+  },
+  "account": {
+    "title": "Ihr Konto",
+    "profileTitle": "Profil & Passwort",
+    "profileDescription": "Ihr Anzeigename, Ihre Sprache und Ihr Anmeldepasswort.",
+    "name": "Name",
+    "language": "Sprache",
+    "languageAuto": "Automatisch (Browsersprache)",
+    "languageHint": "Die Sprache, in der Backup Hub angezeigt wird. Auch E-Mails an Sie (z. B. zum Zurücksetzen des Passworts) verwenden sie.",
+    "changePassword": "Passwort ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "currentPasswordPlaceholder": "Nur nötig, wenn Sie ein neues Passwort festlegen",
+    "newPassword": "Neues Passwort",
+    "newPasswordPlaceholder": "Leer lassen, um das aktuelle Passwort zu behalten",
+    "saveChanges": "Änderungen speichern",
+    "profileSaved": "Profil gespeichert",
+    "passwordChanged": "Passwort geändert",
+    "passwordChangedSignedOut": "Passwort geändert – {count, plural, one {# andere Sitzung} other {# andere Sitzungen}} abgemeldet",
+    "twoFactorTitle": "Zwei-Faktor-Authentifizierung",
+    "twoFactorDescription": "Bei der Anmeldung zusätzlich zum Passwort einen Code aus einer Authenticator-App verlangen.",
+    "enabled": "Aktiviert",
+    "notEnabled": "Nicht aktiviert",
+    "recoveryRemaining": "{count, plural, one {Noch # unbenutzter Wiederherstellungscode.} other {Noch # unbenutzte Wiederherstellungscodes.}}",
+    "passkeysTitle": "Passkeys",
+    "passkeysDescription": "Melden Sie sich mit Touch ID, Face ID, Windows Hello oder einem Sicherheitsschlüssel an – ohne Passwort, und es zählt bereits als zweiter Faktor.",
+    "sessionsTitle": "Aktive Sitzungen",
+    "sessionsDescription": "Überall, wo Sie gerade angemeldet sind. Wenn Sie eine nicht erkennen – oder sich ihre IP unerwartet geändert hat –, melden Sie sie ab und ändern Sie Ihr Passwort. Eine Passwortänderung meldet alle anderen Sitzungen automatisch ab.",
+    "signOutOthers": "Überall sonst abmelden",
+    "onlyThisDevice": "Sie sind nur auf diesem Gerät angemeldet",
+    "signOutOthersConfirm": "{count, plural, one {Die andere Sitzung} other {Die anderen # Sitzungen}} abmelden? Dieses Gerät bleibt angemeldet.",
+    "sessionSignedIn": "Angemeldet <time>date</time>",
+    "sessionSignedInFrom": "Angemeldet <time>date</time> von {ip}",
+    "sessionLastActive": "zuletzt aktiv <time>date</time>",
+    "sessionLastActiveFrom": "zuletzt aktiv <time>date</time> von {ip}",
+    "thisDevice": "Dieses Gerät",
+    "ipChanged": "IP-Adresse geändert",
+    "signOut": "Abmelden",
+    "sessionSignedOut": "Sitzung abgemeldet",
+    "historyTitle": "Letzte Anmeldeaktivität",
+    "historyDescription": "Die letzten Anmeldeversuche bei Ihrem Konto, erfolgreich oder nicht. Sie werden 90 Tage aufbewahrt. Wenn Sie einen nicht erkennen, ändern Sie Ihr Passwort.",
+    "noSignIns": "Noch keine Anmeldungen erfasst.",
+    "noOtherSessions": "Keine anderen Sitzungen zum Abmelden",
+    "signedOutOthers": "{count, plural, one {# andere Sitzung abgemeldet} other {# andere Sitzungen abgemeldet}}",
+    "thatsThisDevice": "Das ist dieses Gerät – verwenden Sie stattdessen „Abmelden“."
+  },
+  "twoFactor": {
+    "setUp": "Authenticator-App einrichten",
+    "scanIntro": "Scannen Sie dies mit Ihrer Authenticator-App (1Password, Google Authenticator, Authy usw.) und geben Sie dann den angezeigten 6-stelligen Code ein.",
+    "qrAlt": "QR-Code für den Authenticator",
+    "cantScan": "Scannen klappt nicht? Geben Sie diesen Schlüssel manuell ein:",
+    "verifyEnable": "Bestätigen & aktivieren",
+    "codesIntro": "Die Zwei-Faktor-Authentifizierung ist aktiv. Bewahren Sie diese Wiederherstellungscodes sicher auf – jeder funktioniert einmal, und sie werden nicht noch einmal angezeigt. Verwenden Sie einen, wenn Sie keinen Zugriff mehr auf Ihre Authenticator-App haben.",
+    "savedThese": "Ich habe sie gespeichert",
+    "isOn": "Zwei-Faktor-Authentifizierung ist aktiv",
+    "verifyFailed": "Der Code konnte nicht bestätigt werden – bitte versuchen Sie es erneut.",
+    "disableLink": "Zwei-Faktor-Authentifizierung deaktivieren",
+    "disablePrompt": "Geben Sie Ihr Passwort ein, um die Zwei-Faktor-Authentifizierung zu deaktivieren.",
+    "disable": "Deaktivieren",
+    "disabling": "Wird deaktiviert …",
+    "turnedOff": "Zwei-Faktor-Authentifizierung deaktiviert",
+    "newCodes": "Neue Wiederherstellungscodes – speichern Sie sie jetzt, sie werden nicht noch einmal angezeigt.",
+    "done": "Fertig",
+    "regenerate": "Wiederherstellungscodes neu erzeugen",
+    "generating": "Wird erzeugt …",
+    "regenerateConfirm": "Neue Wiederherstellungscodes erzeugen? Ihre bisherigen Codes funktionieren dann nicht mehr.",
+    "startFirst": "Starten Sie zuerst die Einrichtung",
+    "codeMismatch": "Dieser Code stimmt nicht – prüfen Sie Ihre Authenticator-App und versuchen Sie es erneut.",
+    "incorrectPassword": "Falsches Passwort",
+    "notEnabled": "Die Zwei-Faktor-Authentifizierung ist nicht aktiviert",
+    "verifying": "Wird bestätigt …"
+  },
+  "passkeys": {
+    "namePrompt": "Name für diesen Passkey (z. B. „MacBook“, „YubiKey“):",
+    "defaultName": "Passkey",
+    "added": "Passkey hinzugefügt",
+    "addFailed": "Dieser Passkey konnte nicht hinzugefügt werden.",
+    "removeConfirm": "Diesen Passkey entfernen? Sie können sich dann nicht mehr damit anmelden.",
+    "removed": "Passkey entfernt",
+    "removeFailed": "Der Passkey konnte nicht entfernt werden – bitte versuchen Sie es erneut.",
+    "addedOn": "Hinzugefügt <time>date</time>",
+    "lastUsed": "zuletzt verwendet <time>date</time>",
+    "neverUsed": "nie verwendet",
+    "none": "Noch keine Passkeys.",
+    "working": "Bitte warten …",
+    "add": "Passkey hinzufügen",
+    "registrationExpired": "Dieser Registrierungsversuch ist abgelaufen – versuchen Sie es erneut.",
+    "registrationFailed": "Passkey-Registrierung fehlgeschlagen"
+  },
+  "errors": {
+    "nameRequired": "Name ist erforderlich",
+    "nameEmailPasswordRequired": "Name, E-Mail und Passwort sind erforderlich",
+    "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein",
+    "newPasswordTooShort": "Das neue Passwort muss mindestens 8 Zeichen lang sein",
+    "currentPasswordIncorrect": "Das aktuelle Passwort ist falsch",
+    "ownAdminRole": "Sie können Ihre eigene Admin-Rolle nicht entfernen",
+    "deleteSelf": "Sie können Ihr eigenes Konto nicht löschen",
+    "setupDone": "Die Einrichtung wurde bereits abgeschlossen",
+    "setupFieldsRequired": "Name, E-Mail und Passwort sind alle erforderlich",
+    "apiKeyFields": "Ein Name und mindestens eine Berechtigung sind erforderlich",
+    "testRestoreUnavailable": "Testwiederherstellungen sind auf diesem Server nicht eingerichtet",
+    "channelAlreadyUsed": "Diese Aufgabe verwendet diesen Benachrichtigungskanal bereits",
+    "locationAlreadyUsed": "Diese Aufgabe verwendet diesen Speicherort bereits",
+    "eventRequired": "Mindestens ein Ereignis ist erforderlich",
+    "connectFirst": "Melden Sie sich zuerst über die Schaltfläche „Verbinden“ bei Ihrem Konto an.",
+    "backupFailed": "Backup fehlgeschlagen: {reason}",
+    "shareEmailRequired": "Geben Sie die E-Mail-Adresse des Benutzers ein, mit dem geteilt werden soll.",
+    "shareNoUser": "Kein Benutzer mit dieser E-Mail-Adresse.",
+    "shareOwnTask": "Diese Aufgabe gehört Ihnen bereits.",
+    "destinationNotFound": "Speicherort nicht gefunden.",
+    "connectionFailedHidden": "Verbindung fehlgeschlagen (Details sieht nur der Eigentümer der Aufgabe)",
+    "noSignInSupport": "Dieser Anbieter unterstützt keine Anmeldung.",
+    "signInNotSetUp": "Die Anmeldung ist auf diesem Server noch nicht eingerichtet – bitten Sie einen Admin, sie zu konfigurieren (siehe README), oder verwenden Sie unter „Erweitert“ eigene Zugangsdaten.",
+    "signInTampered": "Ungültige oder manipulierte Anmeldesitzung. Bitte beginnen Sie von vorn.",
+    "signInOtherTask": "Diese Anmeldesitzung gehört zu einer anderen Aufgabe. Bitte beginnen Sie von vorn.",
+    "codeExpired": "Der Code ist abgelaufen, bevor er bestätigt wurde. Versuchen Sie es erneut."
+  },
+  "task": {
+    "navBackups": "Backups",
+    "navNotifications": "Benachrichtigungen",
+    "navLocations": "Speicherorte",
+    "navSharing": "Freigabe",
+    "navSettings": "Einstellungen",
+    "useSavedChannel": "Gespeicherten Kanal verwenden",
+    "createNew": "Neu erstellen",
+    "useSavedLocation": "Gespeicherten Speicherort verwenden",
+    "scheduleActive": "Zeitplan aktiv",
+    "scheduleDisabled": "Zeitplan deaktiviert",
+    "sharedBy": "geteilt von {name}",
+    "historyTitle": "Backup-Verlauf",
+    "historyDescription": "Alle Backups dieser Aufgabe, neueste zuerst.",
+    "noBackups": "Noch keine Backups – starten Sie jetzt eins oder warten Sie auf den nächsten geplanten Lauf.",
+    "failedBackup": "Fehlgeschlagenes Backup",
+    "colFile": "Datei",
+    "colStarted": "Gestartet",
+    "colStatus": "Status",
+    "notificationsTitle": "Benachrichtigungen",
+    "notificationsDescription": "Wohin die Ergebnisse der Backups dieser Aufgabe gesendet werden – E-Mail (erfordert SMTP, siehe .env), ntfy, Telegram oder Discord.",
+    "addNotification": "Benachrichtigung hinzufügen",
+    "newNotification": "Neue Benachrichtigung",
+    "noNotifications": "Keine Benachrichtigungen eingerichtet – niemand erfährt, ob die Backups dieser Aufgabe gelingen oder scheitern.",
+    "ownerOnlyDetails": "(Details sieht nur der Eigentümer der Aufgabe)",
+    "onSuccess": "Bei Erfolg",
+    "onFailure": "Bei Fehler",
+    "noEvents": "Keine Ereignisse ausgewählt",
+    "taskOnly": "Nur für diese Aufgabe",
+    "fromSavedChannels": "Aus Ihren gespeicherten Kanälen",
+    "savedChannel": "Gespeicherter Kanal",
+    "locationsTitle": "Externe Speicherorte",
+    "locationsDescription": "Jedes abgeschlossene Backup wird immer lokal aufbewahrt. Speicherorte kopieren jede Datei zusätzlich extern – jeder wird unabhängig versucht, sodass ein Ausfall weder die anderen noch die lokale Kopie beeinträchtigt.",
+    "addLocation": "Speicherort hinzufügen",
+    "newLocation": "Neuer Speicherort",
+    "noLocations": "Keine externen Speicherorte – Backups liegen nur auf diesem Server.",
+    "subfolder": "Unterordner <code>{folder}</code>",
+    "disabled": "Deaktiviert",
+    "fromSavedLocations": "Aus Ihren gespeicherten Speicherorten",
+    "savedLocation": "Gespeicherter Speicherort",
+    "sharingTitle": "Freigabe",
+    "sharingDescription": "Diese Aufgabe gehört Ihnen. Nur Sie und die unten aufgeführten Personen können sie sehen – nicht einmal Admins.",
+    "shareTask": "Aufgabe teilen",
+    "shareWith": "Mit jemandem teilen",
+    "share": "Teilen",
+    "notShared": "Mit niemandem geteilt.",
+    "settingsTitle": "Einstellungen",
+    "settingsDescription": "Zeitplan, Aufbewahrung und Verschlüsselung dieser Aufgabe.",
+    "settingsSaved": "Einstellungen gespeichert",
+    "taskName": "Name der Aufgabe",
+    "backupsToKeep": "Anzahl aufzubewahrender Backups",
+    "encrypt": "Backup-Dateien verschlüsseln",
+    "encryptionPassword": "Verschlüsselungspasswort",
+    "keepPassword": "Leer lassen, um das aktuelle Passwort zu behalten",
+    "setPassword": "Passwort festlegen",
+    "testRestoreEach": "Jedes neue Backup testweise wiederherstellen",
+    "testRestoreHint": "Jedes Backup wird bereits auf vollständige Lesbarkeit geprüft. Zusätzlich wird es in eine temporäre Datenbank auf dem Testserver wiederhergestellt, geprüft und wieder gelöscht – langsamer, und bei einem Fehler werden die Fehler-Empfänger der Aufgabe benachrichtigt.",
+    "connectionNotEditable": "Die Datenbankverbindung kann hier noch nicht bearbeitet werden – löschen Sie die Aufgabe und legen Sie sie neu an, oder verwenden Sie <code>PATCH /api/v1/tasks/:id</code>.",
+    "saveSettings": "Einstellungen speichern",
+    "sectionsLabel": "Abschnitte der Aufgabe",
+    "sectionPrefix": "Abschnitt:",
+    "disableSchedule": "Zeitplan deaktivieren",
+    "enableSchedule": "Zeitplan aktivieren",
+    "disableShort": "Deaktivieren",
+    "enableShort": "Aktivieren",
+    "scheduleDisabledToast": "Zeitplan deaktiviert",
+    "scheduleEnabledToast": "Zeitplan aktiviert",
+    "runNow": "Backup jetzt starten",
+    "runNowShort": "Jetzt starten",
+    "running": "Läuft …",
+    "backupCompleted": "Backup abgeschlossen",
+    "deleteTask": "Aufgabe löschen",
+    "deleteTaskHeading": "Diese Aufgabe löschen?",
+    "deleteTaskDescription": "Ihr Zeitplan stoppt sofort, und die Aufgabe samt Verlauf, Benachrichtigungsempfängern und Freigaben wird aus der App entfernt.",
+    "deleteTaskKeepNote": "Die Backup-Dateien bleiben auf dem Server im Ordner {id} im Backup-Verzeichnis, sodass Sie sie weiterhin von Hand wiederherstellen können. In der App erscheinen sie nicht mehr.",
+    "taskDeleted": "Aufgabe gelöscht",
+    "accessRemoved": "Zugriff entfernt",
+    "removing": "Wird entfernt …",
+    "revokeShareConfirm": "Diese Aufgabe nicht mehr mit diesem Benutzer teilen? API-Schlüssel, die er dafür erstellt hat, funktionieren dann ebenfalls nicht mehr."
+  },
+  "channels": {
+    "email": {
+      "label": "E-Mail",
+      "fields": {
+        "email": {
+          "label": "E-Mail",
+          "helpText": "Erfordert, dass SMTP auf dem Server konfiguriert ist (siehe .env)."
+        }
+      }
+    },
+    "ntfy": {
+      "label": "ntfy",
+      "fields": {
+        "serverUrl": {
+          "label": "Server-URL",
+          "helpText": "Verwenden Sie https://ntfy.sh oder Ihren eigenen ntfy-Server."
+        },
+        "topic": {
+          "label": "Topic",
+          "helpText": "Auf dem öffentlichen Server ntfy.sh kann jeder ein Topic lesen, der seinen Namen kennt – wählen Sie also etwas schwer Erratbares."
+        },
+        "accessToken": {
+          "label": "Zugriffstoken (optional)",
+          "helpText": "Nur für Topics nötig, die eine Anmeldung erfordern."
+        }
+      }
+    },
+    "telegram": {
+      "label": "Telegram",
+      "fields": {
+        "botToken": {
+          "label": "Bot-Token",
+          "helpText": "Erstellen Sie einen Bot, indem Sie @BotFather auf Telegram schreiben."
+        },
+        "chatId": {
+          "label": "Chat-ID",
+          "placeholder": "123456789 oder -100123456789",
+          "helpText": "Schreiben Sie Ihrem Bot zuerst eine Nachricht (oder fügen Sie ihn einer Gruppe hinzu) – Bots können keine Unterhaltung beginnen."
+        }
+      }
+    },
+    "discord": {
+      "label": "Discord",
+      "fields": {
+        "webhookUrl": {
+          "label": "Webhook-URL",
+          "helpText": "Kanaleinstellungen → Integrationen → Webhooks → Neuer Webhook → Webhook-URL kopieren."
+        }
+      }
+    }
+  },
+  "scopes": {
+    "tasks_read": {
+      "label": "Aufgaben ansehen",
+      "hint": "Aufgaben und Backup-Verlauf auflisten"
+    },
+    "tasks_write": {
+      "label": "Aufgaben verwalten",
+      "hint": "Aufgaben erstellen, ändern und löschen"
+    },
+    "runs_trigger": {
+      "label": "Backups starten",
+      "hint": "Ein manuelles Backup starten"
+    },
+    "runs_download": {
+      "label": "Backups herunterladen",
+      "hint": "Backup-Dateien herunterladen"
+    },
+    "runs_delete": {
+      "label": "Backups löschen",
+      "hint": "Backup-Dateien löschen"
+    }
+  },
+  "systemEvents": {
+    "user_login": "Benutzeranmeldungen",
+    "user_created": "Benutzer erstellt",
+    "user_deleted": "Benutzer gelöscht",
+    "task_created": "Backup-Aufgabe erstellt",
+    "task_deleted": "Backup-Aufgabe gelöscht",
+    "security_reset": "2FA/Passkeys zurückgesetzt oder Konto entsperrt"
+  },
+  "notifications": {
+    "channelSaved": "Kanal gespeichert",
+    "addChannel": "Kanal hinzufügen",
+    "recipientAdded": "Empfänger hinzugefügt",
+    "notifyFor": "Benachrichtigen bei",
+    "addRecipient": "Empfänger hinzufügen",
+    "notificationAdded": "Benachrichtigung hinzugefügt",
+    "onSuccess": "Bei Erfolg",
+    "onFailure": "Bei Fehler",
+    "saveToAccount": "In meinem Konto speichern, damit meine anderen Aufgaben ihn nutzen können",
+    "saveToAccountHint": "Nicht angehakt bleibt er auf diese Aufgabe beschränkt: Diese Einstellungen können dann nur von dieser Aufgabe verwendet werden.",
+    "add": "Hinzufügen",
+    "adding": "Wird hinzugefügt …",
+    "noOtherSaved": "Keine weiteren gespeicherten Kanäle in Ihrem Konto. Haken Sie beim Hinzufügen „In meinem Konto speichern“ an oder legen Sie sie auf der Seite <link>Benachrichtigungen</link> an, um sie aufgabenübergreifend zu nutzen.",
+    "channelAddedToTask": "Kanal zu dieser Aufgabe hinzugefügt",
+    "savedChannel": "Gespeicherter Kanal",
+    "useThisChannel": "Diesen Kanal verwenden",
+    "sendTest": "Test senden",
+    "sending": "Wird gesendet …",
+    "sent": "Gesendet",
+    "failedWhy": "Fehlgeschlagen: {reason}",
+    "unknownError": "unbekannter Fehler",
+    "testSent": "Testbenachrichtigung gesendet",
+    "testSentDetail": "Testbenachrichtigung gesendet – {detail}",
+    "channelDeleted": "Kanal gelöscht",
+    "deleting": "Wird gelöscht …",
+    "madeReusable": "Kanal in Ihrem Konto gespeichert – Ihre anderen Aufgaben können ihn jetzt nutzen",
+    "makeReusable": "Wiederverwendbar machen",
+    "saving": "Wird gespeichert …",
+    "makeReusableConfirm": "Diesen Kanal in Ihrem Konto speichern, damit auch Ihre anderen Aufgaben ihn nutzen können? Das kann nicht rückgängig gemacht werden – sobald andere Aufgaben ihn nutzen, kann er nicht wieder auf eine Aufgabe beschränkt werden.",
+    "channelUpdated": "Kanal aktualisiert",
+    "name": "Name",
+    "secretSaved": "Gespeichert – leer lassen, um es zu behalten",
+    "saveChanges": "Änderungen speichern",
+    "sendVia": "Senden über",
+    "nameOptional": "Name (optional)",
+    "emailPlaceholder": "Die E-Mail-Adresse",
+    "recipientRemoved": "Empfänger entfernt",
+    "notificationRemoved": "Benachrichtigung entfernt",
+    "removing": "Wird entfernt …",
+    "removeTaskOnlyConfirm": "Diesen Benachrichtigungskanal entfernen? Er gehört nur zu dieser Aufgabe, daher werden er und seine Einstellungen gelöscht.",
+    "removeSavedConfirm": "Diese Aufgabe soll diesen Kanal nicht mehr verwenden? Er bleibt im Konto des Eigentümers für dessen andere Aufgaben gespeichert.",
+    "deleteConfirm": "Diesen Kanal löschen? Aufgaben, die ihn verwenden, senden dann keine Benachrichtigungen mehr dorthin.",
+    "deleteUsedConfirm": "Diesen Benachrichtigungskanal samt Einstellungen löschen? {count, plural, one {# Aufgabe benachrichtigt} other {# Aufgaben benachrichtigen}} ihn dann nicht mehr.",
+    "deleteUnusedConfirm": "Diesen Benachrichtigungskanal samt Einstellungen löschen?"
+  },
+  "sharing": {
+    "saved": "Freigabe gespeichert",
+    "userEmail": "E-Mail des Benutzers",
+    "note": "Das Wiederherstellen eines Backups in die Datenbank kann nie geteilt werden – das können nur Sie. Teilen Sie erneut mit derselben E-Mail-Adresse, um die Berechtigungen einer Person zu ändern.",
+    "share": "Teilen",
+    "sharing": "Wird geteilt …"
+  },
+  "destinations": {
+    "s3": {
+      "label": "S3 (AWS / Backblaze / Wasabi / R2 / MinIO / andere S3-kompatible)",
+      "fields": {
+        "bucket": {
+          "label": "Bucket"
+        },
+        "region": {
+          "label": "Region",
+          "helpText": "Verwenden Sie „auto“ für Anbieter ohne AWS-Regionen (z. B. R2)."
+        },
+        "accessKeyId": {
+          "label": "Access-Key-ID"
+        },
+        "secretAccessKey": {
+          "label": "Secret Access Key"
+        },
+        "endpoint": {
+          "label": "Eigene Endpunkt-URL",
+          "helpText": "Für echtes AWS S3 leer lassen."
+        },
+        "forcePathStyle": {
+          "label": "Pfad-Adressierung erzwingen",
+          "helpText": "Meist nötig für S3-kompatible Anbieter außerhalb von AWS."
+        },
+        "pathPrefix": {
+          "label": "Pfad-Präfix (optional)"
+        }
+      }
+    },
+    "google_drive": {
+      "label": "Google Drive",
+      "fields": {
+        "folderId": {
+          "label": "Ordner-ID (optional)",
+          "helpText": "Die lange ID am Ende der URL eines Drive-Ordners. Leer lassen, um in das Stammverzeichnis von Drive hochzuladen."
+        },
+        "clientId": {
+          "label": "OAuth-Client-ID"
+        },
+        "clientSecret": {
+          "label": "OAuth-Client-Secret"
+        },
+        "refreshToken": {
+          "label": "OAuth-Refresh-Token",
+          "helpText": "Wird über den OAuth-Zustimmungsablauf von Google mit dem Scope drive.file abgerufen – siehe README."
+        }
+      }
+    },
+    "onedrive": {
+      "label": "OneDrive",
+      "fields": {
+        "folderPath": {
+          "label": "Ordnerpfad (optional)",
+          "helpText": "Wird erstellt, falls er nicht existiert. Leer lassen, um in das Stammverzeichnis von OneDrive hochzuladen."
+        },
+        "clientId": {
+          "label": "Anwendungs-ID (Client)"
+        },
+        "clientSecret": {
+          "label": "Client-Secret (optional)",
+          "helpText": "Nur für eine vertrauliche Client-App-Registrierung. Für einen öffentlichen Client leer lassen."
+        },
+        "refreshToken": {
+          "label": "OAuth-Refresh-Token",
+          "helpText": "Wird über den OAuth-Zustimmungsablauf von Microsoft mit den Scopes Files.ReadWrite und offline_access abgerufen – siehe README."
+        },
+        "tenantId": {
+          "label": "Mandanten-ID",
+          "helpText": "„common“ für private Microsoft-Konten oder Ihre Azure-AD-Mandanten-ID für Geschäfts-/Schulkonten."
+        }
+      }
+    },
+    "email": {
+      "label": "E-Mail (Backup-Datei anhängen)",
+      "fields": {
+        "to": {
+          "label": "Senden an",
+          "helpText": "Mehrere Adressen durch Kommas trennen. Unabhängig von den Benachrichtigungsempfängern der Aufgabe."
+        },
+        "maxSizeMb": {
+          "label": "Maximale Dateigröße (MB)",
+          "helpText": "Größere Backups werden übersprungen statt gesendet – und im Verlauf als übersprungen angezeigt. Prüfen Sie das Anhangslimit Ihres Mailanbieters (oft um 25 MB, und E-Mail fügt ~33 % hinzu)."
+        }
+      }
+    },
+    "opencloud": {
+      "label": "OpenCloud",
+      "fields": {
+        "webdavUrl": {
+          "label": "WebDAV-URL des Ordners"
+        },
+        "username": {
+          "label": "Benutzername"
+        },
+        "appToken": {
+          "label": "App-Token"
+        },
+        "pathPrefix": {
+          "label": "Pfad-Präfix (optional)"
+        }
+      }
+    },
+    "ftp": {
+      "label": "FTP (unverschlüsselt)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Für den Standard leer lassen."
+        },
+        "username": {
+          "label": "Benutzername"
+        },
+        "password": {
+          "label": "Passwort"
+        },
+        "pathPrefix": {
+          "label": "Entfernter Ordner (optional)",
+          "helpText": "Wird erstellt, falls er nicht existiert. Mit „/“ beginnen für einen absoluten Pfad, sonst relativ zum Anmeldeordner."
+        }
+      }
+    },
+    "ftps": {
+      "label": "FTPS (FTP über TLS)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Für den Standard leer lassen.",
+          "placeholder": "21 (990 für implizites TLS)"
+        },
+        "username": {
+          "label": "Benutzername"
+        },
+        "password": {
+          "label": "Passwort"
+        },
+        "implicitTls": {
+          "label": "Implizites TLS verwenden",
+          "helpText": "Nur für ältere Server, die TLS von Anfang an erwarten (meist Port 990). Die meisten Server nutzen explizites TLS – nicht anhaken."
+        },
+        "allowSelfSigned": {
+          "label": "Selbstsignierte / nicht vertrauenswürdige Zertifikate erlauben",
+          "helpText": "Die Verbindung bleibt verschlüsselt, aber die Identität des Servers wird nicht geprüft."
+        },
+        "pathPrefix": {
+          "label": "Entfernter Ordner (optional)",
+          "helpText": "Wird erstellt, falls er nicht existiert. Mit „/“ beginnen für einen absoluten Pfad, sonst relativ zum Anmeldeordner."
+        }
+      }
+    },
+    "sftp": {
+      "label": "SFTP (Dateiübertragung über SSH)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Für den Standard leer lassen."
+        },
+        "username": {
+          "label": "Benutzername"
+        },
+        "password": {
+          "label": "Passwort",
+          "helpText": "Leer lassen, wenn Sie einen privaten Schlüssel verwenden."
+        },
+        "privateKey": {
+          "label": "Privater Schlüssel (optional)",
+          "helpText": "Fügen Sie den vollständigen Schlüssel im OpenSSH- oder PEM-Format ein. Er wird verschlüsselt gespeichert.",
+          "placeholder": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+        },
+        "passphrase": {
+          "label": "Passphrase des Schlüssels (optional)"
+        },
+        "hostFingerprint": {
+          "label": "Fingerabdruck des Server-Hostschlüssels (empfohlen)",
+          "helpText": "Klicken Sie auf „Verbindung testen“, um den Fingerabdruck des Servers zu sehen. Ist er gesetzt, werden Verbindungen zu einem Server mit anderem Schlüssel abgelehnt."
+        },
+        "pathPrefix": {
+          "label": "Entfernter Ordner (optional)",
+          "helpText": "Wird erstellt, falls er nicht existiert. Mit „/“ beginnen für einen absoluten Pfad, sonst relativ zum Home-Ordner des Benutzers."
+        }
+      }
+    }
+  },
+  "locations": {
+    "added": "Speicherort hinzugefügt",
+    "provider": "Anbieter",
+    "label": "Bezeichnung",
+    "noOneClick": "Die Ein-Klick-Anmeldung ist auf diesem Server nicht eingerichtet, daher müssen Sie unten eigene OAuth-Zugangsdaten eingeben. (Ein Admin kann die Anmeldung aktivieren, indem er die Client-ID des Anbieters in der Serverumgebung setzt – siehe README.)",
+    "saveToAccount": "In meinem Konto speichern, damit meine anderen Aufgaben ihn nutzen können",
+    "saveToAccountHint": "Nicht angehakt bleibt er auf diese Aufgabe beschränkt: Diese Zugangsdaten können dann nur von dieser Aufgabe verwendet werden.",
+    "openAndSignIn": "1. Öffnen Sie <link>{url}</link> und melden Sie sich an.",
+    "enterCode": "2. Geben Sie diesen Code ein: <mono>{code}</mono>",
+    "waiting": "Warten auf Ihre Bestätigung … diese Seite aktualisiert sich automatisch.",
+    "connectedAs": "Verbunden als {account}. Der Speicherort wurde hinzugefügt.",
+    "connectedToast": "{account} verbunden – Speicherort hinzugefügt",
+    "yourAccount": "Ihr Konto",
+    "codeExpired": "Der Code ist abgelaufen, bevor er bestätigt wurde. Versuchen Sie es erneut.",
+    "connect": "Mit {provider} verbinden",
+    "starting": "Wird gestartet …",
+    "testConnection": "Verbindung testen",
+    "testing": "Wird getestet …",
+    "addLocation": "Speicherort hinzufügen",
+    "useSignIn": "Stattdessen Anmeldung verwenden",
+    "useOwnCredentials": "Erweitert: eigene Zugangsdaten verwenden",
+    "connected": "Verbindung erfolgreich",
+    "failedWhy": "Fehlgeschlagen: {reason}",
+    "unknownError": "unbekannter Fehler",
+    "ok": "OK",
+    "noOtherSaved": "Keine weiteren gespeicherten Speicherorte in Ihrem Konto. Haken Sie beim Hinzufügen „In meinem Konto speichern“ an oder legen Sie sie auf der Seite <link>Speicherorte</link> an, um sie aufgabenübergreifend zu nutzen.",
+    "addedToTask": "Speicherort zu dieser Aufgabe hinzugefügt",
+    "savedLocation": "Gespeicherter Speicherort",
+    "subfolder": "Unterordner für diese Aufgabe (optional)",
+    "subfolderHint": "Wird unter dem Ordner des Speicherorts angelegt, damit Aufgaben, die ihn teilen, ihre Dateien nicht vermischen. Leeren Sie das Feld, um den Ordner direkt zu verwenden.",
+    "useThis": "Diesen Speicherort verwenden",
+    "updated": "Speicherort aktualisiert",
+    "secretSaved": "Gespeichert – leer lassen, um es zu behalten",
+    "saveChanges": "Änderungen speichern",
+    "test": "Testen",
+    "deleted": "Speicherort gelöscht",
+    "deleting": "Wird gelöscht …",
+    "deleteUsedConfirm": "Diesen Speicherort samt Zugangsdaten löschen? {count, plural, one {# Aufgabe kopiert} other {# Aufgaben kopieren}} dann keine Backups mehr hierher. Bereits beim Anbieter hochgeladene Dateien werden nicht gelöscht.",
+    "deleteUnusedConfirm": "Diesen Speicherort samt Zugangsdaten löschen? Bereits beim Anbieter hochgeladene Dateien werden nicht gelöscht.",
+    "madeReusable": "Speicherort in Ihrem Konto gespeichert – Ihre anderen Aufgaben können ihn jetzt nutzen",
+    "makeReusable": "Wiederverwendbar machen",
+    "saving": "Wird gespeichert …",
+    "makeReusableConfirm": "Diesen Speicherort in Ihrem Konto speichern, damit auch Ihre anderen Aufgaben ihn nutzen können? Das kann nicht rückgängig gemacht werden – sobald andere Aufgaben ihn nutzen, kann er nicht wieder auf eine Aufgabe beschränkt werden.",
+    "disable": "Deaktivieren",
+    "enable": "Aktivieren",
+    "disabledForTask": "Speicherort für diese Aufgabe deaktiviert",
+    "enabledForTask": "Speicherort für diese Aufgabe aktiviert",
+    "removedFromTask": "Speicherort von dieser Aufgabe entfernt",
+    "removing": "Wird entfernt …",
+    "removeTaskOnlyConfirm": "Diesen Speicherort entfernen? Er gehört nur zu dieser Aufgabe, daher werden er und seine Zugangsdaten gelöscht. Künftige Läufe kopieren keine Dateien mehr hierher – bereits hochgeladene Dateien beim Anbieter bleiben erhalten.",
+    "removeSavedConfirm": "Diese Aufgabe soll diesen Speicherort nicht mehr verwenden? Er bleibt im Konto des Eigentümers für dessen andere Aufgaben gespeichert. Bereits hochgeladene Dateien beim Anbieter bleiben erhalten."
+  },
+  "apiKeys": {
+    "created": "API-Schlüssel erstellt – kopieren Sie ihn jetzt",
+    "createdBanner": "Schlüssel erstellt – kopieren Sie ihn jetzt, er wird nicht noch einmal angezeigt.",
+    "savedToast": "Schlüssel gespeichert. Sie können ihn auf dieser Seite jederzeit widerrufen.",
+    "done": "Fertig",
+    "keyName": "Name des Schlüssels",
+    "keyNamePlaceholder": "Haupt-App-Server",
+    "allTasks": "Alle Aufgaben",
+    "permissions": "Berechtigungen",
+    "create": "Schlüssel erstellen",
+    "creating": "Wird erstellt …",
+    "revoke": "Widerrufen",
+    "revoking": "Wird widerrufen …",
+    "revokeConfirm": "Diesen API-Schlüssel widerrufen? Jede App, die ihn verwendet, verliert sofort den Zugriff.",
+    "revoked": "API-Schlüssel widerrufen",
+    "scopeTask": "Auf eine einzelne Aufgabe beschränken (optional)"
+  },
+  "users": {
+    "deleteHeading": "Diesen Benutzer löschen?",
+    "deleteDescription": "Seine Sitzungen werden sofort beendet, und alle seine Backup-Aufgaben, sein Verlauf, seine Empfänger und API-Schlüssel werden aus der App entfernt. Das kann nicht rückgängig gemacht werden.",
+    "deleteKeepNote": "Die Backup-Dateien seiner Aufgaben bleiben auf dem Server, jeweils in einem Ordner mit der ID der Aufgabe im Backup-Verzeichnis, sodass Sie sie weiterhin von Hand wiederherstellen können.",
+    "deleteUser": "Benutzer löschen",
+    "deleted": "Benutzer gelöscht",
+    "title": "Benutzer",
+    "intro": "Admins verwalten Benutzer und Systembenachrichtigungen. Backup-Aufgaben sind privat: Admins sehen, wie viele Aufgaben ein Benutzer hat, aber nicht die Aufgaben selbst, außer der Eigentümer teilt sie. Beim Löschen eines Benutzers werden auch alle seine Aufgaben und Backups gelöscht.",
+    "allUsers": "Alle Benutzer",
+    "allUsersDescription": "Alle, die sich bei diesem Server anmelden können.",
+    "addUser": "Benutzer hinzufügen",
+    "newUser": "Neuer Benutzer",
+    "createNew": "Neu erstellen",
+    "userCreated": "Benutzer erstellt",
+    "name": "Name",
+    "email": "E-Mail",
+    "tempPassword": "Vorläufiges Passwort",
+    "role": "Rolle",
+    "roleUser": "Benutzer",
+    "roleAdmin": "Admin",
+    "createUser": "Benutzer erstellen",
+    "noUsers": "Keine Benutzer.",
+    "you": "(Sie)",
+    "taskCount": "{count, plural, one {# Aufgabe} other {# Aufgaben}}",
+    "edit": "Bearbeiten",
+    "ownsTasks": "besitzt {count, plural, one {# Aufgabe} other {# Aufgaben}}",
+    "locked": "<strong>Anmeldung gesperrt</strong> nach wiederholten Fehlversuchen, bis <time>date</time>. Passkeys funktionieren weiterhin.",
+    "unlock": "Jetzt entsperren",
+    "unlocked": "Konto entsperrt",
+    "detailsTitle": "Kontodaten",
+    "detailsDescription": "Name, Rolle und ein neues Passwort, falls der Benutzer ausgesperrt ist.",
+    "changesSaved": "Änderungen gespeichert",
+    "ownRole": "Sie können Ihre eigene Rolle nicht ändern.",
+    "resetPassword": "Passwort zurücksetzen",
+    "keepPassword": "Leer lassen, um das aktuelle Passwort zu behalten",
+    "saveChanges": "Änderungen speichern",
+    "securityTitle": "Zwei-Faktor-Authentifizierung & Passkeys",
+    "securityDescription": "Setzen Sie diese zurück, wenn der Benutzer seine Authenticator-App oder seinen Sicherheitsschlüssel verloren hat.",
+    "authenticatorOn": "Authenticator-App aktiviert",
+    "authenticatorOff": "Keine Authenticator-App",
+    "passkeyCount": "{count, plural, one {# Passkey} other {# Passkeys}}",
+    "resetFactors": "2FA & Passkeys zurücksetzen",
+    "resetFactorsConfirm": "Alle Zwei-Faktor-Methoden und Passkeys von {name} entfernen? Danach kann er sich nur mit seinem Passwort anmelden und muss sie über seine eigene Kontoseite neu einrichten.",
+    "factorsReset": "2FA und Passkeys zurückgesetzt",
+    "noFactors": "Keine Authenticator-App und keine Passkeys eingerichtet – dieser Benutzer meldet sich nur mit Passwort an."
+  },
+  "newTask": {
+    "testConnection": "Verbindung testen",
+    "testing": "Wird getestet …",
+    "connected": "Verbindung erfolgreich",
+    "failedWhy": "Fehlgeschlagen: {reason}",
+    "unknownError": "unbekannter Fehler",
+    "dryRun": "Probelauf",
+    "dryRunning": "Backup läuft …",
+    "dryRunOk": "Backup erfolgreich ({size}, verworfen)",
+    "engine": "Datenbank-Engine",
+    "authSource": "Authentifizierungsdatenbank (optional)",
+    "authSourceHint": "Die Datenbank, in der der Benutzer angelegt wurde. Leer lassen für „admin“ – das passt für MongoDB Atlas und die meisten Server.",
+    "title": "Neue Backup-Aufgabe",
+    "subtitle": "Verbindungsdaten werden verschlüsselt gespeichert und nach dem Speichern nie wieder angezeigt.",
+    "taskName": "Name der Aufgabe",
+    "taskNamePlaceholder": "Backup der Shop-Datenbank",
+    "host": "Host",
+    "port": "Port",
+    "portPlaceholder": "Leer = Standard der Engine",
+    "user": "Benutzer",
+    "password": "Passwort",
+    "database": "Datenbankname",
+    "requireSsl": "SSL erzwingen",
+    "dryRunHint": "Ein Probelauf erstellt mit diesen Einstellungen ein echtes Backup und verwirft das Ergebnis sofort – er dauert genauso lange und belastet die Datenbank genauso wie ein echtes geplantes Backup, speichert aber nichts.",
+    "backupsToKeep": "Anzahl aufzubewahrender Backups",
+    "encrypt": "Backup-Dateien verschlüsseln",
+    "encryptionPassword": "Verschlüsselungspasswort",
+    "encryptionPlaceholder": "Nur verwendet, wenn oben die Verschlüsselung aktiviert ist",
+    "encryptionHint": "Bewahren Sie es selbst sicher auf – geht es verloren, kann Backup Hub es nicht wiederherstellen.",
+    "create": "Aufgabe erstellen"
+  },
+  "engines": {
+    "compatibility": {
+      "mysql": "Auch MySQL-kompatible Dienste wie Amazon RDS / Aurora MySQL, PlanetScale und TiDB.",
+      "postgres": "Auch Postgres-kompatible Dienste wie Supabase, Neon, Amazon RDS / Aurora PostgreSQL und TimescaleDB.",
+      "mongodb": "Selbst gehostetes MongoDB und MongoDB Atlas – für Atlas den Host des Clusters eingeben (z. B. cluster0.abcde.mongodb.net); die Verbindung nutzt automatisch TLS."
+    }
+  },
+  "usage": {
+    "notUsed": "von keiner Aufgabe verwendet",
+    "usedBy": "verwendet von",
+    "addedBy": "hinzugefügt von {name}",
+    "taskOnly": "nur für eine Aufgabe"
+  },
+  "locationsPage": {
+    "title": "Speicherorte",
+    "intro": "Externe Orte, an die Ihre Backups kopiert werden. Gespeicherte Speicherorte kann jede Ihrer Aufgaben nutzen – Zugangsdaten einmal eingeben, auf der Seite einer Aufgabe auswählen, und Änderungen hier gelten für jede Aufgabe, die sie nutzt. Aufgabenbezogene Speicherorte gehören zu genau einer Aufgabe und können nirgendwo sonst verwendet werden. Niemand sonst, auch kein Admin, kann sie sehen.",
+    "savedTitle": "Gespeicherte Speicherorte",
+    "savedDescription": "Für alle Ihre Aufgaben wiederverwendbar.",
+    "addLocation": "Speicherort hinzufügen",
+    "newLocation": "Neuer Speicherort",
+    "createNew": "Neu erstellen",
+    "noSaved": "Noch keine gespeicherten Speicherorte – fügen Sie einen hinzu oder machen Sie einen aufgabenbezogenen wiederverwendbar.",
+    "taskOnlyTitle": "Aufgabenbezogene Speicherorte",
+    "taskOnlyDescription": "An eine Ihrer Aufgaben gebunden. Auch Speicherorte, die Personen hinzugefügt haben, mit denen Sie eine Aufgabe teilen, werden aufgeführt: Sie können sie entfernen, aber nur diese Personen können ihre Zugangsdaten ändern.",
+    "noTaskOnly": "Keine aufgabenbezogenen Speicherorte.",
+    "edit": "Bearbeiten",
+    "editTitle": "{name} bearbeiten",
+    "editIntroTaskOnly": "{provider} · aufgabenbezogen. Änderungen gelten ab dem nächsten Backup für die Aufgabe, die ihn nutzt.",
+    "editIntroSaved": "{provider} · gespeicherter Speicherort. Änderungen gelten ab dem nächsten Backup für jede Aufgabe, die ihn nutzt."
+  },
+  "channelsPage": {
+    "title": "Benachrichtigungen",
+    "intro": "Ihre Benachrichtigungskanäle: wohin Ihre Aufgaben Erfolgs- und Fehlermeldungen zu Backups senden – E-Mail, ntfy, Telegram oder Discord. Gespeicherte Kanäle kann jede Ihrer Aufgaben nutzen: einmal einrichten, auf der Seite einer Aufgabe auswählen, und Änderungen hier gelten für jede Aufgabe, die sie nutzt. Aufgabenbezogene Kanäle gehören zu genau einer Aufgabe. Niemand sonst, auch kein Admin, kann sie sehen.",
+    "savedTitle": "Gespeicherte Kanäle",
+    "savedDescription": "Für alle Ihre Aufgaben wiederverwendbar.",
+    "addChannel": "Kanal hinzufügen",
+    "newChannel": "Neuer Benachrichtigungskanal",
+    "createNew": "Neu erstellen",
+    "noSaved": "Noch keine gespeicherten Kanäle – fügen Sie einen hinzu oder machen Sie einen aufgabenbezogenen wiederverwendbar.",
+    "taskOnlyTitle": "Aufgabenbezogene Kanäle",
+    "taskOnlyDescription": "An eine Ihrer Aufgaben gebunden. Auch Kanäle, die Personen hinzugefügt haben, mit denen Sie eine Aufgabe teilen, werden aufgeführt: Sie können sie entfernen, aber nur diese Personen können ihre Einstellungen ändern.",
+    "noTaskOnly": "Keine aufgabenbezogenen Kanäle.",
+    "edit": "Bearbeiten",
+    "editTitle": "{name} bearbeiten",
+    "editIntroTaskOnly": "{type} · aufgabenbezogen. Änderungen gelten für die Aufgabe, die ihn nutzt.",
+    "editIntroSaved": "{type} · gespeicherter Kanal. Änderungen gelten für jede Aufgabe, die ihn nutzt."
+  },
+  "systemPage": {
+    "title": "Systembenachrichtigungen",
+    "intro": "Serverweite Meldungen zu Konto- und Aufgaben-Ereignissen (E-Mail, ntfy, Telegram oder Discord), verwaltet von Admins. Erfolgs- und Fehlermeldungen zu Backups sind davon getrennt: Jeder Benutzer richtet sie unter <link>Benachrichtigungen</link> und auf der Seite jeder Aufgabe ein.",
+    "recipientsTitle": "Empfänger",
+    "recipientsDescription": "Wer über Konto- und Aufgaben-Ereignisse informiert wird, und über welche.",
+    "addRecipient": "Empfänger hinzufügen",
+    "newRecipient": "Neuer Systemempfänger",
+    "createNew": "Neu erstellen",
+    "noRecipients": "Noch keine Empfänger für Systembenachrichtigungen."
+  },
+  "apiKeysPage": {
+    "title": "API-Schlüssel",
+    "intro": "Werden von externen Apps genutzt, um die REST-API unter <code>/api/v1/*</code> aufzurufen. Jeder Schlüssel hat eigene Berechtigungen und kann auf eine einzelne Aufgabe beschränkt werden. Ein Schlüssel handelt in Ihrem Namen: Er kann bei einer Aufgabe nie mehr als Sie, und er funktioniert bei einer Aufgabe nicht mehr, sobald sie nicht mehr mit Ihnen geteilt ist.",
+    "keysTitle": "Ihre API-Schlüssel",
+    "keysDescription": "Widerrufen Sie einen Schlüssel, sobald die App ihn nicht mehr braucht.",
+    "createKey": "Schlüssel erstellen",
+    "newKey": "Neuer API-Schlüssel",
+    "createNew": "Neu erstellen",
+    "noKeys": "Noch keine API-Schlüssel.",
+    "oneTask": "Eine Aufgabe",
+    "allTasks": "Alle Aufgaben"
+  }
+}

@@ -1,0 +1,1052 @@
+{
+  "meta": {
+    "description": "Sauvegardes planifiées et chiffrées de bases MySQL, MariaDB, PostgreSQL et MongoDB."
+  },
+  "nav": {
+    "tasks": "Tâches",
+    "saveLocations": "Emplacements",
+    "notifications": "Notifications",
+    "users": "Utilisateurs",
+    "systemNotifications": "Notifications système",
+    "myAccount": "Mon compte",
+    "apiKeys": "Clés API",
+    "admin": "Admin",
+    "signOut": "Se déconnecter",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "logoAlt": "Logo Backup Hub"
+  },
+  "footer": {
+    "productBy": "Un produit de",
+    "tryAccounting": "Essayez notre logiciel de comptabilité",
+    "openSource": "Open source",
+    "license": "Licence MIT",
+    "tagline": "Sauvegardez le monde"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "ok": "OK",
+    "dismiss": "Fermer",
+    "processing": "Traitement…",
+    "moreActions": "Plus d’actions",
+    "delete": "Supprimer",
+    "deleting": "Suppression…",
+    "remove": "Retirer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "add": "Ajouter",
+    "adding": "Ajout…",
+    "genericError": "Une erreur s’est produite — veuillez réessayer.",
+    "stalePage": "Cette page n’est plus à jour — actualisez-la et réessayez.",
+    "eraseFilesCheckbox": "Supprimer aussi définitivement les fichiers de sauvegarde du disque",
+    "eraseFilesWarning": "Les fichiers de sauvegarde seront effacés et ne pourront pas être récupérés.",
+    "confirmAndErase": "{label} et effacer les fichiers"
+  },
+  "auth": {
+    "subtitle": "Connectez-vous pour gérer vos tâches de sauvegarde.",
+    "passwordChanged": "Votre mot de passe a été modifié. Connectez-vous avec le nouveau mot de passe.",
+    "lockedOut": "Trop de tentatives de connexion échouées. Réessayez dans {minutes, plural, one {# minute} other {# minutes}}, <link>réinitialisez votre mot de passe</link> ou demandez à un admin de déverrouiller votre compte.",
+    "lockedOutSoon": "Trop de tentatives de connexion échouées. Réessayez dans quelques minutes, <link>réinitialisez votre mot de passe</link> ou demandez à un admin de déverrouiller votre compte.",
+    "incorrect": "E-mail ou mot de passe incorrect.",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "forgotLink": "Mot de passe oublié ?",
+    "signIn": "Se connecter",
+    "or": "ou",
+    "passkeySignIn": "Se connecter avec une clé d’accès",
+    "passkeyWaiting": "En attente de la clé d’accès…",
+    "passkeyCancelled": "Annulé.",
+    "passkeyFailed": "La connexion par clé d’accès a échoué.",
+    "passkeyExpired": "Cette tentative de connexion a expiré — réessayez.",
+    "passkeyLockedNetwork": "Trop de tentatives de connexion échouées depuis votre réseau. Réessayez dans {minutes, plural, one {# minute} other {# minutes}}.",
+    "passkeyUnknown": "Cette clé d’accès n’est associée à aucun compte ici.",
+    "passkeyVerifyFailed": "La vérification de la clé d’accès a échoué.",
+    "accountGone": "Ce compte n’existe plus.",
+    "twoFactorTitle": "Authentification à deux facteurs",
+    "twoFactorRecoveryPrompt": "Saisissez l’un de vos codes de récupération inutilisés.",
+    "twoFactorCodePrompt": "Saisissez le code à 6 chiffres de votre application d’authentification.",
+    "twoFactorRecoveryInvalid": "Ce code de récupération n’est pas valide ou a déjà été utilisé.",
+    "twoFactorCodeInvalid": "Ce code ne correspond pas.",
+    "recoveryCode": "Code de récupération",
+    "authCode": "Code d’authentification",
+    "verify": "Vérifier",
+    "useAuthenticator": "Utiliser plutôt votre application d’authentification",
+    "useRecoveryCode": "Utiliser plutôt un code de récupération",
+    "setupTitle": "Bienvenue dans Backup Hub",
+    "setupSubtitle": "Créez le premier compte administrateur pour commencer.",
+    "yourName": "Votre nom",
+    "passwordHint": "Au moins 8 caractères.",
+    "createAdmin": "Créer le compte administrateur"
+  },
+  "passwordReset": {
+    "forgotTitle": "Mot de passe oublié ?",
+    "noEmail": "L’envoi d’e-mails n’est pas configuré sur ce serveur, les liens de réinitialisation ne peuvent donc pas être envoyés. Demandez à un admin de définir un nouveau mot de passe depuis la page Utilisateurs. Si vous êtes bloqué après trop de tentatives échouées, attendez la fin du blocage ou connectez-vous avec une clé d’accès.",
+    "sent": "Si cet e-mail correspond à un compte, un lien de réinitialisation est en route. Il fonctionne une seule fois et expire après 30 minutes — vérifiez vos courriers indésirables s’il n’arrive pas.",
+    "forgotIntro": "Saisissez l’e-mail de votre compte et nous vous enverrons un lien pour choisir un nouveau mot de passe. La réinitialisation lève aussi un blocage de connexion.",
+    "sendLink": "Envoyer le lien",
+    "sending": "Envoi…",
+    "backToSignIn": "Retour à la connexion",
+    "resetTitle": "Choisir un nouveau mot de passe",
+    "invalidLink": "Ce lien n’est pas valide, a expiré ou a déjà été utilisé.",
+    "sendNewLink": "Envoyer un nouveau lien",
+    "resetIntro": "Pour {email}. Vous serez déconnecté partout et, si vous utilisez une application d’authentification, elle restera nécessaire pour vous connecter.",
+    "mismatch": "Les deux mots de passe ne correspondent pas.",
+    "weak": "Utilisez au moins 8 caractères.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "setPassword": "Définir le mot de passe",
+    "saving": "Enregistrement…",
+    "email": {
+      "resetSubject": "Réinitialisez votre mot de passe Backup Hub",
+      "resetBody": "Bonjour {name},\n\nQuelqu’un a demandé à réinitialiser le mot de passe de votre compte Backup Hub. Pour en choisir un nouveau, ouvrez ce lien :\n\n{link}\n\nIl fonctionne une seule fois et expire après {minutes} minutes. La réinitialisation lève aussi un blocage de connexion.\n\nSi ce n’était pas vous, ignorez cet e-mail — votre mot de passe reste inchangé.",
+      "changedSubject": "Votre mot de passe Backup Hub a été modifié",
+      "changedBody": "Bonjour {name},\n\nLe mot de passe de votre compte Backup Hub vient d’être réinitialisé via un lien envoyé par e-mail, et vous avez été déconnecté partout.\n\nSi ce n’était pas vous, contactez immédiatement votre administrateur Backup Hub."
+    }
+  },
+  "schedule": {
+    "everyMinutes": "{count, plural, one {Chaque minute} other {Toutes les # minutes}}",
+    "everyHourAt": "Toutes les heures à {minute} minutes",
+    "everyHoursAt": "Toutes les {count} heures à {minute} minutes",
+    "everyDayAt": "Tous les jours à {time}",
+    "everyWeekdayAt": "Chaque {day} à {time}",
+    "monthlyAt": "Tous les mois le {day} à {time}",
+    "noSchedule": "Aucune planification",
+    "selectedDay": "jour choisi",
+    "label": "Planification",
+    "serverTime": "Les sauvegardes suivent l’heure locale du serveur.",
+    "closeDialog": "Fermer la planification",
+    "close": "Fermer",
+    "dialogTitle": "Planification des sauvegardes",
+    "dialogIntro": "Choisissez quand les sauvegardes doivent s’exécuter.",
+    "run": "Exécuter",
+    "optMinutes": "Toutes les quelques minutes",
+    "optHours": "Toutes les quelques heures",
+    "optDaily": "Tous les jours",
+    "optWeekly": "Toutes les semaines",
+    "optMonthly": "Tous les mois",
+    "optCustom": "Expression cron personnalisée",
+    "every": "Toutes les",
+    "atMinute": "À la minute",
+    "atMinuteHint": "Par exemple, 15 signifie 15 minutes après l’heure.",
+    "dayOfWeek": "Jour de la semaine",
+    "dayOfMonth": "Jour du mois",
+    "dayOfMonthHint": "Seuls les jours 1 à 28 sont proposés pour que la planification fonctionne chaque mois.",
+    "time": "Heure",
+    "cronExpression": "Expression cron",
+    "cronHint": "Les utilisateurs avancés peuvent saisir une expression cron standard en 5 parties.",
+    "preview": "Aperçu",
+    "apply": "Appliquer"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "L’état de vos sauvegardes, et les tâches que vous avez créées ou qui ont été partagées avec vous.",
+    "newTask": "Nouvelle tâche",
+    "twoFactorWarning": "Quelqu’un a saisi votre bon mot de passe mais un mauvais code 2FA {count, plural, one {# fois} other {# fois}} au cours des {days} derniers jours.",
+    "twoFactorWarningAction": "Si ce n’était pas vous, changez votre mot de passe maintenant.",
+    "succeeded": "Réussie",
+    "failed": "Échouée",
+    "running": "En cours",
+    "compactSucceeded": "Réussies",
+    "compactFailed": "Échouées",
+    "compactCopyFailed": "Copies échouées",
+    "compactBadSignIns": "Connexions échouées",
+    "lastDays": "{days} derniers jours",
+    "problemsBanner": "{count, plural, one {# problème demande votre attention} other {# problèmes demandent votre attention}}",
+    "statSuccessful": "Sauvegardes réussies",
+    "statFailed": "Sauvegardes échouées",
+    "statCopyFailures": "Copies externes échouées",
+    "statSignIns": "Connexions échouées",
+    "statSignInsHint": "Sur votre compte, {days} derniers jours",
+    "attentionTitle": "À surveiller",
+    "attentionDescription": "Problèmes avec la dernière sauvegarde de chaque tâche.",
+    "allGood": "Tout va bien — la dernière sauvegarde de chaque tâche a réussi.",
+    "recentTitle": "Activité récente",
+    "recentDescription": "Les dernières sauvegardes de toutes vos tâches.",
+    "noBackupsYet": "Aucune sauvegarde n’a encore été exécutée.",
+    "tasksTitle": "Tâches de sauvegarde",
+    "tasksDescription": "Chaque tâche a sa propre connexion à une base de données, sa planification et sa rétention.",
+    "noTasks": "Aucune tâche de sauvegarde pour l’instant.",
+    "createFirst": "Créer votre première tâche",
+    "scheduleActive": "Planification active",
+    "scheduleDisabled": "Planification désactivée",
+    "paused": "(en pause)",
+    "keep": "garder {count}",
+    "encrypted": "chiffrée",
+    "sharedBy": "partagée par {name}",
+    "neverRun": "Jamais exécutée",
+    "signInTitle": "Activité de connexion",
+    "signInDescription": "Connexions à votre compte au cours des {days} derniers jours.",
+    "fullHistory": "Historique complet",
+    "failedCountBadge": "{count} échouées",
+    "previousSignIn": "Connexion précédente {when} · {device}",
+    "noEarlierSignIns": "Aucune connexion antérieure enregistrée.",
+    "noFailedSignIns": "Aucune connexion échouée sur votre compte.",
+    "wholeServer": "Tout le serveur (admin)",
+    "serverFailed": "{count, plural, one {# connexion échouée} other {# connexions échouées}}",
+    "serverUnknown": "{count} pour des comptes inconnus",
+    "serverBlocked": "{count} bloquées par verrouillage",
+    "mostFailuresFrom": "Le plus d’échecs depuis",
+    "accountsMostFailures": "Comptes avec le plus d’échecs",
+    "stripLabel": "{count} dernières sauvegardes : {ok} réussies, {failed} échouées",
+    "stripEmpty": "Pas encore de sauvegarde",
+    "stripSucceeded": "Réussie",
+    "stripFailed": "Échouée",
+    "stripRunning": "En cours",
+    "badge": {
+      "auth": "Identifiants",
+      "connection": "Connexion impossible",
+      "other": "Échec",
+      "upload": "Copie externe",
+      "verify": "Vérification échouée"
+    },
+    "attention": {
+      "runAuth": "La dernière sauvegarde n’a pas pu s’authentifier auprès de la base de données",
+      "runConnection": "La dernière sauvegarde n’a pas pu joindre la base de données",
+      "runFailed": "La dernière sauvegarde a échoué",
+      "uploadAuth": "Connexion impossible à « {location} » — reconnectez-le",
+      "uploadFailed": "La copie vers « {location} » a échoué",
+      "verifyRestore": "La dernière sauvegarde a échoué à sa restauration de test",
+      "verifyCheck": "La dernière sauvegarde a échoué à sa vérification",
+      "unnamedLocation": "emplacement"
+    }
+  },
+  "runs": {
+    "trigger": {
+      "cron": "Planifiée",
+      "manual": "Manuelle",
+      "api": "API"
+    },
+    "status": {
+      "completed": "Terminée",
+      "failed": "Échouée",
+      "running": "En cours"
+    },
+    "upload": {
+      "completed": "envoyée",
+      "failed": "échec",
+      "skipped": "ignorée",
+      "skippedWhy": "ignorée — {reason}",
+      "uploading": "envoi…",
+      "line": "{location}: {status}",
+      "unknownLocation": "destination"
+    },
+    "showingAll": "Les {total} sauvegardes sont affichées",
+    "perPage": "Afficher {count} par page",
+    "showingRange": "{from}–{to} sur {total}",
+    "newer": "Plus récentes",
+    "older": "Plus anciennes",
+    "pageOf": "Page {page} sur {pages}",
+    "showAll": "Tout afficher",
+    "checkQueued": "Vérification en attente…",
+    "checking": "Vérification…",
+    "testRestored": "Restauration testée",
+    "verified": "Vérifiée",
+    "testRestoreFailed": "Restauration de test échouée",
+    "checkFailed": "Vérification échouée",
+    "notChecked": "Pas encore vérifiée",
+    "restoreWarning": "La restauration remplacera le contenu actuel de la base de production par les données de cette sauvegarde. Cette action est irréversible.",
+    "restoreTitle": "Restaurer cette sauvegarde ?",
+    "restore": "Restaurer",
+    "restoreMenu": "Restaurer…",
+    "restoreDescription": "Remplacer la base de production par cette sauvegarde",
+    "restoreDone": "Restauration terminée avec succès",
+    "download": "Télécharger",
+    "verifyFile": "Vérifier le fichier",
+    "verifyDescription": "Vérifier qu’il est intact et lisible en entier",
+    "checkStarted": "Vérification lancée — le résultat s’affiche sous cette sauvegarde",
+    "testRestore": "Restauration de test",
+    "testRestoreDescription": "Restaurer dans une base temporaire, la vérifier puis la supprimer",
+    "testRestoreStarted": "Restauration de test lancée — le résultat s’affiche sous cette sauvegarde",
+    "deleteMenu": "Supprimer…",
+    "deleteDescription": "Supprimer ce fichier de sauvegarde",
+    "deleteTitle": "Supprimer cette sauvegarde ?",
+    "deleteMessage": "Le fichier de sauvegarde sera supprimé. Cette action est irréversible.",
+    "deleted": "Sauvegarde supprimée",
+    "actionsLabel": "Actions de la sauvegarde",
+    "passwordNeeded": "Saisissez le mot de passe de chiffrement de la sauvegarde.",
+    "encryptionPassword": "Mot de passe de chiffrement",
+    "passwordPlaceholder": "Le mot de passe de chiffrement de cette sauvegarde",
+    "passwordHint": "C’est le mot de passe défini sur la tâche au moment de cette sauvegarde — pas forcément le mot de passe actuel, s’il a changé depuis.",
+    "restoring": "Restauration…",
+    "testAllConfirm": "Tester la restauration {count, plural, one {de # sauvegarde} other {des # sauvegardes}} ? Chacune est restaurée tour à tour dans une base temporaire du serveur de test, ce qui peut prendre du temps et charge ce serveur.",
+    "clearConfirm": "Supprimer toutes les sauvegardes échouées de cette tâche ? Cette action est irréversible.",
+    "verifyAllStarted": "Vérification de toutes les sauvegardes lancée — les résultats s’affichent dans l’historique",
+    "testAllStarted": "Restaurations de test lancées — les résultats s’affichent dans l’historique",
+    "noFailed": "Aucune sauvegarde échouée à supprimer",
+    "removedFailed": "{count, plural, one {# sauvegarde échouée supprimée} other {# sauvegardes échouées supprimées}}",
+    "verifyAll": "Tout vérifier",
+    "verifyAllDescription": "Vérifier que chaque sauvegarde est intacte et lisible en entier",
+    "testAll": "Tout tester",
+    "testAllDescription": "Restaurer chaque sauvegarde dans une base temporaire, une à une",
+    "testAllTitle": "Tester la restauration de toutes les sauvegardes ?",
+    "removeFailedMenu": "Supprimer les sauvegardes échouées",
+    "removeFailed": "Supprimer les échecs",
+    "clearDescription": "{count, plural, one {Supprimer # sauvegarde échouée} other {Supprimer # sauvegardes échouées}}",
+    "queuing": "Mise en file…",
+    "removing": "Suppression…",
+    "allActionsLabel": "Actions sur toutes les sauvegardes",
+    "allBackups": "Toutes les sauvegardes",
+    "summaryCount": "{count, plural, one {# sauvegarde} other {# sauvegardes}}",
+    "summaryFailed": "{count} échouées"
+  },
+  "signIns": {
+    "unknownDevice": "Appareil inconnu",
+    "script": "Script",
+    "browser": "Navigateur",
+    "browserOnOs": "{browser} sur {os}",
+    "outcome": {
+      "success": "Connecté",
+      "bad_password": "Mot de passe incorrect",
+      "unknown_user": "Compte inconnu",
+      "bad_2fa": "Code 2FA incorrect",
+      "passkey_failed": "Clé d’accès refusée",
+      "locked_out": "Bloqué — verrouillé",
+      "unlocked": "Déverrouillé par un admin",
+      "password_reset": "Mot de passe réinitialisé par e-mail"
+    },
+    "method": {
+      "password": "Mot de passe",
+      "totp": "Mot de passe + application d’authentification",
+      "recovery_code": "Mot de passe + code de récupération",
+      "passkey": "Clé d’accès"
+    }
+  },
+  "account": {
+    "title": "Votre compte",
+    "profileTitle": "Profil et mot de passe",
+    "profileDescription": "Votre nom affiché, votre langue et votre mot de passe.",
+    "name": "Nom",
+    "language": "Langue",
+    "languageAuto": "Automatique (langue du navigateur)",
+    "languageHint": "La langue d’affichage de Backup Hub. Les e-mails qui vous sont envoyés (comme les réinitialisations de mot de passe) l’utilisent aussi.",
+    "changePassword": "Changer de mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "currentPasswordPlaceholder": "Nécessaire seulement pour définir un nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "Laisser vide pour garder le mot de passe actuel",
+    "saveChanges": "Enregistrer",
+    "profileSaved": "Profil enregistré",
+    "passwordChanged": "Mot de passe modifié",
+    "passwordChangedSignedOut": "Mot de passe modifié — {count, plural, one {# autre session déconnectée} other {# autres sessions déconnectées}}",
+    "twoFactorTitle": "Authentification à deux facteurs",
+    "twoFactorDescription": "Exiger, en plus du mot de passe, un code d’une application d’authentification à la connexion.",
+    "enabled": "Activée",
+    "notEnabled": "Non activée",
+    "recoveryRemaining": "{count, plural, one {# code de récupération inutilisé restant.} other {# codes de récupération inutilisés restants.}}",
+    "passkeysTitle": "Clés d’accès",
+    "passkeysDescription": "Connectez-vous avec Touch ID, Face ID, Windows Hello ou une clé de sécurité — sans mot de passe, et cela compte comme second facteur à lui seul.",
+    "sessionsTitle": "Sessions actives",
+    "sessionsDescription": "Partout où vous êtes connecté en ce moment. Si vous n’en reconnaissez pas une — ou si son IP a changé de façon inattendue — déconnectez-la et changez votre mot de passe. Changer de mot de passe déconnecte automatiquement toutes les autres sessions.",
+    "signOutOthers": "Se déconnecter partout ailleurs",
+    "onlyThisDevice": "Vous n’êtes connecté que sur cet appareil",
+    "signOutOthersConfirm": "Déconnecter {count, plural, one {l’autre session} other {les # autres sessions}} ? Cet appareil reste connecté.",
+    "sessionSignedIn": "Connecté <time>date</time>",
+    "sessionSignedInFrom": "Connecté <time>date</time> depuis {ip}",
+    "sessionLastActive": "dernière activité <time>date</time>",
+    "sessionLastActiveFrom": "dernière activité <time>date</time> depuis {ip}",
+    "thisDevice": "Cet appareil",
+    "ipChanged": "Adresse IP modifiée",
+    "signOut": "Déconnecter",
+    "sessionSignedOut": "Session déconnectée",
+    "historyTitle": "Activité de connexion récente",
+    "historyDescription": "Les dernières tentatives de connexion à votre compte, réussies ou non. Conservées 90 jours. Si vous n’en reconnaissez pas une, changez votre mot de passe.",
+    "noSignIns": "Aucune connexion enregistrée pour l’instant.",
+    "noOtherSessions": "Aucune autre session à déconnecter",
+    "signedOutOthers": "{count, plural, one {# autre session déconnectée} other {# autres sessions déconnectées}}",
+    "thatsThisDevice": "C’est cet appareil — utilisez plutôt « Se déconnecter »."
+  },
+  "twoFactor": {
+    "setUp": "Configurer une application d’authentification",
+    "scanIntro": "Scannez ceci avec votre application d’authentification (1Password, Google Authenticator, Authy, etc.), puis saisissez le code à 6 chiffres affiché.",
+    "qrAlt": "QR code d’authentification",
+    "cantScan": "Impossible de scanner ? Saisissez cette clé manuellement :",
+    "verifyEnable": "Vérifier et activer",
+    "codesIntro": "L’authentification à deux facteurs est activée. Conservez ces codes de récupération en lieu sûr — chacun ne fonctionne qu’une fois et ils ne seront plus affichés. Utilisez-en un si vous perdez l’accès à votre application d’authentification.",
+    "savedThese": "Je les ai enregistrés",
+    "isOn": "L’authentification à deux facteurs est activée",
+    "verifyFailed": "Impossible de vérifier ce code — veuillez réessayer.",
+    "disableLink": "Désactiver l’authentification à deux facteurs",
+    "disablePrompt": "Saisissez votre mot de passe pour désactiver l’authentification à deux facteurs.",
+    "disable": "Désactiver",
+    "disabling": "Désactivation…",
+    "turnedOff": "Authentification à deux facteurs désactivée",
+    "newCodes": "Nouveaux codes de récupération — enregistrez-les maintenant, ils ne seront plus affichés.",
+    "done": "Terminé",
+    "regenerate": "Régénérer les codes de récupération",
+    "generating": "Génération…",
+    "regenerateConfirm": "Générer de nouveaux codes de récupération ? Vos codes actuels ne fonctionneront plus.",
+    "startFirst": "Commencez d’abord la configuration",
+    "codeMismatch": "Ce code ne correspond pas — vérifiez votre application d’authentification et réessayez.",
+    "incorrectPassword": "Mot de passe incorrect",
+    "notEnabled": "L’authentification à deux facteurs n’est pas activée",
+    "verifying": "Vérification…"
+  },
+  "passkeys": {
+    "namePrompt": "Nom de cette clé d’accès (par ex. « MacBook », « YubiKey ») :",
+    "defaultName": "Clé d’accès",
+    "added": "Clé d’accès ajoutée",
+    "addFailed": "Impossible d’ajouter cette clé d’accès.",
+    "removeConfirm": "Retirer cette clé d’accès ? Vous ne pourrez plus vous connecter avec.",
+    "removed": "Clé d’accès retirée",
+    "removeFailed": "Impossible de retirer cette clé d’accès — veuillez réessayer.",
+    "addedOn": "Ajoutée <time>date</time>",
+    "lastUsed": "dernière utilisation <time>date</time>",
+    "neverUsed": "jamais utilisée",
+    "none": "Aucune clé d’accès pour l’instant.",
+    "working": "Patientez…",
+    "add": "Ajouter une clé d’accès",
+    "registrationExpired": "Cette tentative d’enregistrement a expiré — réessayez.",
+    "registrationFailed": "L’enregistrement de la clé d’accès a échoué"
+  },
+  "errors": {
+    "nameRequired": "Le nom est obligatoire",
+    "nameEmailPasswordRequired": "Le nom, l’e-mail et le mot de passe sont obligatoires",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+    "newPasswordTooShort": "Le nouveau mot de passe doit contenir au moins 8 caractères",
+    "currentPasswordIncorrect": "Le mot de passe actuel est incorrect",
+    "ownAdminRole": "Vous ne pouvez pas retirer votre propre rôle d’admin",
+    "deleteSelf": "Vous ne pouvez pas supprimer votre propre compte",
+    "setupDone": "La configuration a déjà été effectuée",
+    "setupFieldsRequired": "Le nom, l’e-mail et le mot de passe sont tous obligatoires",
+    "apiKeyFields": "Un nom et au moins une autorisation sont obligatoires",
+    "testRestoreUnavailable": "Les restaurations de test ne sont pas configurées sur ce serveur",
+    "channelAlreadyUsed": "Cette tâche utilise déjà ce canal de notification",
+    "locationAlreadyUsed": "Cette tâche utilise déjà cet emplacement",
+    "eventRequired": "Au moins un événement est obligatoire",
+    "connectFirst": "Connectez-vous d’abord à votre compte avec le bouton « Connecter ».",
+    "backupFailed": "Échec de la sauvegarde : {reason}",
+    "shareEmailRequired": "Saisissez l’e-mail de l’utilisateur avec qui partager.",
+    "shareNoUser": "Aucun utilisateur avec cet e-mail.",
+    "shareOwnTask": "Cette tâche vous appartient déjà.",
+    "destinationNotFound": "Emplacement introuvable.",
+    "connectionFailedHidden": "échec de connexion (les détails ne sont visibles que par le propriétaire de la tâche)",
+    "noSignInSupport": "Ce fournisseur ne prend pas en charge la connexion.",
+    "signInNotSetUp": "La connexion n’est pas encore configurée sur ce serveur — demandez à un admin de la configurer (voir le README) ou utilisez vos propres identifiants sous « Avancé ».",
+    "signInTampered": "Session de connexion invalide ou altérée. Veuillez recommencer.",
+    "signInOtherTask": "Cette session de connexion appartient à une autre tâche. Veuillez recommencer.",
+    "codeExpired": "Le code a expiré avant d’être approuvé. Réessayez."
+  },
+  "task": {
+    "navBackups": "Sauvegardes",
+    "navNotifications": "Notifications",
+    "navLocations": "Emplacements",
+    "navSharing": "Partage",
+    "navSettings": "Paramètres",
+    "useSavedChannel": "Utiliser un canal enregistré",
+    "createNew": "Créer",
+    "useSavedLocation": "Utiliser un emplacement enregistré",
+    "scheduleActive": "Planification active",
+    "scheduleDisabled": "Planification désactivée",
+    "sharedBy": "partagée par {name}",
+    "historyTitle": "Historique des sauvegardes",
+    "historyDescription": "Toutes les sauvegardes de cette tâche, des plus récentes aux plus anciennes.",
+    "noBackups": "Pas encore de sauvegarde — lancez-en une maintenant ou attendez la prochaine exécution planifiée.",
+    "failedBackup": "Sauvegarde échouée",
+    "colFile": "Fichier",
+    "colStarted": "Début",
+    "colStatus": "État",
+    "notificationsTitle": "Notifications",
+    "notificationsDescription": "Où envoyer les résultats des sauvegardes de cette tâche — e-mail (nécessite SMTP, voir .env), ntfy, Telegram ou Discord.",
+    "addNotification": "Ajouter une notification",
+    "newNotification": "Nouvelle notification",
+    "noNotifications": "Aucune notification — personne n’est prévenu quand les sauvegardes de cette tâche réussissent ou échouent.",
+    "ownerOnlyDetails": "(détails visibles uniquement par le propriétaire de la tâche)",
+    "onSuccess": "En cas de succès",
+    "onFailure": "En cas d’échec",
+    "noEvents": "Aucun événement choisi",
+    "taskOnly": "Propre à la tâche",
+    "fromSavedChannels": "Parmi vos canaux enregistrés",
+    "savedChannel": "Canal enregistré",
+    "locationsTitle": "Emplacements distants",
+    "locationsDescription": "Chaque sauvegarde terminée est toujours conservée localement. Les emplacements copient en plus chaque fichier hors site — chacun est essayé indépendamment, donc la panne de l’un n’affecte ni les autres ni la copie locale.",
+    "addLocation": "Ajouter un emplacement",
+    "newLocation": "Nouvel emplacement",
+    "noLocations": "Aucun emplacement distant — les sauvegardes sont conservées uniquement sur ce serveur.",
+    "subfolder": "Sous-dossier <code>{folder}</code>",
+    "disabled": "Désactivé",
+    "fromSavedLocations": "Parmi vos emplacements enregistrés",
+    "savedLocation": "Emplacement enregistré",
+    "sharingTitle": "Partage",
+    "sharingDescription": "Cette tâche vous appartient. Seuls vous et les personnes ci-dessous pouvez la voir — même pas les admins.",
+    "shareTask": "Partager la tâche",
+    "shareWith": "Partager avec quelqu’un",
+    "share": "Partager",
+    "notShared": "Partagée avec personne.",
+    "settingsTitle": "Paramètres",
+    "settingsDescription": "Planification, rétention et chiffrement de cette tâche.",
+    "settingsSaved": "Paramètres enregistrés",
+    "taskName": "Nom de la tâche",
+    "backupsToKeep": "Sauvegardes à conserver",
+    "encrypt": "Chiffrer les fichiers de sauvegarde",
+    "encryptionPassword": "Mot de passe de chiffrement",
+    "keepPassword": "Laisser vide pour garder le mot de passe actuel",
+    "setPassword": "Définir un mot de passe",
+    "testRestoreEach": "Tester la restauration de chaque nouvelle sauvegarde",
+    "testRestoreHint": "Chaque sauvegarde est déjà vérifiée pour être lisible en entier. Cette option la restaure aussi dans une base temporaire du serveur de test, la vérifie puis la supprime — plus lent, et prévient les destinataires d’échec de la tâche en cas de problème.",
+    "connectionNotEditable": "Les informations de connexion à la base ne sont pas encore modifiables ici — supprimez puis recréez la tâche pour les changer, ou utilisez <code>PATCH /api/v1/tasks/:id</code>.",
+    "saveSettings": "Enregistrer les paramètres",
+    "sectionsLabel": "Sections de la tâche",
+    "sectionPrefix": "Section :",
+    "disableSchedule": "Désactiver la planification",
+    "enableSchedule": "Activer la planification",
+    "disableShort": "Désactiver",
+    "enableShort": "Activer",
+    "scheduleDisabledToast": "Planification désactivée",
+    "scheduleEnabledToast": "Planification activée",
+    "runNow": "Sauvegarder maintenant",
+    "runNowShort": "Lancer",
+    "running": "En cours…",
+    "backupCompleted": "Sauvegarde terminée",
+    "deleteTask": "Supprimer la tâche",
+    "deleteTaskHeading": "Supprimer cette tâche ?",
+    "deleteTaskDescription": "Sa planification s’arrête immédiatement, et la tâche, son historique, ses destinataires de notifications et ses partages sont retirés de l’application.",
+    "deleteTaskKeepNote": "Les fichiers de sauvegarde restent sur le serveur dans un dossier nommé {id} dans le répertoire des sauvegardes, vous pouvez donc encore les récupérer à la main. Ils n’apparaîtront plus dans l’application.",
+    "taskDeleted": "Tâche supprimée",
+    "accessRemoved": "Accès retiré",
+    "removing": "Retrait…",
+    "revokeShareConfirm": "Arrêter de partager cette tâche avec cet utilisateur ? Les clés API qu’il a créées pour elle cesseront aussi de fonctionner."
+  },
+  "channels": {
+    "email": {
+      "label": "E-mail",
+      "fields": {
+        "email": {
+          "label": "E-mail",
+          "helpText": "Nécessite que SMTP soit configuré sur le serveur (voir .env)."
+        }
+      }
+    },
+    "ntfy": {
+      "label": "ntfy",
+      "fields": {
+        "serverUrl": {
+          "label": "URL du serveur",
+          "helpText": "Utilisez https://ntfy.sh ou votre propre serveur ntfy."
+        },
+        "topic": {
+          "label": "Sujet",
+          "helpText": "Sur le serveur public ntfy.sh, toute personne qui connaît le nom du sujet peut le lire : choisissez quelque chose de difficile à deviner."
+        },
+        "accessToken": {
+          "label": "Jeton d’accès (facultatif)",
+          "helpText": "Nécessaire uniquement pour les sujets qui exigent une connexion."
+        }
+      }
+    },
+    "telegram": {
+      "label": "Telegram",
+      "fields": {
+        "botToken": {
+          "label": "Jeton du bot",
+          "helpText": "Créez un bot en écrivant à @BotFather sur Telegram."
+        },
+        "chatId": {
+          "label": "ID de discussion",
+          "placeholder": "123456789 ou -100123456789",
+          "helpText": "Envoyez d’abord un message à votre bot (ou ajoutez-le à un groupe) — un bot ne peut pas lancer une conversation lui-même."
+        }
+      }
+    },
+    "discord": {
+      "label": "Discord",
+      "fields": {
+        "webhookUrl": {
+          "label": "URL du webhook",
+          "helpText": "Paramètres du salon → Intégrations → Webhooks → Nouveau webhook → Copier l’URL du webhook."
+        }
+      }
+    }
+  },
+  "scopes": {
+    "tasks_read": {
+      "label": "Voir les tâches",
+      "hint": "Lister les tâches et l’historique"
+    },
+    "tasks_write": {
+      "label": "Gérer les tâches",
+      "hint": "Créer, modifier, supprimer des tâches"
+    },
+    "runs_trigger": {
+      "label": "Lancer des sauvegardes",
+      "hint": "Lancer une sauvegarde manuelle"
+    },
+    "runs_download": {
+      "label": "Télécharger les sauvegardes",
+      "hint": "Télécharger les fichiers de sauvegarde"
+    },
+    "runs_delete": {
+      "label": "Supprimer les sauvegardes",
+      "hint": "Supprimer les fichiers de sauvegarde"
+    }
+  },
+  "systemEvents": {
+    "user_login": "Connexions des utilisateurs",
+    "user_created": "Utilisateur créé",
+    "user_deleted": "Utilisateur supprimé",
+    "task_created": "Tâche de sauvegarde créée",
+    "task_deleted": "Tâche de sauvegarde supprimée",
+    "security_reset": "2FA/clés d’accès réinitialisées ou compte déverrouillé"
+  },
+  "notifications": {
+    "channelSaved": "Canal enregistré",
+    "addChannel": "Ajouter le canal",
+    "recipientAdded": "Destinataire ajouté",
+    "notifyFor": "Notifier pour",
+    "addRecipient": "Ajouter le destinataire",
+    "notificationAdded": "Notification ajoutée",
+    "onSuccess": "En cas de succès",
+    "onFailure": "En cas d’échec",
+    "saveToAccount": "Enregistrer dans mon compte pour que mes autres tâches puissent l’utiliser",
+    "saveToAccountHint": "Sans cette case, il reste propre à la tâche : ces réglages ne pourront être utilisés que par cette tâche.",
+    "add": "Ajouter",
+    "adding": "Ajout…",
+    "noOtherSaved": "Aucun autre canal enregistré dans votre compte. Cochez « Enregistrer dans mon compte » lors de l’ajout, ou ajoutez-les sur la page <link>Notifications</link>, pour les réutiliser entre les tâches.",
+    "channelAddedToTask": "Canal ajouté à cette tâche",
+    "savedChannel": "Canal enregistré",
+    "useThisChannel": "Utiliser ce canal",
+    "sendTest": "Envoyer un test",
+    "sending": "Envoi…",
+    "sent": "Envoyé",
+    "failedWhy": "Échec : {reason}",
+    "unknownError": "erreur inconnue",
+    "testSent": "Notification de test envoyée",
+    "testSentDetail": "Notification de test envoyée — {detail}",
+    "channelDeleted": "Canal supprimé",
+    "deleting": "Suppression…",
+    "madeReusable": "Canal enregistré dans votre compte — vos autres tâches peuvent maintenant l’utiliser",
+    "makeReusable": "Rendre réutilisable",
+    "saving": "Enregistrement…",
+    "makeReusableConfirm": "Enregistrer ce canal dans votre compte pour que vos autres tâches puissent aussi l’utiliser ? C’est irréversible — une fois utilisé par d’autres tâches, il ne peut plus redevenir propre à une tâche.",
+    "channelUpdated": "Canal mis à jour",
+    "name": "Nom",
+    "secretSaved": "Enregistré — laisser vide pour le conserver",
+    "saveChanges": "Enregistrer",
+    "sendVia": "Envoyer via",
+    "nameOptional": "Nom (facultatif)",
+    "emailPlaceholder": "L’adresse e-mail",
+    "recipientRemoved": "Destinataire retiré",
+    "notificationRemoved": "Notification retirée",
+    "removing": "Retrait…",
+    "removeTaskOnlyConfirm": "Retirer ce canal de notification ? Il est propre à cette tâche : lui et ses réglages seront supprimés.",
+    "removeSavedConfirm": "Arrêter d’utiliser ce canal pour cette tâche ? Il reste enregistré dans le compte du propriétaire pour ses autres tâches.",
+    "deleteConfirm": "Supprimer ce canal ? Les tâches qui l’utilisent ne lui enverront plus de notifications.",
+    "deleteUsedConfirm": "Supprimer ce canal de notification et ses réglages ? {count, plural, one {# tâche cessera} other {# tâches cesseront}} de le notifier.",
+    "deleteUnusedConfirm": "Supprimer ce canal de notification et ses réglages ?"
+  },
+  "sharing": {
+    "saved": "Partage enregistré",
+    "userEmail": "E-mail de l’utilisateur",
+    "note": "La restauration d’une sauvegarde dans la base ne peut jamais être partagée — vous seul pouvez le faire. Partagez à nouveau avec le même e-mail pour modifier les autorisations de quelqu’un.",
+    "share": "Partager",
+    "sharing": "Partage…"
+  },
+  "destinations": {
+    "s3": {
+      "label": "S3 (AWS / Backblaze / Wasabi / R2 / MinIO / autre compatible S3)",
+      "fields": {
+        "bucket": {
+          "label": "Bucket"
+        },
+        "region": {
+          "label": "Région",
+          "helpText": "Utilisez « auto » pour les fournisseurs sans régions AWS (par ex. R2)."
+        },
+        "accessKeyId": {
+          "label": "ID de clé d’accès"
+        },
+        "secretAccessKey": {
+          "label": "Clé d’accès secrète"
+        },
+        "endpoint": {
+          "label": "URL de point de terminaison personnalisée",
+          "helpText": "Laisser vide pour le vrai AWS S3."
+        },
+        "forcePathStyle": {
+          "label": "Forcer l’adressage par chemin",
+          "helpText": "Généralement requis pour les fournisseurs compatibles S3 hors AWS."
+        },
+        "pathPrefix": {
+          "label": "Préfixe de chemin (facultatif)"
+        }
+      }
+    },
+    "google_drive": {
+      "label": "Google Drive",
+      "fields": {
+        "folderId": {
+          "label": "ID du dossier (facultatif)",
+          "helpText": "Le long identifiant à la fin de l’URL d’un dossier Drive. Laisser vide pour envoyer à la racine du Drive."
+        },
+        "clientId": {
+          "label": "ID client OAuth"
+        },
+        "clientSecret": {
+          "label": "Secret client OAuth"
+        },
+        "refreshToken": {
+          "label": "Jeton d’actualisation OAuth",
+          "helpText": "Obtenu via le flux de consentement OAuth de Google avec la portée drive.file — voir le README."
+        }
+      }
+    },
+    "onedrive": {
+      "label": "OneDrive",
+      "fields": {
+        "folderPath": {
+          "label": "Chemin du dossier (facultatif)",
+          "helpText": "Créé s’il n’existe pas. Laisser vide pour envoyer à la racine de OneDrive."
+        },
+        "clientId": {
+          "label": "ID d’application (client)"
+        },
+        "clientSecret": {
+          "label": "Secret client (facultatif)",
+          "helpText": "Uniquement pour une application cliente confidentielle. Laisser vide pour un client public."
+        },
+        "refreshToken": {
+          "label": "Jeton d’actualisation OAuth",
+          "helpText": "Obtenu via le flux de consentement OAuth de Microsoft avec les portées Files.ReadWrite et offline_access — voir le README."
+        },
+        "tenantId": {
+          "label": "ID du locataire",
+          "helpText": "« common » pour les comptes Microsoft personnels, ou l’ID de votre locataire Azure AD pour les comptes professionnels ou scolaires."
+        }
+      }
+    },
+    "email": {
+      "label": "E-mail (joindre le fichier de sauvegarde)",
+      "fields": {
+        "to": {
+          "label": "Envoyer à",
+          "helpText": "Séparez plusieurs adresses par des virgules. Indépendant des destinataires de notifications de la tâche."
+        },
+        "maxSizeMb": {
+          "label": "Taille maximale du fichier (Mo)",
+          "helpText": "Les sauvegardes plus volumineuses sont ignorées au lieu d’être envoyées — et l’historique les indique comme ignorées. Vérifiez la limite de pièces jointes de votre messagerie (souvent autour de 25 Mo, et l’e-mail ajoute ~33 %)."
+        }
+      }
+    },
+    "opencloud": {
+      "label": "OpenCloud",
+      "fields": {
+        "webdavUrl": {
+          "label": "URL WebDAV du dossier"
+        },
+        "username": {
+          "label": "Nom d’utilisateur"
+        },
+        "appToken": {
+          "label": "Jeton d’application"
+        },
+        "pathPrefix": {
+          "label": "Préfixe de chemin (facultatif)"
+        }
+      }
+    },
+    "ftp": {
+      "label": "FTP (non chiffré)",
+      "fields": {
+        "host": {
+          "label": "Hôte"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Laisser vide pour la valeur par défaut."
+        },
+        "username": {
+          "label": "Nom d’utilisateur"
+        },
+        "password": {
+          "label": "Mot de passe"
+        },
+        "pathPrefix": {
+          "label": "Dossier distant (facultatif)",
+          "helpText": "Créé s’il n’existe pas. Commencez par « / » pour un chemin absolu, sinon il est relatif au dossier de connexion."
+        }
+      }
+    },
+    "ftps": {
+      "label": "FTPS (FTP sur TLS)",
+      "fields": {
+        "host": {
+          "label": "Hôte"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Laisser vide pour la valeur par défaut.",
+          "placeholder": "21 (990 pour TLS implicite)"
+        },
+        "username": {
+          "label": "Nom d’utilisateur"
+        },
+        "password": {
+          "label": "Mot de passe"
+        },
+        "implicitTls": {
+          "label": "Utiliser TLS implicite",
+          "helpText": "Uniquement pour les anciens serveurs qui attendent TLS dès le début (généralement le port 990). La plupart utilisent TLS explicite — laissez décoché."
+        },
+        "allowSelfSigned": {
+          "label": "Autoriser les certificats auto-signés / non fiables",
+          "helpText": "La connexion reste chiffrée, mais l’identité du serveur n’est pas vérifiée."
+        },
+        "pathPrefix": {
+          "label": "Dossier distant (facultatif)",
+          "helpText": "Créé s’il n’existe pas. Commencez par « / » pour un chemin absolu, sinon il est relatif au dossier de connexion."
+        }
+      }
+    },
+    "sftp": {
+      "label": "SFTP (transfert de fichiers SSH)",
+      "fields": {
+        "host": {
+          "label": "Hôte"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Laisser vide pour la valeur par défaut."
+        },
+        "username": {
+          "label": "Nom d’utilisateur"
+        },
+        "password": {
+          "label": "Mot de passe",
+          "helpText": "Laisser vide si vous utilisez une clé privée."
+        },
+        "privateKey": {
+          "label": "Clé privée (facultatif)",
+          "helpText": "Collez la clé complète au format OpenSSH ou PEM. Elle est stockée chiffrée.",
+          "placeholder": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+        },
+        "passphrase": {
+          "label": "Phrase secrète de la clé (facultatif)"
+        },
+        "hostFingerprint": {
+          "label": "Empreinte de la clé d’hôte du serveur (recommandé)",
+          "helpText": "Cliquez sur « Tester la connexion » pour voir l’empreinte du serveur. Une fois définie, les connexions vers un serveur avec une autre clé sont refusées."
+        },
+        "pathPrefix": {
+          "label": "Dossier distant (facultatif)",
+          "helpText": "Créé s’il n’existe pas. Commencez par « / » pour un chemin absolu, sinon il est relatif au dossier personnel de l’utilisateur."
+        }
+      }
+    }
+  },
+  "locations": {
+    "added": "Emplacement ajouté",
+    "provider": "Fournisseur",
+    "label": "Libellé",
+    "noOneClick": "La connexion en un clic n’est pas configurée sur ce serveur, vous devrez donc saisir vos propres identifiants OAuth ci-dessous. (Un admin peut l’activer en définissant l’ID client du fournisseur dans l’environnement du serveur — voir le README.)",
+    "saveToAccount": "Enregistrer dans mon compte pour que mes autres tâches puissent l’utiliser",
+    "saveToAccountHint": "Sans cette case, il reste propre à la tâche : ces identifiants ne pourront être utilisés que par cette tâche.",
+    "openAndSignIn": "1. Ouvrez <link>{url}</link> et connectez-vous.",
+    "enterCode": "2. Saisissez ce code : <mono>{code}</mono>",
+    "waiting": "En attente de votre approbation… cette page se met à jour automatiquement.",
+    "connectedAs": "Connecté en tant que {account}. L’emplacement a été ajouté.",
+    "connectedToast": "{account} connecté — emplacement ajouté",
+    "yourAccount": "votre compte",
+    "codeExpired": "Le code a expiré avant d’être approuvé. Réessayez.",
+    "connect": "Connecter {provider}",
+    "starting": "Démarrage…",
+    "testConnection": "Tester la connexion",
+    "testing": "Test…",
+    "addLocation": "Ajouter l’emplacement",
+    "useSignIn": "Utiliser plutôt la connexion",
+    "useOwnCredentials": "Avancé : utiliser mes propres identifiants",
+    "connected": "Connexion réussie",
+    "failedWhy": "Échec : {reason}",
+    "unknownError": "erreur inconnue",
+    "ok": "OK",
+    "noOtherSaved": "Aucun autre emplacement enregistré dans votre compte. Cochez « Enregistrer dans mon compte » lors de l’ajout, ou ajoutez-les sur la page <link>Emplacements</link>, pour les réutiliser entre les tâches.",
+    "addedToTask": "Emplacement ajouté à cette tâche",
+    "savedLocation": "Emplacement enregistré",
+    "subfolder": "Sous-dossier pour cette tâche (facultatif)",
+    "subfolderHint": "Ajouté sous le dossier de l’emplacement, pour que les tâches qui le partagent ne mélangent pas leurs fichiers. Videz le champ pour utiliser le dossier tel quel.",
+    "useThis": "Utiliser cet emplacement",
+    "updated": "Emplacement mis à jour",
+    "secretSaved": "Enregistré — laisser vide pour le conserver",
+    "saveChanges": "Enregistrer",
+    "test": "Tester",
+    "deleted": "Emplacement supprimé",
+    "deleting": "Suppression…",
+    "deleteUsedConfirm": "Supprimer cet emplacement et ses identifiants ? {count, plural, one {# tâche cessera} other {# tâches cesseront}} d’y copier des sauvegardes. Les fichiers déjà envoyés au fournisseur ne sont pas supprimés.",
+    "deleteUnusedConfirm": "Supprimer cet emplacement et ses identifiants ? Les fichiers déjà envoyés au fournisseur ne sont pas supprimés.",
+    "madeReusable": "Emplacement enregistré dans votre compte — vos autres tâches peuvent maintenant l’utiliser",
+    "makeReusable": "Rendre réutilisable",
+    "saving": "Enregistrement…",
+    "makeReusableConfirm": "Enregistrer cet emplacement dans votre compte pour que vos autres tâches puissent aussi l’utiliser ? C’est irréversible — une fois utilisé par d’autres tâches, il ne peut plus redevenir propre à une tâche.",
+    "disable": "Désactiver",
+    "enable": "Activer",
+    "disabledForTask": "Emplacement désactivé pour cette tâche",
+    "enabledForTask": "Emplacement activé pour cette tâche",
+    "removedFromTask": "Emplacement retiré de cette tâche",
+    "removing": "Retrait…",
+    "removeTaskOnlyConfirm": "Retirer cet emplacement ? Il est propre à cette tâche : lui et ses identifiants seront supprimés. Les prochaines exécutions n’y copieront plus de fichiers — rien de ce qui a déjà été envoyé au fournisseur n’est supprimé.",
+    "removeSavedConfirm": "Arrêter d’utiliser cet emplacement pour cette tâche ? Il reste enregistré dans le compte du propriétaire pour ses autres tâches. Rien de ce qui a déjà été envoyé au fournisseur n’est supprimé."
+  },
+  "apiKeys": {
+    "created": "Clé API créée — copiez-la maintenant",
+    "createdBanner": "Clé créée — copiez-la maintenant, elle ne sera plus affichée.",
+    "savedToast": "Clé enregistrée. Vous pouvez la révoquer depuis cette page à tout moment.",
+    "done": "Terminé",
+    "keyName": "Nom de la clé",
+    "keyNamePlaceholder": "Serveur de l’application principale",
+    "allTasks": "Toutes les tâches",
+    "permissions": "Autorisations",
+    "create": "Créer la clé",
+    "creating": "Création…",
+    "revoke": "Révoquer",
+    "revoking": "Révocation…",
+    "revokeConfirm": "Révoquer cette clé API ? Toute application qui l’utilise perdra immédiatement l’accès.",
+    "revoked": "Clé API révoquée",
+    "scopeTask": "Limiter à une seule tâche (facultatif)"
+  },
+  "users": {
+    "deleteHeading": "Supprimer cet utilisateur ?",
+    "deleteDescription": "Ses sessions sont révoquées immédiatement, et toutes ses tâches de sauvegarde, son historique, ses destinataires et ses clés API sont retirés de l’application. Cette action est irréversible.",
+    "deleteKeepNote": "Les fichiers de sauvegarde de ses tâches restent sur le serveur, chacun dans un dossier portant l’identifiant de la tâche dans le répertoire des sauvegardes, vous pouvez donc encore les récupérer à la main.",
+    "deleteUser": "Supprimer l’utilisateur",
+    "deleted": "Utilisateur supprimé",
+    "title": "Utilisateurs",
+    "intro": "Les admins gèrent les utilisateurs et les notifications système. Les tâches de sauvegarde sont privées : les admins voient combien de tâches a un utilisateur, mais pas les tâches elles-mêmes, sauf si le propriétaire les partage. Supprimer un utilisateur supprime aussi toutes ses tâches et sauvegardes.",
+    "allUsers": "Tous les utilisateurs",
+    "allUsersDescription": "Tous ceux qui peuvent se connecter à ce serveur.",
+    "addUser": "Ajouter un utilisateur",
+    "newUser": "Nouvel utilisateur",
+    "createNew": "Créer",
+    "userCreated": "Utilisateur créé",
+    "name": "Nom",
+    "email": "E-mail",
+    "tempPassword": "Mot de passe temporaire",
+    "role": "Rôle",
+    "roleUser": "Utilisateur",
+    "roleAdmin": "Admin",
+    "createUser": "Créer l’utilisateur",
+    "noUsers": "Aucun utilisateur.",
+    "you": "(vous)",
+    "taskCount": "{count, plural, one {# tâche} other {# tâches}}",
+    "edit": "Modifier",
+    "ownsTasks": "possède {count, plural, one {# tâche} other {# tâches}}",
+    "locked": "<strong>Connexion verrouillée</strong> après des tentatives échouées répétées, jusqu’à <time>date</time>. Les clés d’accès fonctionnent toujours.",
+    "unlock": "Déverrouiller",
+    "unlocked": "Compte déverrouillé",
+    "detailsTitle": "Détails du compte",
+    "detailsDescription": "Nom, rôle, et un nouveau mot de passe si l’utilisateur est bloqué.",
+    "changesSaved": "Modifications enregistrées",
+    "ownRole": "Vous ne pouvez pas modifier votre propre rôle.",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "keepPassword": "Laisser vide pour garder le mot de passe actuel",
+    "saveChanges": "Enregistrer",
+    "securityTitle": "Authentification à deux facteurs et clés d’accès",
+    "securityDescription": "Réinitialisez-les si l’utilisateur a perdu son application d’authentification ou sa clé de sécurité.",
+    "authenticatorOn": "Application d’authentification activée",
+    "authenticatorOff": "Pas d’application d’authentification",
+    "passkeyCount": "{count, plural, one {# clé d’accès} other {# clés d’accès}}",
+    "resetFactors": "Réinitialiser 2FA et clés d’accès",
+    "resetFactorsConfirm": "Retirer toute l’authentification à deux facteurs et les clés d’accès de {name} ? Il pourra ensuite se connecter avec son seul mot de passe et devra les reconfigurer depuis sa propre page de compte.",
+    "factorsReset": "2FA et clés d’accès réinitialisées",
+    "noFactors": "Ni application d’authentification ni clé d’accès — cet utilisateur se connecte uniquement avec un mot de passe."
+  },
+  "newTask": {
+    "testConnection": "Tester la connexion",
+    "testing": "Test…",
+    "connected": "Connexion réussie",
+    "failedWhy": "Échec : {reason}",
+    "unknownError": "erreur inconnue",
+    "dryRun": "Essai à blanc",
+    "dryRunning": "Sauvegarde en cours…",
+    "dryRunOk": "Sauvegarde réussie ({size}, supprimée)",
+    "engine": "Moteur de base de données",
+    "authSource": "Base d’authentification (facultatif)",
+    "authSourceHint": "La base dans laquelle l’utilisateur a été créé. Laisser vide pour « admin », ce qui convient à MongoDB Atlas et à la plupart des serveurs.",
+    "title": "Nouvelle tâche de sauvegarde",
+    "subtitle": "Les informations de connexion sont chiffrées et ne sont plus jamais affichées après l’enregistrement.",
+    "taskName": "Nom de la tâche",
+    "taskNamePlaceholder": "Sauvegarde de la base boutique",
+    "host": "Hôte",
+    "port": "Port",
+    "portPlaceholder": "Vide = valeur par défaut du moteur",
+    "user": "Utilisateur",
+    "password": "Mot de passe",
+    "database": "Nom de la base",
+    "requireSsl": "Exiger SSL",
+    "dryRunHint": "L’essai à blanc effectue une vraie sauvegarde avec ces réglages puis en jette le résultat — il prend autant de temps et charge autant la base qu’une vraie sauvegarde planifiée, mais rien n’est enregistré.",
+    "backupsToKeep": "Sauvegardes à conserver",
+    "encrypt": "Chiffrer les fichiers de sauvegarde",
+    "encryptionPassword": "Mot de passe de chiffrement",
+    "encryptionPlaceholder": "Utilisé seulement si le chiffrement est activé ci-dessus",
+    "encryptionHint": "Conservez-le en lieu sûr vous-même — Backup Hub ne peut pas le récupérer s’il est perdu.",
+    "create": "Créer la tâche"
+  },
+  "engines": {
+    "compatibility": {
+      "mysql": "Aussi les services compatibles MySQL comme Amazon RDS / Aurora MySQL, PlanetScale et TiDB.",
+      "postgres": "Aussi les services compatibles Postgres comme Supabase, Neon, Amazon RDS / Aurora PostgreSQL et TimescaleDB.",
+      "mongodb": "MongoDB auto-hébergé et MongoDB Atlas — pour Atlas, saisissez l’hôte du cluster (par ex. cluster0.abcde.mongodb.net) ; la connexion utilise TLS automatiquement."
+    }
+  },
+  "usage": {
+    "notUsed": "utilisé par aucune tâche",
+    "usedBy": "utilisé par",
+    "addedBy": "ajouté par {name}",
+    "taskOnly": "propre à une tâche"
+  },
+  "locationsPage": {
+    "title": "Emplacements",
+    "intro": "Les endroits hors site où vos sauvegardes sont copiées. Les emplacements enregistrés peuvent être utilisés par toutes vos tâches — saisissez les identifiants une fois, choisissez-les depuis la page d’une tâche, et les modifier ici met à jour toutes les tâches qui les utilisent. Les emplacements propres à une tâche n’appartiennent qu’à elle. Personne d’autre, pas même les admins, ne peut les voir.",
+    "savedTitle": "Emplacements enregistrés",
+    "savedDescription": "Réutilisables entre vos tâches.",
+    "addLocation": "Ajouter un emplacement",
+    "newLocation": "Nouvel emplacement",
+    "createNew": "Créer",
+    "noSaved": "Aucun emplacement enregistré — ajoutez-en un, ou rendez réutilisable un emplacement propre à une tâche.",
+    "taskOnlyTitle": "Emplacements propres à une tâche",
+    "taskOnlyDescription": "Liés à l’une de vos tâches. Ceux ajoutés par une personne avec qui vous partagez une tâche sont aussi listés : vous pouvez les retirer, mais seule cette personne peut modifier leurs identifiants.",
+    "noTaskOnly": "Aucun emplacement propre à une tâche.",
+    "edit": "Modifier",
+    "editTitle": "Modifier {name}",
+    "editIntroTaskOnly": "{provider} · propre à une tâche. Les modifications s’appliquent à la tâche qui l’utilise dès la prochaine sauvegarde.",
+    "editIntroSaved": "{provider} · emplacement enregistré. Les modifications s’appliquent à toutes les tâches qui l’utilisent dès la prochaine sauvegarde."
+  },
+  "channelsPage": {
+    "title": "Notifications",
+    "intro": "Vos canaux de notification : où vos tâches envoient les alertes de réussite ou d’échec des sauvegardes — e-mail, ntfy, Telegram ou Discord. Les canaux enregistrés peuvent être utilisés par toutes vos tâches : configurez-les une fois, choisissez-les depuis la page d’une tâche, et les modifier ici met à jour toutes les tâches qui les utilisent. Les canaux propres à une tâche n’appartiennent qu’à elle. Personne d’autre, pas même les admins, ne peut les voir.",
+    "savedTitle": "Canaux enregistrés",
+    "savedDescription": "Réutilisables entre vos tâches.",
+    "addChannel": "Ajouter un canal",
+    "newChannel": "Nouveau canal de notification",
+    "createNew": "Créer",
+    "noSaved": "Aucun canal enregistré — ajoutez-en un, ou rendez réutilisable un canal propre à une tâche.",
+    "taskOnlyTitle": "Canaux propres à une tâche",
+    "taskOnlyDescription": "Liés à l’une de vos tâches. Ceux ajoutés par une personne avec qui vous partagez une tâche sont aussi listés : vous pouvez les retirer, mais seule cette personne peut modifier leurs réglages.",
+    "noTaskOnly": "Aucun canal propre à une tâche.",
+    "edit": "Modifier",
+    "editTitle": "Modifier {name}",
+    "editIntroTaskOnly": "{type} · propre à une tâche. Les modifications s’appliquent à la tâche qui l’utilise.",
+    "editIntroSaved": "{type} · canal enregistré. Les modifications s’appliquent à toutes les tâches qui l’utilisent."
+  },
+  "systemPage": {
+    "title": "Notifications système",
+    "intro": "Alertes à l’échelle du serveur pour les événements de comptes et de tâches (e-mail, ntfy, Telegram ou Discord), gérées par les admins. Les alertes de réussite ou d’échec des sauvegardes sont distinctes : chaque utilisateur les configure dans <link>Notifications</link> et sur la page de chaque tâche.",
+    "recipientsTitle": "Destinataires",
+    "recipientsDescription": "Qui est alerté des événements de comptes et de tâches, et pour lesquels.",
+    "addRecipient": "Ajouter un destinataire",
+    "newRecipient": "Nouveau destinataire système",
+    "createNew": "Créer",
+    "noRecipients": "Aucun destinataire de notifications système pour l’instant."
+  },
+  "apiKeysPage": {
+    "title": "Clés API",
+    "intro": "Utilisées par des applications externes pour appeler l’API REST sur <code>/api/v1/*</code>. Chaque clé a ses propres autorisations et peut être limitée à une seule tâche. Une clé agit en votre nom : elle ne peut jamais faire plus que vous sur une tâche, et cesse de fonctionner sur une tâche qui n’est plus partagée avec vous.",
+    "keysTitle": "Vos clés API",
+    "keysDescription": "Révoquez une clé dès que l’application qui l’utilise n’en a plus besoin.",
+    "createKey": "Créer une clé",
+    "newKey": "Nouvelle clé API",
+    "createNew": "Créer",
+    "noKeys": "Aucune clé API pour l’instant.",
+    "oneTask": "Une tâche",
+    "allTasks": "Toutes les tâches"
+  }
+}

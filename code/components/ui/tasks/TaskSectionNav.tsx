@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { LuChevronDown, LuList } from "react-icons/lu";
 
@@ -15,6 +16,7 @@ export type SectionNavItem = { id: string; label: string; count?: number };
 export function TaskSectionNav({ items }: { items: SectionNavItem[] }) {
   const [active, setActive] = useState(items[0]?.id);
   const [open, setOpen] = useState(false);
+  const t = useTranslations("task");
   const [top, setTop] = useState(0);
   const navRef = useRef<HTMLElement>(null);
 
@@ -83,7 +85,7 @@ export function TaskSectionNav({ items }: { items: SectionNavItem[] }) {
   return (
     <nav
       ref={navRef}
-      aria-label="Task sections"
+      aria-label={t("sectionsLabel")}
       style={{ top }}
       className="sticky z-30 -mx-4 sm:mx-0 border-y sm:border border-line bg-white/95 backdrop-blur sm:rounded-md"
     >
@@ -97,7 +99,7 @@ export function TaskSectionNav({ items }: { items: SectionNavItem[] }) {
           className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-ink"
         >
           <LuList size={16} aria-hidden="true" className="text-muted" />
-          <span className="text-muted font-normal">Section:</span>
+          <span className="text-muted font-normal">{t("sectionPrefix")}</span>
           <span className="truncate">{current?.label}</span>
           {current?.count !== undefined && <span className="text-xs text-muted">{current.count}</span>}
           <LuChevronDown

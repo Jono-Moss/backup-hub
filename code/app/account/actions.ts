@@ -1,6 +1,7 @@
 "use server";
 
 import { fail } from "@/lib/action-result";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { userTotp, userRecoveryCode, userPasskey, appUser, loginAttempt, session } from "@/db/schema";
 import { eq, and, desc, gt, gte, inArray, isNull, sql } from "drizzle-orm";
@@ -61,11 +62,11 @@ export async function startTotpEnrollment() {
 export async function confirmTotpEnrollment(code: string) {
   const me = await requireUser();
   const [totp] = await db.select().from(userTotp).where(eq(userTotp.userId, me.id)).limit(1);
-  if (!totp) return fail("Start enrollment first");
+  if (!totp) return fail((await getTranslations("twoFactor"))("startFirst"));
 
   const secret = unwrapSecret(totp.encryptedSecret);
   if (!verifyTotpCode(secret, code)) {
-    return fail("That code didn't match — check your authenticator app and try again.");
+    return fail((await getTranslations("twoFactor"))("codeMismatch"));
   }
 
   await db.update(userTotp).set({ enabled: true, verifiedAt: new Date() }).where(eq(userTotp.id, totp.id));
@@ -86,7 +87,7 @@ export async function disableTotp(formData: FormData) {
 
   const [user] = await db.select().from(appUser).where(eq(appUser.id, me.id)).limit(1);
   if (!user || !(await verifyPassword(user.hashedPassword, password))) {
-    return fail("Incorrect password");
+    return fail((await getTranslations("twoFactor"))("incorrectPassword"));
   }
 
   await db.delete(userTotp).where(eq(userTotp.userId, me.id));
@@ -97,7 +98,7 @@ export async function disableTotp(formData: FormData) {
 export async function regenerateRecoveryCodes() {
   const me = await requireUser();
   const [totp] = await db.select().from(userTotp).where(eq(userTotp.userId, me.id)).limit(1);
-  if (!totp?.enabled) return fail("Two-factor authentication isn't enabled");
+  if (!totp?.enabled) return fail((await getTranslations("twoFactor"))("notEnabled"));
 
   await db.delete(userRecoveryCode).where(eq(userRecoveryCode.userId, me.id));
   const codes = generateRecoveryCodes();
@@ -137,7 +138,7 @@ export async function startPasskeyRegistration() {
 export async function finishPasskeyRegistration(name: string, response: RegistrationResponseJSON) {
   const me = await requireUser();
   const challenge = await consumeChallengeCookie();
-  if (!challenge) return fail("This registration attempt expired — try again.");
+  if (!challenge) return fail((await getTranslations("passkeys"))("registrationExpired"));
 
   const verification = await verifyRegistrationResponse({
     response,
@@ -147,7 +148,7 @@ export async function finishPasskeyRegistration(name: string, response: Registra
   });
 
   if (!verification.verified || !verification.registrationInfo) {
-    return fail("Passkey registration failed");
+    return fail((await getTranslations("passkeys"))("registrationFailed"));
   }
 
   const { credential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
@@ -292,7 +293,7 @@ export async function listMySessions() {
 /** Ends one of the user's other sessions. (This device signs out with the normal Sign out.) */
 export async function endSession(sessionId: string) {
   const me = await requireUser();
-  if (sessionId === me.sessionId) return fail("That's this device — use Sign out instead.");
+  if (sessionId === me.sessionId) return fail((await getTranslations("account"))("thatsThisDevice"));
   await db.delete(session).where(and(eq(session.id, sessionId), eq(session.userId, me.id)));
   revalidatePath("/account");
 }
@@ -301,8 +302,9 @@ export async function endAllOtherSessions() {
   const me = await requireUser();
   const ended = await endOtherSessions(me.id, me.sessionId);
   revalidatePath("/account");
+  const t = await getTranslations("account");
   return {
     ok: true as const,
-    message: ended === 0 ? "No other sessions to sign out" : `Signed out ${ended} other session${ended === 1 ? "" : "s"}`,
+    message: ended === 0 ? t("noOtherSessions") : t("signedOutOthers", { count: ended }),
   };
 }

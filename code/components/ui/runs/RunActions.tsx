@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition, type ReactNode } from "react";
 import { LuDatabaseZap, LuDownload, LuHistory, LuShieldCheck, LuTrash2 } from "react-icons/lu";
 import {
@@ -14,8 +15,6 @@ import { useModal } from "@/components/ui/modal/ModalProvider";
 import { useToast } from "@/components/ui/common/ToastProvider";
 import { useActionFeedback, type FeedbackOptions } from "@/components/ui/common/useActionFeedback";
 
-const RESTORE_WARNING =
-  "Restoring will overwrite the current contents of the live database with this backup's data. This cannot be undone.";
 
 interface RunActionsProps {
   taskId: string;
@@ -38,6 +37,8 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
   const [restoreOpen, setRestoreOpen] = useState(false);
   const { confirm } = useModal();
   const feedback = useActionFeedback();
+  const t = useTranslations("runs");
+  const tCommon = useTranslations("common");
   const completed = run.status === "completed";
   const downloadHref = `/tasks/${taskId}/runs/${run.id}/download`;
 
@@ -53,48 +54,48 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
     // Encrypted backups need their password, so they get the dialog; plain
     // ones just need a confirmation.
     if (run.encrypted) return setRestoreOpen(true);
-    const ok = await confirm({ title: "Restore this backup?", message: RESTORE_WARNING, confirmLabel: "Restore", danger: true });
+    const ok = await confirm({ title: t("restoreTitle"), message: t("restoreWarning"), confirmLabel: t("restore"), danger: true });
     if (!ok) return;
-    runAction(() => restoreBackupRun(taskId, run.id), "Restore completed successfully");
+    runAction(() => restoreBackupRun(taskId, run.id), t("restoreDone"));
   };
 
   const actions: MenuAction[] = [];
   if (completed && can.download && variant === "mobile") {
-    actions.push({ key: "download", label: "Download", icon: LuDownload, href: downloadHref });
+    actions.push({ key: "download", label: t("download"), icon: LuDownload, href: downloadHref });
   }
   if (completed && can.restore) {
-    actions.push({ key: "restore", label: "Restore…", icon: LuHistory, description: "Overwrite the live database with this backup", onSelect: restore });
+    actions.push({ key: "restore", label: t("restoreMenu"), icon: LuHistory, description: t("restoreDescription"), onSelect: restore });
   }
   if (completed && can.trigger) {
     actions.push({
       key: "verify",
-      label: "Verify file",
+      label: t("verifyFile"),
       icon: LuShieldCheck,
-      description: "Check it's intact and reads back completely",
+      description: t("verifyDescription"),
       disabled: checking,
-      onSelect: () => runAction(() => verifyBackupRun(taskId, run.id), "Check started — the result shows under this backup"),
+      onSelect: () => runAction(() => verifyBackupRun(taskId, run.id), t("checkStarted")),
     });
     if (testRestore) {
       actions.push({
         key: "test-restore",
-        label: "Test restore",
+        label: t("testRestore"),
         icon: LuDatabaseZap,
-        description: "Restore into a temporary database, check it, then delete it",
+        description: t("testRestoreDescription"),
         disabled: checking,
-        onSelect: () => runAction(() => testRestoreBackupRun(taskId, run.id), "Test restore started — the result shows under this backup"),
+        onSelect: () => runAction(() => testRestoreBackupRun(taskId, run.id), t("testRestoreStarted")),
       });
     }
   }
   if (can.deleteRuns) {
     actions.push({
       key: "delete",
-      label: "Delete…",
+      label: t("deleteMenu"),
       icon: LuTrash2,
-      description: "Remove this backup file",
+      description: t("deleteDescription"),
       danger: true,
       onSelect: async () => {
-        const ok = await confirm({ title: "Delete this backup?", message: "The backup file is deleted. This cannot be undone.", confirmLabel: "Delete", danger: true });
-        if (ok) runAction(() => deleteBackupRun(taskId, run.id), "Backup deleted");
+        const ok = await confirm({ title: t("deleteTitle"), message: t("deleteMessage"), confirmLabel: tCommon("delete"), danger: true });
+        if (ok) runAction(() => deleteBackupRun(taskId, run.id), t("deleted"));
       },
     });
   }
@@ -103,12 +104,12 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
     <>
       <div className="inline-flex items-center gap-2">
         {variant === "desktop" && completed && can.download && (
-          <StandardLinkButton href={downloadHref} title="Download" compact />
+          <StandardLinkButton href={downloadHref} title={t("download")} compact />
         )}
         <ActionMenu
           actions={actions}
           variant={variant === "desktop" ? "dropdown" : "sheet"}
-          label="Backup actions"
+          label={t("actionsLabel")}
           title={title}
           summary={summary}
           busy={isPending}
@@ -120,27 +121,29 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
 }
 
 function RestorePasswordDialog({ taskId, runId, onClose }: { taskId: string; runId: string; onClose: () => void }) {
+  const t = useTranslations("runs");
+  const tCommon = useTranslations("common");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
 
   const submit = () => {
-    if (!password) return setError("Enter the backup's encryption password.");
+    if (!password) return setError(t("passwordNeeded"));
     setError(null);
     startTransition(async () => {
       const result = await restoreBackupRun(taskId, runId, password);
       if (!result.ok) return setError(result.message);
       onClose();
-      toast.success("Restore completed successfully");
+      toast.success(t("restoreDone"));
     });
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-sm rounded-md border border-line bg-white p-6 shadow-lg">
-        <h2 className="text-base font-semibold text-ink mb-1">Restore this backup?</h2>
-        <p className="text-sm text-muted mb-4">{RESTORE_WARNING}</p>
+        <h2 className="text-base font-semibold text-ink mb-1">{t("restoreTitle")}</h2>
+        <p className="text-sm text-muted mb-4">{t("restoreWarning")}</p>
 
         <form
           onSubmit={(e) => {
@@ -149,7 +152,7 @@ function RestorePasswordDialog({ taskId, runId, onClose }: { taskId: string; run
           }}
         >
           <label className="block text-sm text-ink mb-1" htmlFor="restore-password">
-            Encryption password
+            {t("encryptionPassword")}
           </label>
           <input
             id="restore-password"
@@ -161,12 +164,11 @@ function RestorePasswordDialog({ taskId, runId, onClose }: { taskId: string; run
               setPassword(e.target.value);
               setError(null);
             }}
-            placeholder="This backup's encryption password"
+            placeholder={t("passwordPlaceholder")}
             className="w-full border border-line px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <p className="text-xs text-muted mb-4">
-            This is the password that was set on the task when this backup was taken — not necessarily the task's
-            current password, if it's been changed since.
+            {t("passwordHint")}
           </p>
 
           {error && <p className="text-sm text-danger mb-4">{error}</p>}
@@ -178,14 +180,14 @@ function RestorePasswordDialog({ taskId, runId, onClose }: { taskId: string; run
               disabled={isPending}
               className="rounded-md border border-line text-ink text-sm font-medium px-4 py-2 hover:border-primary disabled:opacity-40"
             >
-              Cancel
+              {tCommon("cancel")}
             </button>
             <button
               type="submit"
               disabled={isPending}
               className="rounded-md bg-primary text-white text-sm font-medium px-4 py-2 border-b-primary-dark border-b-2 hover:border-b-transparent disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isPending ? "Restoring..." : "Restore"}
+              {isPending ? t("restoring") : t("restore")}
             </button>
           </div>
         </form>

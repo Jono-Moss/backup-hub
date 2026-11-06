@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useDefinitionText } from "@/components/ui/common/useDefinitionText";
 import { useEffect, useRef, useState } from "react";
 import {
   addDestination,
@@ -75,6 +77,10 @@ export function AddTaskDestinationForm({
   const [connectedAccount, setConnectedAccount] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const toast = useToast();
+  const t = useTranslations("locations");
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const text = useDefinitionText("destinations");
 
   const provider = providers.find((p) => p.type === type);
   const bound = addDestination.bind(null, taskId);
@@ -137,7 +143,7 @@ export function AddTaskDestinationForm({
     async function tick() {
       if (cancelled || !flow) return;
       if (Date.now() > flow.expiresAt) {
-        setConnectError("The code expired before it was approved. Try again.");
+        setConnectError(t("codeExpired"));
         setFlow(null);
         return;
       }
@@ -148,8 +154,8 @@ export function AddTaskDestinationForm({
         timer = setTimeout(tick, delay);
       } else if (res.status === "complete") {
         setFlow(null);
-        setConnectedAccount(res.account ?? "your account");
-        toast.success(`Connected ${res.account ?? "your account"} — save location added`);
+        setConnectedAccount(res.account ?? t("yourAccount"));
+        toast.success(t("connectedToast", { account: res.account ?? t("yourAccount") }));
         formRef.current?.reset();
       } else {
         setConnectError(res.message);
@@ -175,18 +181,18 @@ export function AddTaskDestinationForm({
         // text field would still submit — and save a destination with no
         // credentials. The destination is only ever created by the sign-in
         // flow itself in this mode.
-        if (connectMode) return fail("Use the Connect button to sign in to your account first.");
+        if (connectMode) return fail(tErrors("connectFirst"));
         setResult(null);
         return bound(formData);
       }}
-      success="Save location added"
+      success={t("added")}
       resetOnSuccess
       className="space-y-4"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="destination-type">
-            Provider
+            {t("provider")}
           </label>
           <select
             id="destination-type"
@@ -201,19 +207,19 @@ export function AddTaskDestinationForm({
           >
             {providers.map((p) => (
               <option key={p.type} value={p.type}>
-                {p.label}
+                {text(`${p.type}.label`, p.label)}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="destination-label">
-            Label
+            {t("label")}
           </label>
           <input
             id="destination-label"
             name="label"
-            placeholder={provider?.label}
+            placeholder={provider ? text(`${provider.type}.label`, provider.label) : undefined}
             className="w-full border border-line px-3 py-2 text-sm"
           />
         </div>
@@ -221,8 +227,7 @@ export function AddTaskDestinationForm({
 
       {provider?.supportsConnect && !provider.connectAvailable && (
         <p className="text-xs text-muted">
-          One-click sign-in isn&apos;t set up on this server, so you&apos;ll need to enter your own OAuth credentials
-          below. (An admin can enable sign-in by setting the provider&apos;s client ID in the server environment — see the README.)
+          {t("noOneClick")}
         </p>
       )}
 
@@ -231,12 +236,12 @@ export function AddTaskDestinationForm({
           {field.type === "checkbox" ? (
             <label className="flex items-center gap-2 text-sm text-ink">
               <input type="checkbox" name={field.name} value="true" />
-              {field.label}
+              {text(`${type}.fields.${field.name}.label`, field.label)}
             </label>
           ) : (
             <>
               <label className="block text-sm text-ink mb-1" htmlFor={`destination-${field.name}`}>
-                {field.label}
+                {text(`${type}.fields.${field.name}.label`, field.label)}
                 {field.required && <span className="text-danger"> *</span>}
               </label>
               {field.type === "textarea" ? (
@@ -244,7 +249,7 @@ export function AddTaskDestinationForm({
                   id={`destination-${field.name}`}
                   name={field.name}
                   required={field.required}
-                  placeholder={field.placeholder}
+                  placeholder={text(`${type}.fields.${field.name}.placeholder`, field.placeholder)}
                   defaultValue={field.defaultValue}
                   rows={6}
                   spellCheck={false}
@@ -256,7 +261,7 @@ export function AddTaskDestinationForm({
                 name={field.name}
                 type={field.type}
                 required={field.required}
-                placeholder={field.placeholder}
+                placeholder={text(`${type}.fields.${field.name}.placeholder`, field.placeholder)}
                 defaultValue={field.defaultValue}
                 min={field.type === "number" ? 0 : undefined}
                 step={field.type === "number" ? "any" : undefined}
@@ -265,7 +270,7 @@ export function AddTaskDestinationForm({
               )}
             </>
           )}
-          {field.helpText && <p className="text-xs text-muted mt-1">{field.helpText}</p>}
+          {field.helpText && <p className="text-xs text-muted mt-1">{text(`${type}.fields.${field.name}.helpText`, field.helpText)}</p>}
         </div>
       ))}
 
@@ -273,9 +278,9 @@ export function AddTaskDestinationForm({
         <label className="flex items-start gap-2 text-sm text-ink">
           <input type="checkbox" name="saveToAccount" value="true" className="mt-0.5" />
           <span>
-            Save to my account so my other tasks can use it
+            {t("saveToAccount")}
             <span className="block text-xs text-muted">
-              Leave unticked to keep it task-only: these credentials can then only ever be used by this task.
+              {t("saveToAccountHint")}
             </span>
           </span>
         </label>
@@ -284,18 +289,24 @@ export function AddTaskDestinationForm({
       {flow && (
         <div className="border border-line rounded-md p-4 space-y-2 bg-white">
           <p className="text-sm text-ink">
-            1. Open{" "}
-            <a href={flow.verificationUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">
-              {flow.verificationUrl}
-            </a>{" "}
-            and sign in.
+            {t.rich("openAndSignIn", {
+              url: flow.verificationUrl,
+              link: (chunks) => (
+                <a href={flow.verificationUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
           <p className="text-sm text-ink">
-            2. Enter this code: <span className="font-mono text-lg font-semibold tracking-widest">{flow.userCode}</span>
+            {t.rich("enterCode", {
+              code: flow.userCode,
+              mono: (chunks) => <span className="font-mono text-lg font-semibold tracking-widest">{chunks}</span>,
+            })}
           </p>
-          <p className="text-xs text-muted">Waiting for you to approve… this page updates automatically.</p>
+          <p className="text-xs text-muted">{t("waiting")}</p>
           <StandardActionButton
-            title="Cancel"
+            title={tCommon("cancel")}
             variant="link"
             compact
             action={() => {
@@ -306,29 +317,29 @@ export function AddTaskDestinationForm({
       )}
 
       {connectedAccount && (
-        <p className="text-sm text-primary">Connected as {connectedAccount}. The save location has been added.</p>
+        <p className="text-sm text-primary">{t("connectedAs", { account: connectedAccount })}</p>
       )}
       {connectError && <p className="text-sm text-danger">{connectError}</p>}
 
       <div className="flex items-center gap-3">
         {connectMode ? (
           <StandardActionButton
-            title={`Connect ${provider?.label ?? ""}`}
-            pendingTitle="Starting…"
+            title={t("connect", { provider: provider ? text(`${provider.type}.label`, provider.label) ?? "" : "" })}
+            pendingTitle={t("starting")}
             action={handleConnect}
             disabled={!!flow}
           />
         ) : (
           <>
-            <StandardActionButton action={handleTest} variant="outline" title="Test connection" pendingTitle="Testing…" />
-            <StandardSubmitButton title="Add save location" />
+            <StandardActionButton action={handleTest} variant="outline" title={t("testConnection")} pendingTitle={t("testing")} />
+            <StandardSubmitButton title={t("addLocation")} />
           </>
         )}
         {provider?.supportsConnect && provider.connectAvailable && (
           <StandardActionButton
             variant="link"
             compact
-            title={advanced ? "Use sign-in instead" : "Advanced: use my own credentials"}
+            title={advanced ? t("useSignIn") : t("useOwnCredentials")}
             action={() => {
               setAdvanced(!advanced);
               resetTransient();
@@ -337,7 +348,7 @@ export function AddTaskDestinationForm({
         )}
         {result && (
           <span className={`text-sm ${result.ok ? "text-primary" : "text-danger"}`}>
-            {result.ok ? result.message ?? "Connected successfully" : `Failed: ${result.message ?? "unknown error"}`}
+            {result.ok ? result.message ?? t("connected") : t("failedWhy", { reason: result.message ?? t("unknownError") })}
           </span>
         )}
       </div>

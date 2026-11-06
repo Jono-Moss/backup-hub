@@ -1,0 +1,1052 @@
+{
+  "meta": {
+    "description": "为 MySQL、MariaDB、PostgreSQL 和 MongoDB 数据库提供定时加密备份。"
+  },
+  "nav": {
+    "tasks": "任务",
+    "saveLocations": "存储位置",
+    "notifications": "通知",
+    "users": "用户",
+    "systemNotifications": "系统通知",
+    "myAccount": "我的账户",
+    "apiKeys": "API 密钥",
+    "admin": "管理",
+    "signOut": "退出登录",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "logoAlt": "Backup Hub 标志"
+  },
+  "footer": {
+    "productBy": "出品方",
+    "tryAccounting": "试试我们的会计软件",
+    "openSource": "开源",
+    "license": "MIT 许可证",
+    "tagline": "为世界做备份"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "ok": "确定",
+    "dismiss": "关闭",
+    "processing": "处理中…",
+    "moreActions": "更多操作",
+    "delete": "删除",
+    "deleting": "正在删除…",
+    "remove": "移除",
+    "edit": "编辑",
+    "save": "保存",
+    "saving": "正在保存…",
+    "add": "添加",
+    "adding": "正在添加…",
+    "genericError": "出了点问题，请重试。",
+    "stalePage": "此页面已过期，请刷新后重试。",
+    "eraseFilesCheckbox": "同时从磁盘永久删除备份文件",
+    "eraseFilesWarning": "备份文件将被删除且无法恢复。",
+    "confirmAndErase": "{label}并删除文件"
+  },
+  "auth": {
+    "subtitle": "登录以管理备份任务。",
+    "passwordChanged": "密码已更改，请使用新密码登录。",
+    "lockedOut": "登录失败次数过多。请在 {minutes, plural, other {# 分钟}}后重试，或<link>重置密码</link>，或请管理员解锁你的账户。",
+    "lockedOutSoon": "登录失败次数过多。请几分钟后重试，或<link>重置密码</link>，或请管理员解锁你的账户。",
+    "incorrect": "邮箱或密码不正确。",
+    "email": "邮箱",
+    "password": "密码",
+    "forgotLink": "忘记密码？",
+    "signIn": "登录",
+    "or": "或",
+    "passkeySignIn": "使用通行密钥登录",
+    "passkeyWaiting": "正在等待通行密钥…",
+    "passkeyCancelled": "已取消。",
+    "passkeyFailed": "通行密钥登录失败。",
+    "passkeyExpired": "此次登录尝试已过期，请重试。",
+    "passkeyLockedNetwork": "来自你所在网络的失败尝试过多。请在 {minutes, plural, other {# 分钟}}后重试。",
+    "passkeyUnknown": "该通行密钥未注册到任何账户。",
+    "passkeyVerifyFailed": "通行密钥验证失败。",
+    "accountGone": "该账户已不存在。",
+    "twoFactorTitle": "两步验证",
+    "twoFactorRecoveryPrompt": "请输入一个未使用的恢复码。",
+    "twoFactorCodePrompt": "请输入身份验证器应用中的 6 位数字代码。",
+    "twoFactorRecoveryInvalid": "该恢复码无效或已被使用。",
+    "twoFactorCodeInvalid": "代码不匹配。",
+    "recoveryCode": "恢复码",
+    "authCode": "验证码",
+    "verify": "验证",
+    "useAuthenticator": "改用身份验证器应用",
+    "useRecoveryCode": "改用恢复码",
+    "setupTitle": "欢迎使用 Backup Hub",
+    "setupSubtitle": "创建第一个管理员账户以开始使用。",
+    "yourName": "你的姓名",
+    "passwordHint": "至少 8 个字符。",
+    "createAdmin": "创建管理员账户"
+  },
+  "passwordReset": {
+    "forgotTitle": "忘记密码？",
+    "noEmail": "此服务器未配置邮件，因此无法发送重置链接。请管理员在用户页面为你设置新密码。如果你因失败尝试过多而被锁定，请等待锁定结束，或使用通行密钥登录。",
+    "sent": "如果该邮箱属于某个账户，我们已向其发送链接。链接仅可使用一次，30 分钟后过期；如未收到，请检查垃圾邮件文件夹。",
+    "forgotIntro": "输入你的账户邮箱，我们会发送一个设置新密码的链接。重置密码也会解除登录锁定。",
+    "sendLink": "发送重置链接",
+    "sending": "正在发送…",
+    "backToSignIn": "返回登录",
+    "resetTitle": "设置新密码",
+    "invalidLink": "此链接无效、已过期或已被使用。",
+    "sendNewLink": "发送新链接",
+    "resetIntro": "账户：{email}。你将在所有设备上退出登录；如果你使用身份验证器应用，登录时仍需要它。",
+    "mismatch": "两次输入的密码不一致。",
+    "weak": "请至少使用 8 个字符。",
+    "newPassword": "新密码",
+    "confirmPassword": "确认新密码",
+    "setPassword": "设置新密码",
+    "saving": "正在保存…",
+    "email": {
+      "resetSubject": "重置你的 Backup Hub 密码",
+      "resetBody": "{name}，你好：\n\n有人请求重置你的 Backup Hub 账户密码。如需设置新密码，请打开以下链接：\n\n{link}\n\n该链接仅可使用一次，{minutes} 分钟后过期。重置密码也会解除登录锁定。\n\n如果这不是你本人的操作，请忽略此邮件，你的密码不会改变。",
+      "changedSubject": "你的 Backup Hub 密码已更改",
+      "changedBody": "{name}，你好：\n\n你的 Backup Hub 账户密码刚刚通过邮件链接被重置，你已在所有设备上退出登录。\n\n如果这不是你本人的操作，请立即联系 Backup Hub 管理员。"
+    }
+  },
+  "schedule": {
+    "everyMinutes": "{count, plural, other {每 # 分钟}}",
+    "everyHourAt": "每小时第 {minute} 分",
+    "everyHoursAt": "每 {count} 小时，在第 {minute} 分",
+    "everyDayAt": "每天 {time}",
+    "everyWeekdayAt": "每{day} {time}",
+    "monthlyAt": "每月 {day} 日 {time}",
+    "noSchedule": "无计划",
+    "selectedDay": "所选日期",
+    "label": "计划",
+    "serverTime": "备份按服务器的本地时间运行。",
+    "closeDialog": "关闭计划设置",
+    "close": "关闭",
+    "dialogTitle": "备份计划",
+    "dialogIntro": "选择备份的运行时间。",
+    "run": "运行",
+    "optMinutes": "每隔几分钟",
+    "optHours": "每隔几小时",
+    "optDaily": "每天",
+    "optWeekly": "每周",
+    "optMonthly": "每月",
+    "optCustom": "自定义 cron 表达式",
+    "every": "每",
+    "atMinute": "在第几分",
+    "atMinuteHint": "例如 15 表示整点过 15 分钟。",
+    "dayOfWeek": "星期",
+    "dayOfMonth": "日期",
+    "dayOfMonthHint": "仅提供 1–28 日，以确保计划每个月都能运行。",
+    "time": "时间",
+    "cronExpression": "Cron 表达式",
+    "cronHint": "高级用户可输入标准的 5 段 cron 表达式。",
+    "preview": "预览",
+    "apply": "应用计划"
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "subtitle": "你的备份运行情况，以及你创建或与你共享的任务。",
+    "newTask": "新建任务",
+    "twoFactorWarning": "在过去 {days} 天内，有人输入了你的正确密码，但两步验证码错误，共 {count, plural, other {# 次}}。",
+    "twoFactorWarningAction": "如果不是你本人，请立即更改密码。",
+    "succeeded": "成功",
+    "failed": "失败",
+    "running": "运行中",
+    "compactSucceeded": "成功",
+    "compactFailed": "失败",
+    "compactCopyFailed": "复制失败",
+    "compactBadSignIns": "登录失败",
+    "lastDays": "最近 {days} 天",
+    "problemsBanner": "{count, plural, other {# 个问题需要处理}}",
+    "statSuccessful": "成功的备份",
+    "statFailed": "失败的备份",
+    "statCopyFailures": "异地复制失败",
+    "statSignIns": "失败的登录",
+    "statSignInsHint": "你的账户，最近 {days} 天",
+    "attentionTitle": "需要处理",
+    "attentionDescription": "各任务最近一次备份中的问题。",
+    "allGood": "一切正常：每个任务的最近一次备份都已成功。",
+    "recentTitle": "最近活动",
+    "recentDescription": "所有任务的最新备份。",
+    "noBackupsYet": "尚未运行任何备份。",
+    "tasksTitle": "备份任务",
+    "tasksDescription": "每个任务都有自己的数据库连接、计划和保留策略。",
+    "noTasks": "还没有备份任务。",
+    "createFirst": "创建你的第一个任务",
+    "scheduleActive": "计划已启用",
+    "scheduleDisabled": "计划已停用",
+    "paused": "（已暂停）",
+    "keep": "保留 {count} 份",
+    "encrypted": "已加密",
+    "sharedBy": "由 {name} 共享",
+    "neverRun": "从未运行",
+    "signInTitle": "登录活动",
+    "signInDescription": "最近 {days} 天内你账户的登录情况。",
+    "fullHistory": "完整记录",
+    "failedCountBadge": "{count} 次失败",
+    "previousSignIn": "上次登录：{when} · {device}",
+    "noEarlierSignIns": "没有更早的登录记录。",
+    "noFailedSignIns": "你的账户没有失败的登录。",
+    "wholeServer": "整个服务器（管理员）",
+    "serverFailed": "{count, plural, other {# 次登录失败}}",
+    "serverUnknown": "{count} 次来自未知账户",
+    "serverBlocked": "{count} 次被拦截",
+    "mostFailuresFrom": "失败最多的来源",
+    "accountsMostFailures": "失败最多的账户",
+    "stripLabel": "最近 {count} 次备份：{ok} 次成功，{failed} 次失败",
+    "stripEmpty": "暂无备份",
+    "stripSucceeded": "成功",
+    "stripFailed": "失败",
+    "stripRunning": "运行中",
+    "badge": {
+      "auth": "凭据",
+      "connection": "无法连接",
+      "other": "失败",
+      "upload": "异地复制",
+      "verify": "检查失败"
+    },
+    "attention": {
+      "runAuth": "最近一次备份无法通过数据库身份验证",
+      "runConnection": "最近一次备份无法连接到数据库",
+      "runFailed": "最近一次备份失败",
+      "uploadAuth": "无法登录“{location}”，请重新连接",
+      "uploadFailed": "复制到“{location}”失败",
+      "verifyRestore": "最新备份未通过测试还原",
+      "verifyCheck": "最新备份未通过检查",
+      "unnamedLocation": "存储位置"
+    }
+  },
+  "runs": {
+    "trigger": {
+      "cron": "定时",
+      "manual": "手动",
+      "api": "API"
+    },
+    "status": {
+      "completed": "已完成",
+      "failed": "失败",
+      "running": "运行中"
+    },
+    "upload": {
+      "completed": "已上传",
+      "failed": "失败",
+      "skipped": "已跳过",
+      "skippedWhy": "已跳过：{reason}",
+      "uploading": "正在上传…",
+      "line": "{location}: {status}",
+      "unknownLocation": "目标"
+    },
+    "showingAll": "显示全部 {total} 个备份",
+    "perPage": "每页显示 {count} 个",
+    "showingRange": "第 {from}–{to} 个，共 {total} 个",
+    "newer": "较新",
+    "older": "较旧",
+    "pageOf": "第 {page} 页，共 {pages} 页",
+    "showAll": "显示全部",
+    "checkQueued": "检查已排队…",
+    "checking": "正在检查…",
+    "testRestored": "已测试还原",
+    "verified": "已验证",
+    "testRestoreFailed": "测试还原失败",
+    "checkFailed": "检查失败",
+    "notChecked": "尚未检查",
+    "restoreWarning": "还原会用此备份中的数据覆盖线上数据库的当前内容。此操作无法撤销。",
+    "restoreTitle": "还原此备份？",
+    "restore": "还原",
+    "restoreMenu": "还原…",
+    "restoreDescription": "用此备份覆盖线上数据库",
+    "restoreDone": "还原成功完成",
+    "download": "下载",
+    "verifyFile": "验证文件",
+    "verifyDescription": "检查文件完整且可以完整读取",
+    "checkStarted": "检查已开始，结果会显示在此备份下方",
+    "testRestore": "测试还原",
+    "testRestoreDescription": "还原到临时数据库，检查后删除",
+    "testRestoreStarted": "测试还原已开始，结果会显示在此备份下方",
+    "deleteMenu": "删除…",
+    "deleteDescription": "移除此备份文件",
+    "deleteTitle": "删除此备份？",
+    "deleteMessage": "备份文件将被删除。此操作无法撤销。",
+    "deleted": "备份已删除",
+    "actionsLabel": "备份操作",
+    "passwordNeeded": "请输入此备份的加密密码。",
+    "encryptionPassword": "加密密码",
+    "passwordPlaceholder": "此备份的加密密码",
+    "passwordHint": "即创建此备份时任务所用的密码；如果之后改过密码，不一定是当前密码。",
+    "restoring": "正在还原…",
+    "testAllConfirm": "测试还原全部 {count, plural, other {# 个备份}}？每个备份会依次还原到测试服务器上的临时数据库，可能需要较长时间，并会给该服务器带来负载。",
+    "clearConfirm": "移除此任务的所有失败备份记录？此操作无法撤销。",
+    "verifyAllStarted": "已开始检查所有备份，结果会显示在备份记录中",
+    "testAllStarted": "测试还原已开始，结果会显示在备份记录中",
+    "noFailed": "没有可移除的失败备份",
+    "removedFailed": "{count, plural, other {已移除 # 个失败备份}}",
+    "verifyAll": "全部验证",
+    "verifyAllDescription": "检查每个备份都完整且可以完整读取",
+    "testAll": "全部测试还原",
+    "testAllDescription": "依次将每个备份还原到临时数据库",
+    "testAllTitle": "测试还原所有备份？",
+    "removeFailedMenu": "移除失败备份",
+    "removeFailed": "移除失败项",
+    "clearDescription": "{count, plural, other {移除 # 条失败备份记录}}",
+    "queuing": "正在排队…",
+    "removing": "正在移除…",
+    "allActionsLabel": "所有备份的操作",
+    "allBackups": "所有备份",
+    "summaryCount": "{count, plural, other {# 个备份}}",
+    "summaryFailed": "{count} 个失败"
+  },
+  "signIns": {
+    "unknownDevice": "未知设备",
+    "script": "脚本",
+    "browser": "浏览器",
+    "browserOnOs": "{os} 上的 {browser}",
+    "outcome": {
+      "success": "已登录",
+      "bad_password": "密码错误",
+      "unknown_user": "未知账户",
+      "bad_2fa": "两步验证码错误",
+      "passkey_failed": "通行密钥被拒绝",
+      "locked_out": "已锁定",
+      "unlocked": "已由管理员解锁",
+      "password_reset": "已通过邮件重置密码"
+    },
+    "method": {
+      "password": "密码",
+      "totp": "密码 + 身份验证器",
+      "recovery_code": "密码 + 恢复码",
+      "passkey": "通行密钥"
+    }
+  },
+  "account": {
+    "title": "你的账户",
+    "profileTitle": "个人资料与密码",
+    "profileDescription": "你的显示名称、语言和登录密码。",
+    "name": "姓名",
+    "language": "语言",
+    "languageAuto": "自动（浏览器语言）",
+    "languageHint": "Backup Hub 的显示语言。你收到的邮件（例如密码重置邮件）也会使用此语言。",
+    "changePassword": "更改密码",
+    "currentPassword": "当前密码",
+    "currentPasswordPlaceholder": "仅在设置新密码时需要",
+    "newPassword": "新密码",
+    "newPasswordPlaceholder": "留空则保留当前密码",
+    "saveChanges": "保存更改",
+    "profileSaved": "个人资料已保存",
+    "passwordChanged": "密码已更改",
+    "passwordChangedSignedOut": "密码已更改，已退出 {count, plural, other {# 个其他会话}}",
+    "twoFactorTitle": "两步验证",
+    "twoFactorDescription": "登录时除密码外，还需输入身份验证器应用中的代码。",
+    "enabled": "已启用",
+    "notEnabled": "未启用",
+    "recoveryRemaining": "{count, plural, other {剩余 # 个未使用的恢复码。}}",
+    "passkeysTitle": "通行密钥",
+    "passkeysDescription": "使用 Touch ID、Face ID、Windows Hello 或安全密钥登录：无需密码，且本身即可作为第二验证因素。",
+    "sessionsTitle": "活动会话",
+    "sessionsDescription": "你当前登录的所有位置。如果有你不认识的会话，或其 IP 意外变化，请将其退出并更改密码。更改密码会自动退出所有其他会话。",
+    "signOutOthers": "退出所有其他会话",
+    "onlyThisDevice": "你只在此设备上登录",
+    "signOutOthersConfirm": "退出 {count, plural, other {其他 # 个会话}}？此设备将保持登录。",
+    "sessionSignedIn": "登录于 <time>date</time>",
+    "sessionSignedInFrom": "登录于 <time>date</time>，来自 {ip}",
+    "sessionLastActive": "最后活动于 <time>date</time>",
+    "sessionLastActiveFrom": "最后活动于 <time>date</time>，来自 {ip}",
+    "thisDevice": "此设备",
+    "ipChanged": "IP 地址已变化",
+    "signOut": "退出",
+    "sessionSignedOut": "会话已退出",
+    "historyTitle": "最近登录活动",
+    "historyDescription": "最近尝试登录你账户的记录，无论成功与否，保留 90 天。如有你不认识的记录，请更改密码。",
+    "noSignIns": "暂无登录记录。",
+    "noOtherSessions": "没有可退出的其他会话",
+    "signedOutOthers": "{count, plural, other {已退出 # 个其他会话}}",
+    "thatsThisDevice": "这是当前设备，请改用“退出登录”。"
+  },
+  "twoFactor": {
+    "setUp": "设置身份验证器应用",
+    "scanIntro": "使用身份验证器应用（1Password、Google Authenticator、Authy 等）扫描，然后输入其显示的 6 位数字代码。",
+    "qrAlt": "身份验证器二维码",
+    "cantScan": "无法扫描？请手动输入此密钥：",
+    "verifyEnable": "验证并启用",
+    "codesIntro": "两步验证已启用。请将这些恢复码保存在安全的地方：每个只能使用一次，且不会再次显示。如果无法使用身份验证器应用，可用其中一个登录。",
+    "savedThese": "我已保存",
+    "isOn": "两步验证已启用",
+    "verifyFailed": "无法验证该代码，请重试。",
+    "disableLink": "停用两步验证",
+    "disablePrompt": "输入密码以停用两步验证。",
+    "disable": "停用",
+    "disabling": "正在停用…",
+    "turnedOff": "两步验证已停用",
+    "newCodes": "新的恢复码：请立即保存，它们不会再次显示。",
+    "done": "完成",
+    "regenerate": "重新生成恢复码",
+    "generating": "正在生成…",
+    "regenerateConfirm": "生成新的恢复码？你现有的恢复码将失效。",
+    "startFirst": "请先开始设置",
+    "codeMismatch": "代码不匹配，请检查身份验证器应用后重试。",
+    "incorrectPassword": "密码错误",
+    "notEnabled": "两步验证未启用",
+    "verifying": "正在验证…"
+  },
+  "passkeys": {
+    "namePrompt": "为此通行密钥命名（例如“MacBook”“YubiKey”）：",
+    "defaultName": "通行密钥",
+    "added": "通行密钥已添加",
+    "addFailed": "无法添加该通行密钥。",
+    "removeConfirm": "移除此通行密钥？之后将无法再用它登录。",
+    "removed": "通行密钥已移除",
+    "removeFailed": "无法移除该通行密钥，请重试。",
+    "addedOn": "添加于 <time>date</time>",
+    "lastUsed": "最后使用于 <time>date</time>",
+    "neverUsed": "从未使用",
+    "none": "还没有通行密钥。",
+    "working": "请稍候…",
+    "add": "添加通行密钥",
+    "registrationExpired": "此次注册尝试已过期，请重试。",
+    "registrationFailed": "通行密钥注册失败"
+  },
+  "errors": {
+    "nameRequired": "姓名为必填项",
+    "nameEmailPasswordRequired": "姓名、邮箱和密码为必填项",
+    "passwordTooShort": "密码至少需要 8 个字符",
+    "newPasswordTooShort": "新密码至少需要 8 个字符",
+    "currentPasswordIncorrect": "当前密码不正确",
+    "ownAdminRole": "你不能移除自己的管理员角色",
+    "deleteSelf": "你不能删除自己的账户",
+    "setupDone": "初始设置已完成",
+    "setupFieldsRequired": "姓名、邮箱和密码为必填项",
+    "apiKeyFields": "需要名称和至少一项权限",
+    "testRestoreUnavailable": "此服务器未配置测试还原",
+    "channelAlreadyUsed": "此任务已在使用该通知渠道",
+    "locationAlreadyUsed": "此任务已在使用该存储位置",
+    "eventRequired": "至少需要选择一个事件",
+    "connectFirst": "请先使用“连接”按钮登录你的账户。",
+    "backupFailed": "备份失败：{reason}",
+    "shareEmailRequired": "请输入要共享给的用户邮箱。",
+    "shareNoUser": "没有使用该邮箱的用户。",
+    "shareOwnTask": "你已经是此任务的所有者。",
+    "destinationNotFound": "未找到存储位置。",
+    "connectionFailedHidden": "连接失败（详情仅任务所有者可见）",
+    "noSignInSupport": "此提供商不支持登录。",
+    "signInNotSetUp": "此服务器尚未配置登录：请管理员进行配置（见 README），或在“高级”中使用你自己的凭据。",
+    "signInTampered": "登录会话无效或已被篡改，请重新开始。",
+    "signInOtherTask": "此登录会话属于其他任务，请重新开始。",
+    "codeExpired": "代码在批准前已过期，请重试。"
+  },
+  "task": {
+    "navBackups": "备份",
+    "navNotifications": "通知",
+    "navLocations": "存储位置",
+    "navSharing": "共享",
+    "navSettings": "设置",
+    "useSavedChannel": "使用已保存的渠道",
+    "createNew": "新建",
+    "useSavedLocation": "使用已保存的位置",
+    "scheduleActive": "计划已启用",
+    "scheduleDisabled": "计划已停用",
+    "sharedBy": "由 {name} 共享",
+    "historyTitle": "备份记录",
+    "historyDescription": "此任务的所有备份，按从新到旧排列。",
+    "noBackups": "还没有备份：立即运行一次，或等待下一次定时运行。",
+    "failedBackup": "备份失败",
+    "colFile": "文件",
+    "colStarted": "开始时间",
+    "colStatus": "状态",
+    "notificationsTitle": "通知",
+    "notificationsDescription": "此任务的备份结果发送到哪里：邮件（需要 SMTP，见 .env）、ntfy、Telegram 或 Discord。",
+    "addNotification": "添加通知",
+    "newNotification": "新建通知",
+    "noNotifications": "没有通知：此任务的备份成功或失败都不会有人知道。",
+    "ownerOnlyDetails": "（详情仅任务所有者可见）",
+    "onSuccess": "成功时",
+    "onFailure": "失败时",
+    "noEvents": "未选择事件",
+    "taskOnly": "仅限此任务",
+    "fromSavedChannels": "从你保存的渠道中选择",
+    "savedChannel": "已保存的渠道",
+    "locationsTitle": "远程存储位置",
+    "locationsDescription": "每个完成的备份始终会保留在本地。存储位置会将每个文件另外复制到服务器之外；每个位置单独尝试，因此一个失败不会影响其他位置或本地副本。",
+    "addLocation": "添加存储位置",
+    "newLocation": "新建存储位置",
+    "noLocations": "没有远程存储位置：备份只保存在此服务器上。",
+    "subfolder": "子文件夹 <code>{folder}</code>",
+    "disabled": "已停用",
+    "fromSavedLocations": "从你保存的位置中选择",
+    "savedLocation": "已保存的位置",
+    "sharingTitle": "共享",
+    "sharingDescription": "此任务属于你。只有你和下列人员可以看到它，管理员也看不到。",
+    "shareTask": "共享任务",
+    "shareWith": "与他人共享",
+    "share": "共享",
+    "notShared": "未与任何人共享。",
+    "settingsTitle": "设置",
+    "settingsDescription": "此任务的计划、保留和加密设置。",
+    "settingsSaved": "设置已保存",
+    "taskName": "任务名称",
+    "backupsToKeep": "保留的备份数",
+    "encrypt": "加密备份文件",
+    "encryptionPassword": "加密密码",
+    "keepPassword": "留空则保留当前密码",
+    "setPassword": "设置密码",
+    "testRestoreEach": "对每个新备份进行测试还原",
+    "testRestoreHint": "每个备份都会检查是否可以完整读取。启用后还会将其还原到测试服务器上的临时数据库，检查后删除；速度较慢，失败时会通知任务的失败接收人。",
+    "connectionNotEditable": "数据库连接信息暂时无法在此编辑：如需更改，请删除并重新创建任务，或使用 <code>PATCH /api/v1/tasks/:id</code>。",
+    "saveSettings": "保存设置",
+    "sectionsLabel": "任务分区",
+    "sectionPrefix": "分区：",
+    "disableSchedule": "停用计划",
+    "enableSchedule": "启用计划",
+    "disableShort": "停用",
+    "enableShort": "启用",
+    "scheduleDisabledToast": "计划已停用",
+    "scheduleEnabledToast": "计划已启用",
+    "runNow": "立即备份",
+    "runNowShort": "运行",
+    "running": "正在运行…",
+    "backupCompleted": "备份完成",
+    "deleteTask": "删除任务",
+    "deleteTaskHeading": "删除此任务？",
+    "deleteTaskDescription": "其计划将立即停止，任务本身、备份记录、通知接收人和共享权限都会从应用中移除。",
+    "deleteTaskKeepNote": "备份文件会保留在服务器上备份目录中名为 {id} 的文件夹里，你仍可手动取回，但它们不会再显示在应用中。",
+    "taskDeleted": "任务已删除",
+    "accessRemoved": "访问权限已移除",
+    "removing": "正在移除…",
+    "revokeShareConfirm": "停止与此用户共享此任务？他们为此任务创建的 API 密钥也将失效。"
+  },
+  "channels": {
+    "email": {
+      "label": "邮件",
+      "fields": {
+        "email": {
+          "label": "邮箱地址",
+          "helpText": "需要在服务器上配置 SMTP（见 .env）。"
+        }
+      }
+    },
+    "ntfy": {
+      "label": "ntfy",
+      "fields": {
+        "serverUrl": {
+          "label": "服务器 URL",
+          "helpText": "使用 https://ntfy.sh 或你自建的 ntfy 服务器。"
+        },
+        "topic": {
+          "label": "主题",
+          "helpText": "在公共 ntfy.sh 服务器上，任何知道主题名称的人都能读取，所以请选择难以猜到的名称。"
+        },
+        "accessToken": {
+          "label": "访问令牌（可选）",
+          "helpText": "仅在主题需要登录时才需要。"
+        }
+      }
+    },
+    "telegram": {
+      "label": "Telegram",
+      "fields": {
+        "botToken": {
+          "label": "机器人令牌",
+          "helpText": "在 Telegram 中向 @BotFather 发消息来创建机器人。"
+        },
+        "chatId": {
+          "label": "聊天 ID",
+          "placeholder": "123456789 或 -100123456789",
+          "helpText": "请先给你的机器人发一条消息（或将其加入群组）：机器人无法主动发起对话。"
+        }
+      }
+    },
+    "discord": {
+      "label": "Discord",
+      "fields": {
+        "webhookUrl": {
+          "label": "Webhook URL",
+          "helpText": "频道设置 → 整合 → Webhook → 新 Webhook → 复制 Webhook URL。"
+        }
+      }
+    }
+  },
+  "scopes": {
+    "tasks_read": {
+      "label": "查看任务",
+      "hint": "列出任务和记录"
+    },
+    "tasks_write": {
+      "label": "管理任务",
+      "hint": "创建、修改和删除任务"
+    },
+    "runs_trigger": {
+      "label": "触发备份",
+      "hint": "启动手动备份"
+    },
+    "runs_download": {
+      "label": "下载备份",
+      "hint": "下载备份文件"
+    },
+    "runs_delete": {
+      "label": "删除备份",
+      "hint": "删除备份文件"
+    }
+  },
+  "systemEvents": {
+    "user_login": "用户登录",
+    "user_created": "用户已创建",
+    "user_deleted": "用户已删除",
+    "task_created": "备份任务已创建",
+    "task_deleted": "备份任务已删除",
+    "security_reset": "两步验证/通行密钥已重置或账户已解锁"
+  },
+  "notifications": {
+    "channelSaved": "渠道已保存",
+    "addChannel": "添加渠道",
+    "recipientAdded": "接收人已添加",
+    "notifyFor": "通知事件",
+    "addRecipient": "添加接收人",
+    "notificationAdded": "通知已添加",
+    "onSuccess": "成功时",
+    "onFailure": "失败时",
+    "saveToAccount": "保存到我的账户，以便我的其他任务使用",
+    "saveToAccountHint": "不勾选则仅限此任务：这些设置只能由此任务使用。",
+    "add": "添加",
+    "adding": "正在添加…",
+    "noOtherSaved": "你的账户中没有其他已保存的渠道。添加渠道时勾选“保存到我的账户”，或在<link>通知</link>页面添加，即可在多个任务间复用。",
+    "channelAddedToTask": "渠道已添加到此任务",
+    "savedChannel": "已保存的渠道",
+    "useThisChannel": "使用此渠道",
+    "sendTest": "发送测试",
+    "sending": "正在发送…",
+    "sent": "已发送",
+    "failedWhy": "失败：{reason}",
+    "unknownError": "未知错误",
+    "testSent": "测试通知已发送",
+    "testSentDetail": "测试通知已发送：{detail}",
+    "channelDeleted": "渠道已删除",
+    "deleting": "正在删除…",
+    "madeReusable": "渠道已保存到你的账户，你的其他任务现在可以使用它",
+    "makeReusable": "设为可复用",
+    "saving": "正在保存…",
+    "makeReusableConfirm": "将此渠道保存到你的账户，以便其他任务也能使用？此操作无法撤销：一旦其他任务使用它，就无法再改回仅限单个任务。",
+    "channelUpdated": "渠道已更新",
+    "name": "名称",
+    "secretSaved": "已保存，留空则保持不变",
+    "saveChanges": "保存更改",
+    "sendVia": "发送方式",
+    "nameOptional": "名称（可选）",
+    "emailPlaceholder": "邮箱地址",
+    "recipientRemoved": "接收人已移除",
+    "notificationRemoved": "通知已移除",
+    "removing": "正在移除…",
+    "removeTaskOnlyConfirm": "移除此通知渠道？它仅属于此任务，因此渠道及其设置都将被删除。",
+    "removeSavedConfirm": "停止在此任务中使用此渠道？它仍会保存在所有者的账户中，供其其他任务使用。",
+    "deleteConfirm": "删除此渠道？使用它的任务将不再向其发送通知。",
+    "deleteUsedConfirm": "删除此通知渠道及其设置？{count, plural, other {# 个任务}}将不再向其发送通知。",
+    "deleteUnusedConfirm": "删除此通知渠道及其设置？"
+  },
+  "sharing": {
+    "saved": "共享设置已保存",
+    "userEmail": "用户邮箱",
+    "note": "将备份还原到数据库的权限永远无法共享，只有你可以执行。如需更改某人的权限，请用同一邮箱重新共享。",
+    "share": "共享",
+    "sharing": "正在共享…"
+  },
+  "destinations": {
+    "s3": {
+      "label": "S3（AWS / Backblaze / Wasabi / R2 / MinIO / 其他 S3 兼容服务）",
+      "fields": {
+        "bucket": {
+          "label": "存储桶"
+        },
+        "region": {
+          "label": "区域",
+          "helpText": "对于不使用 AWS 区域的提供商（如 R2），请填写“auto”。"
+        },
+        "accessKeyId": {
+          "label": "访问密钥 ID"
+        },
+        "secretAccessKey": {
+          "label": "秘密访问密钥"
+        },
+        "endpoint": {
+          "label": "自定义端点 URL",
+          "helpText": "使用 AWS S3 本身时请留空。"
+        },
+        "forcePathStyle": {
+          "label": "强制使用路径样式寻址",
+          "helpText": "非 AWS 的 S3 兼容提供商通常需要启用。"
+        },
+        "pathPrefix": {
+          "label": "路径前缀（可选）"
+        }
+      }
+    },
+    "google_drive": {
+      "label": "Google Drive",
+      "fields": {
+        "folderId": {
+          "label": "文件夹 ID（可选）",
+          "helpText": "Drive 文件夹 URL 末尾的长 ID。留空则上传到 Drive 根目录。"
+        },
+        "clientId": {
+          "label": "OAuth 客户端 ID"
+        },
+        "clientSecret": {
+          "label": "OAuth 客户端密钥"
+        },
+        "refreshToken": {
+          "label": "OAuth 刷新令牌",
+          "helpText": "通过 Google OAuth 授权流程（drive.file 范围）获取，详见 README。"
+        }
+      }
+    },
+    "onedrive": {
+      "label": "OneDrive",
+      "fields": {
+        "folderPath": {
+          "label": "文件夹路径（可选）",
+          "helpText": "不存在时会自动创建。留空则上传到 OneDrive 根目录。"
+        },
+        "clientId": {
+          "label": "应用程序（客户端）ID"
+        },
+        "clientSecret": {
+          "label": "客户端密钥（可选）",
+          "helpText": "仅用于机密客户端应用注册。公共客户端请留空。"
+        },
+        "refreshToken": {
+          "label": "OAuth 刷新令牌",
+          "helpText": "通过 Microsoft OAuth 授权流程（Files.ReadWrite 和 offline_access 范围）获取，详见 README。"
+        },
+        "tenantId": {
+          "label": "租户 ID",
+          "helpText": "个人 Microsoft 账户填写“common”，工作或学校账户填写你的 Azure AD 租户 ID。"
+        }
+      }
+    },
+    "email": {
+      "label": "邮件（附带备份文件）",
+      "fields": {
+        "to": {
+          "label": "发送至",
+          "helpText": "多个地址用逗号分隔。与任务的通知接收人相互独立。"
+        },
+        "maxSizeMb": {
+          "label": "最大文件大小（MB）",
+          "helpText": "超过此大小的备份将被跳过而不发送，并在记录中显示为已跳过。请查看邮件服务商的附件限制（很多约为 25 MB，且邮件编码会增加约 33%）。"
+        }
+      }
+    },
+    "opencloud": {
+      "label": "OpenCloud",
+      "fields": {
+        "webdavUrl": {
+          "label": "文件夹 WebDAV URL"
+        },
+        "username": {
+          "label": "用户名"
+        },
+        "appToken": {
+          "label": "应用令牌"
+        },
+        "pathPrefix": {
+          "label": "路径前缀（可选）"
+        }
+      }
+    },
+    "ftp": {
+      "label": "FTP（未加密）",
+      "fields": {
+        "host": {
+          "label": "主机"
+        },
+        "port": {
+          "label": "端口",
+          "helpText": "留空则使用默认值。"
+        },
+        "username": {
+          "label": "用户名"
+        },
+        "password": {
+          "label": "密码"
+        },
+        "pathPrefix": {
+          "label": "远程文件夹（可选）",
+          "helpText": "不存在时会自动创建。以“/”开头表示绝对路径，否则相对于登录文件夹。"
+        }
+      }
+    },
+    "ftps": {
+      "label": "FTPS（基于 TLS 的 FTP）",
+      "fields": {
+        "host": {
+          "label": "主机"
+        },
+        "port": {
+          "label": "端口",
+          "helpText": "留空则使用默认值。",
+          "placeholder": "21（隐式 TLS 为 990）"
+        },
+        "username": {
+          "label": "用户名"
+        },
+        "password": {
+          "label": "密码"
+        },
+        "implicitTls": {
+          "label": "使用隐式 TLS",
+          "helpText": "仅适用于一开始就要求 TLS 的旧服务器（通常为 990 端口）。大多数服务器使用显式 TLS，请保持不勾选。"
+        },
+        "allowSelfSigned": {
+          "label": "允许自签名或不受信任的证书",
+          "helpText": "连接仍然加密，但不会验证服务器身份。"
+        },
+        "pathPrefix": {
+          "label": "远程文件夹（可选）",
+          "helpText": "不存在时会自动创建。以“/”开头表示绝对路径，否则相对于登录文件夹。"
+        }
+      }
+    },
+    "sftp": {
+      "label": "SFTP（基于 SSH 的文件传输）",
+      "fields": {
+        "host": {
+          "label": "主机"
+        },
+        "port": {
+          "label": "端口",
+          "helpText": "留空则使用默认值。"
+        },
+        "username": {
+          "label": "用户名"
+        },
+        "password": {
+          "label": "密码",
+          "helpText": "使用私钥时请留空。"
+        },
+        "privateKey": {
+          "label": "私钥（可选）",
+          "helpText": "粘贴完整的 OpenSSH 或 PEM 格式密钥，将加密存储。",
+          "placeholder": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+        },
+        "passphrase": {
+          "label": "密钥口令（可选）"
+        },
+        "hostFingerprint": {
+          "label": "主机密钥指纹（推荐）",
+          "helpText": "点击“测试连接”查看服务器指纹。设置后，将拒绝连接到使用其他密钥的服务器。"
+        },
+        "pathPrefix": {
+          "label": "远程文件夹（可选）",
+          "helpText": "不存在时会自动创建。以“/”开头表示绝对路径，否则相对于用户的主目录。"
+        }
+      }
+    }
+  },
+  "locations": {
+    "added": "存储位置已添加",
+    "provider": "提供商",
+    "label": "标签",
+    "noOneClick": "此服务器未配置一键登录，因此你需要在下方输入自己的 OAuth 凭据。（管理员可在服务器环境中设置提供商的客户端 ID 来启用，详见 README。）",
+    "saveToAccount": "保存到我的账户，以便我的其他任务使用",
+    "saveToAccountHint": "不勾选则仅限此任务：这些凭据只能由此任务使用。",
+    "openAndSignIn": "1. 打开 <link>{url}</link> 并登录。",
+    "enterCode": "2. 输入此代码：<mono>{code}</mono>",
+    "waiting": "正在等待你的批准…此页面会自动更新。",
+    "connectedAs": "已连接为 {account}，存储位置已添加。",
+    "connectedToast": "已连接 {account}，存储位置已添加",
+    "yourAccount": "你的账户",
+    "codeExpired": "代码在批准前已过期，请重试。",
+    "connect": "连接 {provider}",
+    "starting": "正在启动…",
+    "testConnection": "测试连接",
+    "testing": "正在测试…",
+    "addLocation": "添加存储位置",
+    "useSignIn": "改用登录",
+    "useOwnCredentials": "高级：使用我自己的凭据",
+    "connected": "连接成功",
+    "failedWhy": "失败：{reason}",
+    "unknownError": "未知错误",
+    "ok": "正常",
+    "noOtherSaved": "你的账户中没有其他已保存的位置。添加位置时勾选“保存到我的账户”，或在<link>存储位置</link>页面添加，即可在多个任务间复用。",
+    "addedToTask": "存储位置已添加到此任务",
+    "savedLocation": "已保存的位置",
+    "subfolder": "此任务的子文件夹（可选）",
+    "subfolderHint": "附加在存储位置文件夹之下，使共享该位置的任务不会混用文件。清空则直接使用该文件夹。",
+    "useThis": "使用此位置",
+    "updated": "存储位置已更新",
+    "secretSaved": "已保存，留空则保持不变",
+    "saveChanges": "保存更改",
+    "test": "测试",
+    "deleted": "存储位置已删除",
+    "deleting": "正在删除…",
+    "deleteUsedConfirm": "删除此存储位置及其凭据？{count, plural, other {# 个任务}}将不再复制到这里。已上传到提供商的文件不会被删除。",
+    "deleteUnusedConfirm": "删除此存储位置及其凭据？已上传到提供商的文件不会被删除。",
+    "madeReusable": "存储位置已保存到你的账户，你的其他任务现在可以使用它",
+    "makeReusable": "设为可复用",
+    "saving": "正在保存…",
+    "makeReusableConfirm": "将此存储位置保存到你的账户，以便其他任务也能使用？此操作无法撤销：一旦其他任务使用它，就无法再改回仅限单个任务。",
+    "disable": "停用",
+    "enable": "启用",
+    "disabledForTask": "已为此任务停用该存储位置",
+    "enabledForTask": "已为此任务启用该存储位置",
+    "removedFromTask": "已从此任务移除该存储位置",
+    "removing": "正在移除…",
+    "removeTaskOnlyConfirm": "移除此存储位置？它仅属于此任务，因此位置及其凭据都将被删除。之后的运行将不再复制到这里；已上传到提供商的文件不会被删除。",
+    "removeSavedConfirm": "停止在此任务中使用此存储位置？它仍会保存在所有者的账户中，供其其他任务使用。已上传到提供商的文件不会被删除。"
+  },
+  "apiKeys": {
+    "created": "API 密钥已创建，请立即复制",
+    "createdBanner": "密钥已创建：请立即复制，它不会再次显示。",
+    "savedToast": "密钥已保存。你可以随时在此页面撤销它。",
+    "done": "完成",
+    "keyName": "密钥名称",
+    "keyNamePlaceholder": "主应用服务器",
+    "allTasks": "所有任务",
+    "permissions": "权限",
+    "create": "创建密钥",
+    "creating": "正在创建…",
+    "revoke": "撤销",
+    "revoking": "正在撤销…",
+    "revokeConfirm": "撤销此 API 密钥？使用它的应用将立即失去访问权限。",
+    "revoked": "API 密钥已撤销",
+    "scopeTask": "限制为单个任务（可选）"
+  },
+  "users": {
+    "deleteHeading": "删除此用户？",
+    "deleteDescription": "其会话将立即被撤销，其所有备份任务、备份记录、接收人和 API 密钥都会从应用中移除。此操作无法撤销。",
+    "deleteKeepNote": "其任务的备份文件会保留在服务器上，分别位于备份目录中以任务 ID 命名的文件夹里，你仍可手动取回。",
+    "deleteUser": "删除用户",
+    "deleted": "用户已删除",
+    "title": "用户",
+    "intro": "管理员负责管理用户和系统通知。备份任务是私有的：管理员可以看到用户拥有的任务数量，但看不到任务本身，除非所有者共享。删除用户也会删除其所有任务和备份。",
+    "allUsers": "所有用户",
+    "allUsersDescription": "所有可以登录此服务器的人。",
+    "addUser": "添加用户",
+    "newUser": "新建用户",
+    "createNew": "新建",
+    "userCreated": "用户已创建",
+    "name": "姓名",
+    "email": "邮箱",
+    "tempPassword": "临时密码",
+    "role": "角色",
+    "roleUser": "普通用户",
+    "roleAdmin": "管理员",
+    "createUser": "创建用户",
+    "noUsers": "没有用户。",
+    "you": "（你）",
+    "taskCount": "{count, plural, other {# 个任务}}",
+    "edit": "编辑",
+    "ownsTasks": "拥有 {count, plural, other {# 个任务}}",
+    "locked": "<strong>登录已锁定</strong>（多次尝试失败），直到 <time>date</time>。通行密钥仍可使用。",
+    "unlock": "立即解锁",
+    "unlocked": "账户已解锁",
+    "detailsTitle": "账户详情",
+    "detailsDescription": "姓名、角色，以及在用户被锁定时设置新密码。",
+    "changesSaved": "更改已保存",
+    "ownRole": "你不能更改自己的角色。",
+    "resetPassword": "重置密码",
+    "keepPassword": "留空则保留当前密码",
+    "saveChanges": "保存更改",
+    "securityTitle": "两步验证与通行密钥",
+    "securityDescription": "如果用户丢失了身份验证器应用或安全密钥，可在此重置。",
+    "authenticatorOn": "身份验证器已启用",
+    "authenticatorOff": "未使用身份验证器",
+    "passkeyCount": "{count, plural, other {# 个通行密钥}}",
+    "resetFactors": "重置两步验证和通行密钥",
+    "resetFactorsConfirm": "移除 {name} 的所有两步验证和通行密钥？之后他们只需密码即可登录，并需要在自己的账户页面重新设置。",
+    "factorsReset": "两步验证和通行密钥已重置",
+    "noFactors": "没有身份验证器或通行密钥：此用户仅使用密码登录。"
+  },
+  "newTask": {
+    "testConnection": "测试连接",
+    "testing": "正在测试…",
+    "connected": "连接成功",
+    "failedWhy": "失败：{reason}",
+    "unknownError": "未知错误",
+    "dryRun": "试运行",
+    "dryRunning": "正在执行备份…",
+    "dryRunOk": "备份成功（{size}，已丢弃）",
+    "engine": "数据库引擎",
+    "authSource": "身份验证数据库（可选）",
+    "authSourceHint": "创建该用户的数据库。留空则使用“admin”，这适用于 MongoDB Atlas 和大多数服务器。",
+    "title": "新建备份任务",
+    "subtitle": "连接信息会加密存储，保存后不会再显示。",
+    "taskName": "任务名称",
+    "taskNamePlaceholder": "商店数据库备份",
+    "host": "主机",
+    "port": "端口",
+    "portPlaceholder": "留空 = 引擎默认值",
+    "user": "用户名",
+    "password": "密码",
+    "database": "数据库名称",
+    "requireSsl": "要求 SSL",
+    "dryRunHint": "试运行会用这些设置执行一次真实备份，并立即丢弃结果：耗时和数据库负载与真正的定时备份相同，但不会保存任何内容。",
+    "backupsToKeep": "保留的备份数",
+    "encrypt": "加密备份文件",
+    "encryptionPassword": "加密密码",
+    "encryptionPlaceholder": "仅在上方启用加密时使用",
+    "encryptionHint": "请自行妥善保存：一旦丢失，Backup Hub 无法找回。",
+    "create": "创建任务"
+  },
+  "engines": {
+    "compatibility": {
+      "mysql": "也支持 MySQL 兼容服务，如 Amazon RDS / Aurora MySQL、PlanetScale 和 TiDB。",
+      "postgres": "也支持 Postgres 兼容服务，如 Supabase、Neon、Amazon RDS / Aurora PostgreSQL 和 TimescaleDB。",
+      "mongodb": "自建 MongoDB 和 MongoDB Atlas：使用 Atlas 时请输入集群主机名（如 cluster0.abcde.mongodb.net），将自动通过 TLS 连接。"
+    }
+  },
+  "usage": {
+    "notUsed": "未被任何任务使用",
+    "usedBy": "使用者：",
+    "addedBy": "由 {name} 添加",
+    "taskOnly": "仅限单个任务"
+  },
+  "locationsPage": {
+    "title": "存储位置",
+    "intro": "备份会被复制到的异地位置。已保存的位置可供你的任何任务使用：只需输入一次凭据，在任务页面中选择即可，在此修改会更新所有使用它的任务。单任务位置属于该任务，不能在其他地方使用。其他人（包括管理员）都看不到它们。",
+    "savedTitle": "已保存的位置",
+    "savedDescription": "可在你的任务间复用。",
+    "addLocation": "添加存储位置",
+    "newLocation": "新建存储位置",
+    "createNew": "新建",
+    "noSaved": "还没有已保存的位置：添加一个，或将单任务位置设为可复用。",
+    "taskOnlyTitle": "单任务位置",
+    "taskOnlyDescription": "绑定到你的某个任务。也会显示与你共享任务的人添加的位置：你可以移除它们，但只有添加者能修改其凭据。",
+    "noTaskOnly": "没有单任务位置。",
+    "edit": "编辑",
+    "editTitle": "编辑 {name}",
+    "editIntroTaskOnly": "{provider} · 单任务。更改将从下一次备份起应用到使用它的任务。",
+    "editIntroSaved": "{provider} · 已保存的位置。更改将从下一次备份起应用到所有使用它的任务。"
+  },
+  "channelsPage": {
+    "title": "通知",
+    "intro": "你的通知渠道：任务发送备份成功或失败提醒的去处（邮件、ntfy、Telegram 或 Discord）。已保存的渠道可供你的任何任务使用：只需设置一次，在任务页面中选择即可，在此修改会更新所有使用它的任务。单任务渠道属于该任务。其他人（包括管理员）都看不到它们。",
+    "savedTitle": "已保存的渠道",
+    "savedDescription": "可在你的任务间复用。",
+    "addChannel": "添加渠道",
+    "newChannel": "新建通知渠道",
+    "createNew": "新建",
+    "noSaved": "还没有已保存的渠道：添加一个，或将单任务渠道设为可复用。",
+    "taskOnlyTitle": "单任务渠道",
+    "taskOnlyDescription": "绑定到你的某个任务。也会显示与你共享任务的人添加的渠道：你可以移除它们，但只有添加者能修改其设置。",
+    "noTaskOnly": "没有单任务渠道。",
+    "edit": "编辑",
+    "editTitle": "编辑 {name}",
+    "editIntroTaskOnly": "{type} · 单任务。更改将应用到使用它的任务。",
+    "editIntroSaved": "{type} · 已保存的渠道。更改将应用到所有使用它的任务。"
+  },
+  "systemPage": {
+    "title": "系统通知",
+    "intro": "关于账户和任务事件的全服务器提醒（邮件、ntfy、Telegram 或 Discord），由管理员管理。备份成功或失败的提醒是单独的：每个用户在<link>通知</link>和各任务页面中自行设置。",
+    "recipientsTitle": "接收人",
+    "recipientsDescription": "谁会收到哪些账户和任务事件的提醒。",
+    "addRecipient": "添加接收人",
+    "newRecipient": "新建系统接收人",
+    "createNew": "新建",
+    "noRecipients": "还没有系统通知接收人。"
+  },
+  "apiKeysPage": {
+    "title": "API 密钥",
+    "intro": "供外部应用调用 <code>/api/v1/*</code> 下的 REST API。每个密钥都有自己的权限，并可限制为单个任务。密钥代表你执行操作：它在任务上的权限永远不会超过你，任务一旦停止与你共享，密钥在该任务上也会失效。",
+    "keysTitle": "你的 API 密钥",
+    "keysDescription": "使用密钥的应用不再需要时，请及时撤销。",
+    "createKey": "创建密钥",
+    "newKey": "新建 API 密钥",
+    "createNew": "新建",
+    "noKeys": "还没有 API 密钥。",
+    "oneTask": "单个任务",
+    "allTasks": "所有任务"
+  }
+}

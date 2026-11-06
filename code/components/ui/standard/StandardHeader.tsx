@@ -7,6 +7,10 @@ import Image from "next/image";
 import logoImg from '@/public/logo-light.png';
 import { LuChevronDown, LuDoorOpen, LuMenu, LuX } from "react-icons/lu";
 import { SessionUser } from "@/lib/auth/session";
+import { useTranslations } from "next-intl";
+
+type NavKey = "tasks" | "saveLocations" | "notifications" | "users" | "systemNotifications" | "myAccount" | "apiKeys";
+type NavItem = { href: string; key: NavKey };
 
 type StandardHeaderProps = {
     user: SessionUser | null;
@@ -45,10 +49,11 @@ function NavMenu({
     children,
 }: {
     label: string;
-    items: { href: string; label: string }[];
+    items: NavItem[];
     pathname: string;
     children?: React.ReactNode;
 }) {
+    const t = useTranslations("nav");
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const active = items.some((i) => isActive(pathname, i.href));
@@ -92,7 +97,7 @@ function NavMenu({
                             aria-current={isActive(pathname, item.href) ? "page" : undefined}
                             className={`block px-4 py-2 hover:bg-paper ${isActive(pathname, item.href) ? "text-primary" : "text-ink"}`}
                         >
-                            {item.label}
+                            {t(item.key)}
                         </a>
                     ))}
                     {children}
@@ -102,26 +107,27 @@ function NavMenu({
     );
 }
 
-const MAIN_LINKS = [
-    { href: "/", label: "Tasks" },
-    { href: "/locations", label: "Save locations" },
-    { href: "/notification-channels", label: "Notifications" },
+const MAIN_LINKS: NavItem[] = [
+    { href: "/", key: "tasks" },
+    { href: "/locations", key: "saveLocations" },
+    { href: "/notification-channels", key: "notifications" },
 ];
-const ADMIN_LINKS = [
-    { href: "/users", label: "Users" },
-    { href: "/notifications", label: "System notifications" },
+const ADMIN_LINKS: NavItem[] = [
+    { href: "/users", key: "users" },
+    { href: "/notifications", key: "systemNotifications" },
 ];
-const ACCOUNT_LINKS = [
-    { href: "/account", label: "My account" },
-    { href: "/api-keys", label: "API keys" },
+const ACCOUNT_LINKS: NavItem[] = [
+    { href: "/account", key: "myAccount" },
+    { href: "/api-keys", key: "apiKeys" },
 ];
 
 function SignOutButton({ className }: { className: string }) {
+    const t = useTranslations("nav");
     return (
         <form action={logout}>
             <button type="submit" className={`w-full flex items-center gap-2 text-left text-ink hover:text-danger ${className}`}>
                 <LuDoorOpen size={16} />
-                Sign out
+                {t("signOut")}
             </button>
         </form>
     );
@@ -132,6 +138,7 @@ function SignOutButton({ className }: { className: string }) {
 // scrolls on its own, while the page behind it is locked — so a long menu
 // on a short screen never drags the whole site along with it.
 function MobileNav({ user, pathname }: { user: SessionUser; pathname: string }) {
+    const t = useTranslations("nav");
     const [open, setOpen] = useState(false);
     const [top, setTop] = useState(0);
     const ref = useRef<HTMLDivElement>(null);
@@ -164,7 +171,7 @@ function MobileNav({ user, pathname }: { user: SessionUser; pathname: string }) 
 
     const groups = [
         { title: null, links: MAIN_LINKS },
-        ...(user.role === "admin" ? [{ title: "Admin", links: ADMIN_LINKS }] : []),
+        ...(user.role === "admin" ? [{ title: t("admin"), links: ADMIN_LINKS }] : []),
         { title: user.name, links: ACCOUNT_LINKS },
     ];
 
@@ -172,7 +179,7 @@ function MobileNav({ user, pathname }: { user: SessionUser; pathname: string }) 
         <div ref={ref} className="md:hidden">
             <button
                 type="button"
-                aria-label={open ? "Close menu" : "Open menu"}
+                aria-label={open ? t("closeMenu") : t("openMenu")}
                 aria-expanded={open}
                 aria-controls="mobile-nav"
                 onClick={() => setOpen(!open)}
@@ -207,7 +214,7 @@ function MobileNav({ user, pathname }: { user: SessionUser; pathname: string }) 
                                         aria-current={active ? "page" : undefined}
                                         className={`block px-6 py-3 border-l-4 ${active ? "border-primary text-primary bg-primary-light" : "border-transparent text-ink hover:bg-paper"}`}
                                     >
-                                        {link.label}
+                                        {t(link.key)}
                                     </a>
                                 );
                             })}
@@ -224,6 +231,7 @@ function MobileNav({ user, pathname }: { user: SessionUser; pathname: string }) 
 }
 
 export function StandardHeader({ user }: StandardHeaderProps) {
+    const t = useTranslations("nav");
     const pathname = usePathname() ?? "/";
 
     return (
@@ -232,7 +240,7 @@ export function StandardHeader({ user }: StandardHeaderProps) {
                 <a href="/" className="font-semibold text-ink shrink-0">
                     <Image
                         src={logoImg}
-                        alt="Backup Hub Logo"
+                        alt={t("logoAlt")}
                         height={80}
                         className="w-auto h-8 md:h-10"
                         loading="eager"
@@ -243,10 +251,10 @@ export function StandardHeader({ user }: StandardHeaderProps) {
                     <>
                         <nav className="hidden md:flex items-center gap-6 text-sm">
                             {MAIN_LINKS.map((link) => (
-                                <NavLink key={link.href} href={link.href} label={link.label} pathname={pathname} />
+                                <NavLink key={link.href} href={link.href} label={t(link.key)} pathname={pathname} />
                             ))}
 
-                            {user.role === "admin" && <NavMenu label="Admin" pathname={pathname} items={ADMIN_LINKS} />}
+                            {user.role === "admin" && <NavMenu label={t("admin")} pathname={pathname} items={ADMIN_LINKS} />}
 
                             <NavMenu label={user.name} pathname={pathname} items={ACCOUNT_LINKS}>
                                 <div role="menuitem" className="border-t border-line mt-1 pt-1">

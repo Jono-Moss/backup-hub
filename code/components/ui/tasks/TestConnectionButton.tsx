@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { testConnection } from "@/app/tasks/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 
 export function TestConnectionButton() {
+  const t = useTranslations("newTask");
   const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
 
   async function handleClick() {
@@ -21,12 +23,12 @@ export function TestConnectionButton() {
       <StandardActionButton
         action={handleClick}
         variant="outline"
-        title="Test connection"
-        pendingTitle="Testing…"
+        title={t("testConnection")}
+        pendingTitle={t("testing")}
       />
       {result && (
         <span className={`text-sm ${result.ok ? "text-primary" : "text-danger"}`}>
-          {result.ok ? "Connected successfully" : `Failed: ${result.message ?? "unknown error"}`}
+          {result.ok ? t("connected") : t("failedWhy", { reason: result.message ?? t("unknownError") })}
         </span>
       )}
     </div>

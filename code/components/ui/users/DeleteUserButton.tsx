@@ -1,20 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { deleteUser } from "@/app/users/actions";
 import { DeleteWithFilesButton } from "@/components/ui/common/DeleteWithFilesButton";
 
 export function DeleteUserButton({ userId }: { userId: string }) {
+  const t = useTranslations("users");
+  const tCommon = useTranslations("common");
   return (
     <DeleteWithFilesButton
-      buttonTitle="Delete"
+      buttonTitle={tCommon("delete")}
       compact
-      heading="Delete this user?"
-      description={
-        "Their sessions are revoked immediately, and all of their backup tasks, run history, recipients and API keys are removed from the app. This cannot be undone."
-      }
-      keepNote="The backup files of their tasks stay on the server, each in a folder named after its task id inside the backup directory, so you can still recover them by hand."
-      confirmLabel="Delete user"
-      successMessage="User deleted"
+      heading={t("deleteHeading")}
+      description={t("deleteDescription")}
+      keepNote={t("deleteKeepNote")}
+      confirmLabel={t("deleteUser")}
+      successMessage={t("deleted")}
       onDelete={(deleteFiles) => deleteUser(userId, deleteFiles)}
     />
   );

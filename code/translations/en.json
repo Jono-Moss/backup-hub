@@ -1,0 +1,1052 @@
+{
+  "meta": {
+    "description": "Scheduled, encrypted database backups for MySQL, MariaDB, PostgreSQL and MongoDB."
+  },
+  "nav": {
+    "tasks": "Tasks",
+    "saveLocations": "Save locations",
+    "notifications": "Notifications",
+    "users": "Users",
+    "systemNotifications": "System notifications",
+    "myAccount": "My account",
+    "apiKeys": "API keys",
+    "admin": "Admin",
+    "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logoAlt": "Backup Hub logo"
+  },
+  "footer": {
+    "productBy": "A product by",
+    "tryAccounting": "Try our accounting software",
+    "openSource": "Open Source",
+    "license": "MIT License",
+    "tagline": "Backup the world"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "ok": "OK",
+    "dismiss": "Dismiss",
+    "processing": "Processing…",
+    "moreActions": "More actions",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "remove": "Remove",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving…",
+    "add": "Add",
+    "adding": "Adding…",
+    "genericError": "Something went wrong — please try again.",
+    "stalePage": "This page is out of date — refresh it and try again.",
+    "eraseFilesCheckbox": "Also permanently delete the backup files from disk",
+    "eraseFilesWarning": "The backup files will be erased and cannot be recovered.",
+    "confirmAndErase": "{label} and erase files"
+  },
+  "auth": {
+    "subtitle": "Sign in to manage backup tasks.",
+    "passwordChanged": "Your password has been changed. Sign in with your new password.",
+    "lockedOut": "Too many failed sign-in attempts. Try again in {minutes, plural, one {# minute} other {# minutes}}, <link>reset your password</link>, or ask an admin to unlock your account.",
+    "lockedOutSoon": "Too many failed sign-in attempts. Try again in a few minutes, <link>reset your password</link>, or ask an admin to unlock your account.",
+    "incorrect": "Incorrect email or password.",
+    "email": "Email",
+    "password": "Password",
+    "forgotLink": "Forgot password?",
+    "signIn": "Sign in",
+    "or": "or",
+    "passkeySignIn": "Sign in with a passkey",
+    "passkeyWaiting": "Waiting for passkey…",
+    "passkeyCancelled": "Cancelled.",
+    "passkeyFailed": "Passkey sign-in failed.",
+    "passkeyExpired": "This sign-in attempt expired — try again.",
+    "passkeyLockedNetwork": "Too many failed sign-in attempts from your network. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+    "passkeyUnknown": "That passkey isn't registered with any account here.",
+    "passkeyVerifyFailed": "Passkey verification failed.",
+    "accountGone": "That account no longer exists.",
+    "twoFactorTitle": "Two-factor authentication",
+    "twoFactorRecoveryPrompt": "Enter one of your unused recovery codes.",
+    "twoFactorCodePrompt": "Enter the 6-digit code from your authenticator app.",
+    "twoFactorRecoveryInvalid": "That recovery code isn't valid or was already used.",
+    "twoFactorCodeInvalid": "That code didn't match.",
+    "recoveryCode": "Recovery code",
+    "authCode": "Authentication code",
+    "verify": "Verify",
+    "useAuthenticator": "Use your authenticator app instead",
+    "useRecoveryCode": "Use a recovery code instead",
+    "setupTitle": "Welcome to Backup Hub",
+    "setupSubtitle": "Create the first admin account to get started.",
+    "yourName": "Your name",
+    "passwordHint": "At least 8 characters.",
+    "createAdmin": "Create admin account"
+  },
+  "passwordReset": {
+    "forgotTitle": "Forgot your password?",
+    "noEmail": "Email isn't set up on this server, so reset links can't be sent. Ask an admin to set a new password for you from the Users page. If you can't sign in because of too many failed attempts, wait for the lockout to end, or sign in with a passkey.",
+    "sent": "If that email belongs to an account, a reset link is on its way. It works once and expires in 30 minutes — check your spam folder if it doesn't arrive.",
+    "forgotIntro": "Enter your account's email and we'll send you a link to choose a new password. Resetting also lifts a sign-in lockout.",
+    "sendLink": "Send reset link",
+    "sending": "Sending…",
+    "backToSignIn": "Back to sign in",
+    "resetTitle": "Choose a new password",
+    "invalidLink": "This reset link is invalid, has expired, or was already used.",
+    "sendNewLink": "Send a new link",
+    "resetIntro": "For {email}. You'll be signed out everywhere, and if you use an authenticator app you'll still need it to sign in.",
+    "mismatch": "The two passwords didn't match.",
+    "weak": "Use at least 8 characters.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "setPassword": "Set new password",
+    "saving": "Saving…",
+    "email": {
+      "resetSubject": "Reset your Backup Hub password",
+      "resetBody": "Hi {name},\n\nSomeone asked to reset the password for your Backup Hub account. To choose a new one, open this link:\n\n{link}\n\nIt works once and expires in {minutes} minutes. Resetting also lifts a sign-in lockout.\n\nIf this wasn't you, ignore this email — your password stays as it is.",
+      "changedSubject": "Your Backup Hub password was changed",
+      "changedBody": "Hi {name},\n\nThe password for your Backup Hub account was just reset using an emailed link, and you've been signed out everywhere.\n\nIf this wasn't you, contact your Backup Hub admin straight away."
+    }
+  },
+  "schedule": {
+    "everyMinutes": "Every {count, plural, one {minute} other {# minutes}}",
+    "everyHourAt": "Every hour at {minute} minutes past the hour",
+    "everyHoursAt": "Every {count} hours at {minute} minutes past the hour",
+    "everyDayAt": "Every day at {time}",
+    "everyWeekdayAt": "Every {day} at {time}",
+    "monthlyAt": "Monthly on day {day} at {time}",
+    "noSchedule": "No schedule",
+    "selectedDay": "selected day",
+    "label": "Schedule",
+    "serverTime": "Backups run according to the server's local time.",
+    "closeDialog": "Close schedule dialog",
+    "close": "Close",
+    "dialogTitle": "Backup schedule",
+    "dialogIntro": "Choose when backups should run.",
+    "run": "Run",
+    "optMinutes": "Every few minutes",
+    "optHours": "Every few hours",
+    "optDaily": "Every day",
+    "optWeekly": "Every week",
+    "optMonthly": "Every month",
+    "optCustom": "Custom cron expression",
+    "every": "Every",
+    "atMinute": "At minute",
+    "atMinuteHint": "For example, 15 means 15 minutes past the hour.",
+    "dayOfWeek": "Day of the week",
+    "dayOfMonth": "Day of the month",
+    "dayOfMonthHint": "Days 1–28 are available so the schedule works in every month.",
+    "time": "Time",
+    "cronExpression": "Cron expression",
+    "cronHint": "Advanced users can enter a standard 5-part cron expression.",
+    "preview": "Schedule preview",
+    "apply": "Apply schedule"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "How your backups have been doing, and the tasks you created or that were shared with you.",
+    "newTask": "New task",
+    "twoFactorWarning": "Someone entered your correct password but the wrong 2FA code {count, plural, one {# time} other {# times}} in the last {days} days.",
+    "twoFactorWarningAction": "If that wasn't you, change your password now.",
+    "succeeded": "Succeeded",
+    "failed": "Failed",
+    "running": "Running",
+    "compactSucceeded": "Succeeded",
+    "compactFailed": "Failed",
+    "compactCopyFailed": "Copy failed",
+    "compactBadSignIns": "Bad sign-ins",
+    "lastDays": "Last {days} days",
+    "problemsBanner": "{count, plural, one {# problem needs attention} other {# problems need attention}}",
+    "statSuccessful": "Successful backups",
+    "statFailed": "Failed backups",
+    "statCopyFailures": "Off-site copy failures",
+    "statSignIns": "Failed sign-ins",
+    "statSignInsHint": "To your account, last {days} days",
+    "attentionTitle": "Needs attention",
+    "attentionDescription": "Problems with each task's most recent backup.",
+    "allGood": "All good — every task's latest backup succeeded.",
+    "recentTitle": "Recent activity",
+    "recentDescription": "The latest backups across all your tasks.",
+    "noBackupsYet": "No backups have run yet.",
+    "tasksTitle": "Backup tasks",
+    "tasksDescription": "Each task owns one database connection, its own schedule, and retention.",
+    "noTasks": "No backup tasks yet.",
+    "createFirst": "Create your first task",
+    "scheduleActive": "Schedule active",
+    "scheduleDisabled": "Schedule disabled",
+    "paused": "(paused)",
+    "keep": "keep {count}",
+    "encrypted": "encrypted",
+    "sharedBy": "shared by {name}",
+    "neverRun": "Never run",
+    "signInTitle": "Sign-in activity",
+    "signInDescription": "Sign-ins to your account over the last {days} days.",
+    "fullHistory": "Full history",
+    "failedCountBadge": "{count} failed",
+    "previousSignIn": "Previous sign-in {when} · {device}",
+    "noEarlierSignIns": "No earlier sign-ins recorded.",
+    "noFailedSignIns": "No failed sign-ins to your account.",
+    "wholeServer": "Whole server (admin)",
+    "serverFailed": "{count, plural, one {# failed sign-in} other {# failed sign-ins}}",
+    "serverUnknown": "{count} for unknown accounts",
+    "serverBlocked": "{count} blocked by lockout",
+    "mostFailuresFrom": "Most failures from",
+    "accountsMostFailures": "Accounts with most failures",
+    "stripLabel": "Last {count} backups: {ok} succeeded, {failed} failed",
+    "stripEmpty": "No backups yet",
+    "stripSucceeded": "Succeeded",
+    "stripFailed": "Failed",
+    "stripRunning": "Running",
+    "badge": {
+      "auth": "Credentials",
+      "connection": "Can't connect",
+      "other": "Failed",
+      "upload": "Off-site copy",
+      "verify": "Check failed"
+    },
+    "attention": {
+      "runAuth": "Last backup couldn't sign in to the database",
+      "runConnection": "Last backup couldn't reach the database",
+      "runFailed": "Last backup failed",
+      "uploadAuth": "Couldn't sign in to \"{location}\" — reconnect it",
+      "uploadFailed": "Copy to \"{location}\" failed",
+      "verifyRestore": "Latest backup failed its test restore",
+      "verifyCheck": "Latest backup failed its check",
+      "unnamedLocation": "save location"
+    }
+  },
+  "runs": {
+    "trigger": {
+      "cron": "Scheduled",
+      "manual": "Manual",
+      "api": "API"
+    },
+    "status": {
+      "completed": "Completed",
+      "failed": "Failed",
+      "running": "Running"
+    },
+    "upload": {
+      "completed": "uploaded",
+      "failed": "failed",
+      "skipped": "skipped",
+      "skippedWhy": "skipped — {reason}",
+      "uploading": "uploading…",
+      "line": "{location}: {status}",
+      "unknownLocation": "destination"
+    },
+    "showingAll": "Showing all {total} backups",
+    "perPage": "Show {count} per page",
+    "showingRange": "Showing {from}–{to} of {total}",
+    "newer": "Newer",
+    "older": "Older",
+    "pageOf": "Page {page} of {pages}",
+    "showAll": "Show all",
+    "checkQueued": "Check queued…",
+    "checking": "Checking…",
+    "testRestored": "Test-restored",
+    "verified": "Verified",
+    "testRestoreFailed": "Test restore failed",
+    "checkFailed": "Check failed",
+    "notChecked": "Not checked yet",
+    "restoreWarning": "Restoring will overwrite the current contents of the live database with this backup's data. This cannot be undone.",
+    "restoreTitle": "Restore this backup?",
+    "restore": "Restore",
+    "restoreMenu": "Restore…",
+    "restoreDescription": "Overwrite the live database with this backup",
+    "restoreDone": "Restore completed successfully",
+    "download": "Download",
+    "verifyFile": "Verify file",
+    "verifyDescription": "Check it's intact and reads back completely",
+    "checkStarted": "Check started — the result shows under this backup",
+    "testRestore": "Test restore",
+    "testRestoreDescription": "Restore into a temporary database, check it, then delete it",
+    "testRestoreStarted": "Test restore started — the result shows under this backup",
+    "deleteMenu": "Delete…",
+    "deleteDescription": "Remove this backup file",
+    "deleteTitle": "Delete this backup?",
+    "deleteMessage": "The backup file is deleted. This cannot be undone.",
+    "deleted": "Backup deleted",
+    "actionsLabel": "Backup actions",
+    "passwordNeeded": "Enter the backup's encryption password.",
+    "encryptionPassword": "Encryption password",
+    "passwordPlaceholder": "This backup's encryption password",
+    "passwordHint": "This is the password that was set on the task when this backup was taken — not necessarily the task's current password, if it's been changed since.",
+    "restoring": "Restoring…",
+    "testAllConfirm": "Test-restore all {count, plural, one {# backup} other {# backups}}? Each one is restored into a temporary database on the test-restore server, one after another, so this can take a while and puts load on that server.",
+    "clearConfirm": "Remove all failed backup records for this task? This cannot be undone.",
+    "verifyAllStarted": "Checks started for every backup — results show in the history",
+    "testAllStarted": "Test restores started — results show in the history",
+    "noFailed": "No failed backups to remove",
+    "removedFailed": "{count, plural, one {Removed # failed backup} other {Removed # failed backups}}",
+    "verifyAll": "Verify all",
+    "verifyAllDescription": "Check every backup is intact and reads back completely",
+    "testAll": "Test-restore all",
+    "testAllDescription": "Restore each backup into a temporary database, one at a time",
+    "testAllTitle": "Test-restore all backups?",
+    "removeFailedMenu": "Remove failed backups",
+    "removeFailed": "Remove failed",
+    "clearDescription": "{count, plural, one {Clear # failed backup record} other {Clear # failed backup records}}",
+    "queuing": "Queuing…",
+    "removing": "Removing…",
+    "allActionsLabel": "Actions for all backups",
+    "allBackups": "All backups",
+    "summaryCount": "{count, plural, one {# backup} other {# backups}}",
+    "summaryFailed": "{count} failed"
+  },
+  "signIns": {
+    "unknownDevice": "Unknown device",
+    "script": "Script",
+    "browser": "Browser",
+    "browserOnOs": "{browser} on {os}",
+    "outcome": {
+      "success": "Signed in",
+      "bad_password": "Wrong password",
+      "unknown_user": "Unknown account",
+      "bad_2fa": "Wrong 2FA code",
+      "passkey_failed": "Passkey rejected",
+      "locked_out": "Blocked — locked out",
+      "unlocked": "Unlocked by an admin",
+      "password_reset": "Password reset by email"
+    },
+    "method": {
+      "password": "Password",
+      "totp": "Password + authenticator",
+      "recovery_code": "Password + recovery code",
+      "passkey": "Passkey"
+    }
+  },
+  "account": {
+    "title": "Your account",
+    "profileTitle": "Profile & password",
+    "profileDescription": "Your display name, language and sign-in password.",
+    "name": "Name",
+    "language": "Language",
+    "languageAuto": "Automatic (browser language)",
+    "languageHint": "The language Backup Hub is shown in. Emails sent to you (like password resets) use it too.",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "currentPasswordPlaceholder": "Required only if setting a new password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Leave blank to keep current password",
+    "saveChanges": "Save changes",
+    "profileSaved": "Profile saved",
+    "passwordChanged": "Password changed",
+    "passwordChangedSignedOut": "Password changed — signed out {count, plural, one {# other session} other {# other sessions}}",
+    "twoFactorTitle": "Two-factor authentication",
+    "twoFactorDescription": "Require a code from an authenticator app in addition to your password when signing in.",
+    "enabled": "Enabled",
+    "notEnabled": "Not enabled",
+    "recoveryRemaining": "{count, plural, one {# unused recovery code remaining.} other {# unused recovery codes remaining.}}",
+    "passkeysTitle": "Passkeys",
+    "passkeysDescription": "Sign in with Touch ID, Face ID, Windows Hello, or a security key — no password needed, and it counts as your second factor on its own.",
+    "sessionsTitle": "Active sessions",
+    "sessionsDescription": "Everywhere you're signed in right now. If you don't recognise one — or its IP has changed unexpectedly — sign it out and change your password. Changing your password signs out every other session automatically.",
+    "signOutOthers": "Sign out everywhere else",
+    "onlyThisDevice": "You're only signed in on this device",
+    "signOutOthersConfirm": "Sign out of the other {count, plural, one {# session} other {# sessions}}? This device stays signed in.",
+    "sessionSignedIn": "Signed in <time>date</time>",
+    "sessionSignedInFrom": "Signed in <time>date</time> from {ip}",
+    "sessionLastActive": "last active <time>date</time>",
+    "sessionLastActiveFrom": "last active <time>date</time> from {ip}",
+    "thisDevice": "This device",
+    "ipChanged": "IP address changed",
+    "signOut": "Sign out",
+    "sessionSignedOut": "Session signed out",
+    "historyTitle": "Recent sign-in activity",
+    "historyDescription": "The latest attempts to sign in to your account, successful or not. Kept for 90 days. If you don't recognise one, change your password.",
+    "noSignIns": "No sign-ins recorded yet.",
+    "noOtherSessions": "No other sessions to sign out",
+    "signedOutOthers": "{count, plural, one {Signed out # other session} other {Signed out # other sessions}}",
+    "thatsThisDevice": "That's this device — use Sign out instead."
+  },
+  "twoFactor": {
+    "setUp": "Set up authenticator app",
+    "scanIntro": "Scan this with your authenticator app (1Password, Google Authenticator, Authy, etc.), then enter the 6-digit code it shows.",
+    "qrAlt": "Authenticator QR code",
+    "cantScan": "Can't scan? Enter this key manually:",
+    "verifyEnable": "Verify & enable",
+    "codesIntro": "Two-factor authentication is on. Save these recovery codes somewhere safe — each works once, and they won't be shown again. Use one if you lose access to your authenticator app.",
+    "savedThese": "I've saved these",
+    "isOn": "Two-factor authentication is on",
+    "verifyFailed": "Couldn't verify that code — please try again.",
+    "disableLink": "Disable two-factor authentication",
+    "disablePrompt": "Enter your password to disable two-factor authentication.",
+    "disable": "Disable",
+    "disabling": "Disabling…",
+    "turnedOff": "Two-factor authentication turned off",
+    "newCodes": "New recovery codes — save these now, they won't be shown again.",
+    "done": "Done",
+    "regenerate": "Regenerate recovery codes",
+    "generating": "Generating…",
+    "regenerateConfirm": "Generate new recovery codes? Your existing codes will stop working.",
+    "startFirst": "Start enrollment first",
+    "codeMismatch": "That code didn't match — check your authenticator app and try again.",
+    "incorrectPassword": "Incorrect password",
+    "notEnabled": "Two-factor authentication isn't enabled",
+    "verifying": "Verifying…"
+  },
+  "passkeys": {
+    "namePrompt": "Name this passkey (e.g. \"MacBook\", \"YubiKey\"):",
+    "defaultName": "Passkey",
+    "added": "Passkey added",
+    "addFailed": "Couldn't add that passkey.",
+    "removeConfirm": "Remove this passkey? You'll no longer be able to sign in with it.",
+    "removed": "Passkey removed",
+    "removeFailed": "Couldn't remove that passkey — please try again.",
+    "addedOn": "Added <time>date</time>",
+    "lastUsed": "last used <time>date</time>",
+    "neverUsed": "never used",
+    "none": "No passkeys yet.",
+    "working": "Working…",
+    "add": "Add a passkey",
+    "registrationExpired": "This registration attempt expired — try again.",
+    "registrationFailed": "Passkey registration failed"
+  },
+  "errors": {
+    "nameRequired": "Name is required",
+    "nameEmailPasswordRequired": "Name, email, and password are required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "newPasswordTooShort": "New password must be at least 8 characters",
+    "currentPasswordIncorrect": "Current password is incorrect",
+    "ownAdminRole": "You can't remove your own admin role",
+    "deleteSelf": "You can't delete your own account",
+    "setupDone": "Setup has already been completed",
+    "setupFieldsRequired": "Name, email, and password are all required",
+    "apiKeyFields": "Name and at least one scope are required",
+    "testRestoreUnavailable": "Test restores aren't set up on this server",
+    "channelAlreadyUsed": "This task already uses that notification channel",
+    "locationAlreadyUsed": "This task already uses that save location",
+    "eventRequired": "At least one event is required",
+    "connectFirst": "Use the Connect button to sign in to your account first.",
+    "backupFailed": "Backup failed: {reason}",
+    "shareEmailRequired": "Enter the email of the user to share with.",
+    "shareNoUser": "No user with that email.",
+    "shareOwnTask": "You already own this task.",
+    "destinationNotFound": "Save location not found.",
+    "connectionFailedHidden": "connection failed (details are only shown to the task owner)",
+    "noSignInSupport": "This provider doesn't support signing in.",
+    "signInNotSetUp": "Sign-in isn't set up on this server yet — ask an admin to configure it (see the README), or use your own credentials under Advanced.",
+    "signInTampered": "Invalid or tampered sign-in session. Please start again.",
+    "signInOtherTask": "This sign-in session belongs to a different task. Please start again.",
+    "codeExpired": "The code expired before it was approved. Try again."
+  },
+  "task": {
+    "navBackups": "Backups",
+    "navNotifications": "Notifications",
+    "navLocations": "Save locations",
+    "navSharing": "Sharing",
+    "navSettings": "Settings",
+    "useSavedChannel": "Use a saved channel",
+    "createNew": "Create new",
+    "useSavedLocation": "Use a saved location",
+    "scheduleActive": "Schedule active",
+    "scheduleDisabled": "Schedule disabled",
+    "sharedBy": "shared by {name}",
+    "historyTitle": "Backup history",
+    "historyDescription": "Every backup this task has made, newest first.",
+    "noBackups": "No backups yet — run one now, or wait for the next scheduled run.",
+    "failedBackup": "Failed backup",
+    "colFile": "File",
+    "colStarted": "Started",
+    "colStatus": "Status",
+    "notificationsTitle": "Notifications",
+    "notificationsDescription": "Where this task's backup outcomes are sent — email (requires SMTP, see .env), ntfy, Telegram or Discord.",
+    "addNotification": "Add notification",
+    "newNotification": "New notification",
+    "noNotifications": "No notifications set — nobody is told when this task's backups succeed or fail.",
+    "ownerOnlyDetails": "(details visible to the task owner only)",
+    "onSuccess": "On success",
+    "onFailure": "On failure",
+    "noEvents": "No events selected",
+    "taskOnly": "Task-only",
+    "fromSavedChannels": "From your saved channels",
+    "savedChannel": "Saved channel",
+    "locationsTitle": "Remote save locations",
+    "locationsDescription": "Every completed backup is always kept locally. Save locations also copy each file off-site — each is tried independently, so one being down never affects the others or the local copy.",
+    "addLocation": "Add location",
+    "newLocation": "New save location",
+    "noLocations": "No remote save locations — backups are only kept on this server.",
+    "subfolder": "Subfolder <code>{folder}</code>",
+    "disabled": "Disabled",
+    "fromSavedLocations": "From your saved locations",
+    "savedLocation": "Saved location",
+    "sharingTitle": "Sharing",
+    "sharingDescription": "You own this task. Only you and the people below can see it — not even admins can.",
+    "shareTask": "Share task",
+    "shareWith": "Share with someone",
+    "share": "Share",
+    "notShared": "Not shared with anyone.",
+    "settingsTitle": "Settings",
+    "settingsDescription": "Schedule, retention and encryption for this task.",
+    "settingsSaved": "Settings saved",
+    "taskName": "Task name",
+    "backupsToKeep": "Backups to keep",
+    "encrypt": "Encrypt backup files",
+    "encryptionPassword": "Encryption password",
+    "keepPassword": "Leave blank to keep current password",
+    "setPassword": "Set a password",
+    "testRestoreEach": "Test-restore each new backup",
+    "testRestoreHint": "Every backup is already checked to read back completely. This also restores it into a temporary database on the server's test-restore server, checks it, then deletes it — slower, and alerts the task's failure recipients if it fails.",
+    "connectionNotEditable": "Database connection details aren't editable here yet — delete and recreate the task to change them, or use <code>PATCH /api/v1/tasks/:id</code>.",
+    "saveSettings": "Save settings",
+    "sectionsLabel": "Task sections",
+    "sectionPrefix": "Section:",
+    "disableSchedule": "Disable schedule",
+    "enableSchedule": "Enable schedule",
+    "disableShort": "Disable",
+    "enableShort": "Enable",
+    "scheduleDisabledToast": "Schedule disabled",
+    "scheduleEnabledToast": "Schedule enabled",
+    "runNow": "Run backup now",
+    "runNowShort": "Run now",
+    "running": "Running…",
+    "backupCompleted": "Backup completed",
+    "deleteTask": "Delete task",
+    "deleteTaskHeading": "Delete this task?",
+    "deleteTaskDescription": "Its schedule stops immediately, and the task, its run history, notification recipients and sharing are removed from the app.",
+    "deleteTaskKeepNote": "The backup files stay on the server in a folder named {id} inside the backup directory, so you can still recover them by hand. They will no longer appear in the app.",
+    "taskDeleted": "Task deleted",
+    "accessRemoved": "Access removed",
+    "removing": "Removing…",
+    "revokeShareConfirm": "Stop sharing this task with this user? Any API keys they made for it stop working too."
+  },
+  "channels": {
+    "email": {
+      "label": "Email",
+      "fields": {
+        "email": {
+          "label": "Email",
+          "helpText": "Requires SMTP to be configured on the server (see .env)."
+        }
+      }
+    },
+    "ntfy": {
+      "label": "ntfy",
+      "fields": {
+        "serverUrl": {
+          "label": "Server URL",
+          "helpText": "Use https://ntfy.sh or your own ntfy server."
+        },
+        "topic": {
+          "label": "Topic",
+          "helpText": "On the public ntfy.sh server anyone who knows the topic name can read it, so pick something hard to guess."
+        },
+        "accessToken": {
+          "label": "Access token (optional)",
+          "helpText": "Only needed for topics that require login."
+        }
+      }
+    },
+    "telegram": {
+      "label": "Telegram",
+      "fields": {
+        "botToken": {
+          "label": "Bot token",
+          "helpText": "Create a bot by messaging @BotFather on Telegram."
+        },
+        "chatId": {
+          "label": "Chat ID",
+          "placeholder": "123456789 or -100123456789",
+          "helpText": "Send your bot a message (or add it to a group) first — bots can't start a conversation themselves."
+        }
+      }
+    },
+    "discord": {
+      "label": "Discord",
+      "fields": {
+        "webhookUrl": {
+          "label": "Webhook URL",
+          "helpText": "Channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL."
+        }
+      }
+    }
+  },
+  "scopes": {
+    "tasks_read": {
+      "label": "View tasks",
+      "hint": "List tasks and run history"
+    },
+    "tasks_write": {
+      "label": "Manage tasks",
+      "hint": "Create, update, delete tasks"
+    },
+    "runs_trigger": {
+      "label": "Trigger backups",
+      "hint": "Start a manual backup"
+    },
+    "runs_download": {
+      "label": "Download backups",
+      "hint": "Download backup files"
+    },
+    "runs_delete": {
+      "label": "Delete backups",
+      "hint": "Delete backup files"
+    }
+  },
+  "systemEvents": {
+    "user_login": "User logins",
+    "user_created": "User created",
+    "user_deleted": "User deleted",
+    "task_created": "Backup task created",
+    "task_deleted": "Backup task deleted",
+    "security_reset": "2FA/passkeys reset or account unlocked"
+  },
+  "notifications": {
+    "channelSaved": "Channel saved",
+    "addChannel": "Add channel",
+    "recipientAdded": "Recipient added",
+    "notifyFor": "Notify for",
+    "addRecipient": "Add recipient",
+    "notificationAdded": "Notification added",
+    "onSuccess": "On success",
+    "onFailure": "On failure",
+    "saveToAccount": "Save to my account so my other tasks can use it",
+    "saveToAccountHint": "Leave unticked to keep it task-only: these settings can then only ever be used by this task.",
+    "add": "Add",
+    "adding": "Adding…",
+    "noOtherSaved": "No other saved channels in your account. Tick “Save to my account” when adding one, or add them on the <link>Notifications</link> page, to reuse them across tasks.",
+    "channelAddedToTask": "Channel added to this task",
+    "savedChannel": "Saved channel",
+    "useThisChannel": "Use this channel",
+    "sendTest": "Send test",
+    "sending": "Sending…",
+    "sent": "Sent",
+    "failedWhy": "Failed: {reason}",
+    "unknownError": "unknown error",
+    "testSent": "Test notification sent",
+    "testSentDetail": "Test notification sent — {detail}",
+    "channelDeleted": "Channel deleted",
+    "deleting": "Deleting…",
+    "madeReusable": "Channel saved to your account — your other tasks can use it now",
+    "makeReusable": "Make reusable",
+    "saving": "Saving…",
+    "makeReusableConfirm": "Save this channel to your account so your other tasks can use it too? This can't be undone — once other tasks use it, it can't go back to task-only.",
+    "channelUpdated": "Channel updated",
+    "name": "Name",
+    "secretSaved": "Saved — leave blank to keep it",
+    "saveChanges": "Save changes",
+    "sendVia": "Send via",
+    "nameOptional": "Name (optional)",
+    "emailPlaceholder": "The email address",
+    "recipientRemoved": "Recipient removed",
+    "notificationRemoved": "Notification removed",
+    "removing": "Removing…",
+    "removeTaskOnlyConfirm": "Remove this notification channel? It's task-only, so it and its saved settings are deleted.",
+    "removeSavedConfirm": "Stop this task using this notification channel? It stays saved in the owner's account for their other tasks.",
+    "deleteConfirm": "Delete this channel? Tasks using it stop sending notifications to it.",
+    "deleteUsedConfirm": "Delete this notification channel and its saved settings? {count, plural, one {# task} other {# tasks}} will stop notifying it.",
+    "deleteUnusedConfirm": "Delete this notification channel and its saved settings?"
+  },
+  "sharing": {
+    "saved": "Sharing saved",
+    "userEmail": "User's email",
+    "note": "Restoring a backup into the database is never shareable — only you can do that. Share again with the same email to change someone's permissions.",
+    "share": "Share",
+    "sharing": "Sharing…"
+  },
+  "destinations": {
+    "s3": {
+      "label": "S3 (AWS / Backblaze / Wasabi / R2 / MinIO / other S3-compatible)",
+      "fields": {
+        "bucket": {
+          "label": "Bucket"
+        },
+        "region": {
+          "label": "Region",
+          "helpText": "Use \"auto\" for providers that don't use AWS regions (e.g. R2)."
+        },
+        "accessKeyId": {
+          "label": "Access key ID"
+        },
+        "secretAccessKey": {
+          "label": "Secret access key"
+        },
+        "endpoint": {
+          "label": "Custom endpoint URL",
+          "helpText": "Leave blank for real AWS S3."
+        },
+        "forcePathStyle": {
+          "label": "Force path-style addressing",
+          "helpText": "Usually required for non-AWS S3-compatible providers."
+        },
+        "pathPrefix": {
+          "label": "Path prefix (optional)"
+        }
+      }
+    },
+    "google_drive": {
+      "label": "Google Drive",
+      "fields": {
+        "folderId": {
+          "label": "Folder ID (optional)",
+          "helpText": "The long ID at the end of a Drive folder's URL. Leave blank to upload to the Drive root."
+        },
+        "clientId": {
+          "label": "OAuth client ID"
+        },
+        "clientSecret": {
+          "label": "OAuth client secret"
+        },
+        "refreshToken": {
+          "label": "OAuth refresh token",
+          "helpText": "Obtained via Google's OAuth consent flow with the drive.file scope — see README."
+        }
+      }
+    },
+    "onedrive": {
+      "label": "OneDrive",
+      "fields": {
+        "folderPath": {
+          "label": "Folder path (optional)",
+          "helpText": "Created if it doesn't exist. Leave blank to upload to the OneDrive root."
+        },
+        "clientId": {
+          "label": "Application (client) ID"
+        },
+        "clientSecret": {
+          "label": "Client secret (optional)",
+          "helpText": "Only for a confidential-client app registration. Leave blank for a public client."
+        },
+        "refreshToken": {
+          "label": "OAuth refresh token",
+          "helpText": "Obtained via Microsoft's OAuth consent flow with the Files.ReadWrite and offline_access scopes — see README."
+        },
+        "tenantId": {
+          "label": "Tenant ID",
+          "helpText": "\"common\" for personal Microsoft accounts, or your Azure AD tenant ID for work/school accounts."
+        }
+      }
+    },
+    "email": {
+      "label": "Email (attach the backup file)",
+      "fields": {
+        "to": {
+          "label": "Send to",
+          "helpText": "Separate multiple addresses with commas. Independent of the task's notification recipients."
+        },
+        "maxSizeMb": {
+          "label": "Maximum file size (MB)",
+          "helpText": "Backups larger than this are skipped, not emailed — and the run history shows them as skipped. Check your mail provider's attachment limit (many cap around 25 MB, and email adds ~33% overhead)."
+        }
+      }
+    },
+    "opencloud": {
+      "label": "OpenCloud",
+      "fields": {
+        "webdavUrl": {
+          "label": "Folder WebDAV URL"
+        },
+        "username": {
+          "label": "Username"
+        },
+        "appToken": {
+          "label": "App token"
+        },
+        "pathPrefix": {
+          "label": "Path prefix (optional)"
+        }
+      }
+    },
+    "ftp": {
+      "label": "FTP (unencrypted)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Leave blank for the default."
+        },
+        "username": {
+          "label": "Username"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "pathPrefix": {
+          "label": "Remote folder (optional)",
+          "helpText": "Created if it doesn't exist. Start with \"/\" for an absolute path, otherwise it's relative to the login folder."
+        }
+      }
+    },
+    "ftps": {
+      "label": "FTPS (FTP over TLS)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Leave blank for the default.",
+          "placeholder": "21 (990 for implicit TLS)"
+        },
+        "username": {
+          "label": "Username"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "implicitTls": {
+          "label": "Use implicit TLS",
+          "helpText": "Only for older servers that expect TLS from the start (usually port 990). Most servers use explicit TLS — leave unchecked."
+        },
+        "allowSelfSigned": {
+          "label": "Allow self-signed / untrusted certificates",
+          "helpText": "The connection is still encrypted, but the server's identity isn't verified."
+        },
+        "pathPrefix": {
+          "label": "Remote folder (optional)",
+          "helpText": "Created if it doesn't exist. Start with \"/\" for an absolute path, otherwise it's relative to the login folder."
+        }
+      }
+    },
+    "sftp": {
+      "label": "SFTP (SSH file transfer)",
+      "fields": {
+        "host": {
+          "label": "Host"
+        },
+        "port": {
+          "label": "Port",
+          "helpText": "Leave blank for the default."
+        },
+        "username": {
+          "label": "Username"
+        },
+        "password": {
+          "label": "Password",
+          "helpText": "Leave blank if you're using a private key."
+        },
+        "privateKey": {
+          "label": "Private key (optional)",
+          "helpText": "Paste the full key in OpenSSH or PEM format. Stored encrypted.",
+          "placeholder": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+        },
+        "passphrase": {
+          "label": "Key passphrase (optional)"
+        },
+        "hostFingerprint": {
+          "label": "Server host key fingerprint (recommended)",
+          "helpText": "Click \"Test connection\" to see the server's fingerprint. Once set, connections to a server with a different key are refused."
+        },
+        "pathPrefix": {
+          "label": "Remote folder (optional)",
+          "helpText": "Created if it doesn't exist. Start with \"/\" for an absolute path, otherwise it's relative to the user's home folder."
+        }
+      }
+    }
+  },
+  "locations": {
+    "added": "Save location added",
+    "provider": "Provider",
+    "label": "Label",
+    "noOneClick": "One-click sign-in isn't set up on this server, so you'll need to enter your own OAuth credentials below. (An admin can enable sign-in by setting the provider's client ID in the server environment — see the README.)",
+    "saveToAccount": "Save to my account so my other tasks can use it",
+    "saveToAccountHint": "Leave unticked to keep it task-only: these credentials can then only ever be used by this task.",
+    "openAndSignIn": "1. Open <link>{url}</link> and sign in.",
+    "enterCode": "2. Enter this code: <mono>{code}</mono>",
+    "waiting": "Waiting for you to approve… this page updates automatically.",
+    "connectedAs": "Connected as {account}. The save location has been added.",
+    "connectedToast": "Connected {account} — save location added",
+    "yourAccount": "your account",
+    "codeExpired": "The code expired before it was approved. Try again.",
+    "connect": "Connect {provider}",
+    "starting": "Starting…",
+    "testConnection": "Test connection",
+    "testing": "Testing…",
+    "addLocation": "Add save location",
+    "useSignIn": "Use sign-in instead",
+    "useOwnCredentials": "Advanced: use my own credentials",
+    "connected": "Connected successfully",
+    "failedWhy": "Failed: {reason}",
+    "unknownError": "unknown error",
+    "ok": "OK",
+    "noOtherSaved": "No other saved locations in your account. Tick “Save to my account” when adding one, or add them on the <link>Save locations</link> page, to reuse them across tasks.",
+    "addedToTask": "Save location added to this task",
+    "savedLocation": "Saved location",
+    "subfolder": "Subfolder for this task (optional)",
+    "subfolderHint": "Added under the location's own folder, so tasks sharing it don't mix their files. Clear it to use the folder as-is.",
+    "useThis": "Use this location",
+    "updated": "Save location updated",
+    "secretSaved": "Saved — leave blank to keep it",
+    "saveChanges": "Save changes",
+    "test": "Test",
+    "deleted": "Save location deleted",
+    "deleting": "Deleting…",
+    "deleteUsedConfirm": "Delete this save location and its saved credentials? {count, plural, one {# task} other {# tasks}} will stop copying backups here. Files already uploaded to the provider are not deleted.",
+    "deleteUnusedConfirm": "Delete this save location and its saved credentials? Files already uploaded to the provider are not deleted.",
+    "madeReusable": "Save location saved to your account — your other tasks can use it now",
+    "makeReusable": "Make reusable",
+    "saving": "Saving…",
+    "makeReusableConfirm": "Save this location to your account so your other tasks can use it too? This can't be undone — once other tasks use it, it can't go back to task-only.",
+    "disable": "Disable",
+    "enable": "Enable",
+    "disabledForTask": "Save location disabled for this task",
+    "enabledForTask": "Save location enabled for this task",
+    "removedFromTask": "Save location removed from this task",
+    "removing": "Removing…",
+    "removeTaskOnlyConfirm": "Remove this save location? It's task-only, so it and its saved credentials are deleted. Future runs will stop copying files here — this doesn't delete anything already uploaded to the provider.",
+    "removeSavedConfirm": "Stop this task using this save location? It stays saved in the owner's account for their other tasks. This doesn't delete anything already uploaded to the provider."
+  },
+  "apiKeys": {
+    "created": "API key created — copy it now",
+    "createdBanner": "Key created — copy it now, it won't be shown again.",
+    "savedToast": "Key saved. You can revoke it from this page at any time.",
+    "done": "Done",
+    "keyName": "Key name",
+    "keyNamePlaceholder": "Main app server",
+    "allTasks": "All tasks",
+    "permissions": "Permissions",
+    "create": "Create key",
+    "creating": "Creating…",
+    "revoke": "Revoke",
+    "revoking": "Revoking…",
+    "revokeConfirm": "Revoke this API key? Any app using it will immediately lose access.",
+    "revoked": "API key revoked",
+    "scopeTask": "Scope to a single task (optional)"
+  },
+  "users": {
+    "deleteHeading": "Delete this user?",
+    "deleteDescription": "Their sessions are revoked immediately, and all of their backup tasks, run history, recipients and API keys are removed from the app. This cannot be undone.",
+    "deleteKeepNote": "The backup files of their tasks stay on the server, each in a folder named after its task id inside the backup directory, so you can still recover them by hand.",
+    "deleteUser": "Delete user",
+    "deleted": "User deleted",
+    "title": "Users",
+    "intro": "Admins manage users and system notifications. Backup tasks are private to their owner: admins can see how many tasks a user has, but not the tasks themselves unless the owner shares them. Deleting a user also deletes all of their tasks and backups.",
+    "allUsers": "All users",
+    "allUsersDescription": "Everyone who can sign in to this server.",
+    "addUser": "Add user",
+    "newUser": "New user",
+    "createNew": "Create new",
+    "userCreated": "User created",
+    "name": "Name",
+    "email": "Email",
+    "tempPassword": "Temporary password",
+    "role": "Role",
+    "roleUser": "User",
+    "roleAdmin": "Admin",
+    "createUser": "Create user",
+    "noUsers": "No users.",
+    "you": "(you)",
+    "taskCount": "{count, plural, one {# task} other {# tasks}}",
+    "edit": "Edit",
+    "ownsTasks": "owns {count, plural, one {# task} other {# tasks}}",
+    "locked": "<strong>Sign-in locked</strong> after repeated failed attempts, until <time>date</time>. Passkeys still work.",
+    "unlock": "Unlock now",
+    "unlocked": "Account unlocked",
+    "detailsTitle": "Account details",
+    "detailsDescription": "Name, role, and a password reset if they're locked out.",
+    "changesSaved": "Changes saved",
+    "ownRole": "You can't change your own role.",
+    "resetPassword": "Reset password",
+    "keepPassword": "Leave blank to keep current password",
+    "saveChanges": "Save changes",
+    "securityTitle": "Two-factor authentication & passkeys",
+    "securityDescription": "Reset these if the user has lost their authenticator app or security key.",
+    "authenticatorOn": "Authenticator app enabled",
+    "authenticatorOff": "No authenticator app",
+    "passkeyCount": "{count, plural, one {# passkey} other {# passkeys}}",
+    "resetFactors": "Reset 2FA & passkeys",
+    "resetFactorsConfirm": "Remove all two-factor authentication and passkeys for {name}? They'll be able to sign in with just their password afterward, and will need to re-enroll from their own account page.",
+    "factorsReset": "2FA and passkeys reset",
+    "noFactors": "No authenticator app or passkeys set up — this user signs in with a password only."
+  },
+  "newTask": {
+    "testConnection": "Test connection",
+    "testing": "Testing…",
+    "connected": "Connected successfully",
+    "failedWhy": "Failed: {reason}",
+    "unknownError": "unknown error",
+    "dryRun": "Dry run",
+    "dryRunning": "Running backup…",
+    "dryRunOk": "Backup succeeded ({size}, discarded)",
+    "engine": "Database engine",
+    "authSource": "Auth database (optional)",
+    "authSourceHint": "The database the user was created in. Leave blank for “admin”, which is right for MongoDB Atlas and most servers.",
+    "title": "New backup task",
+    "subtitle": "Connection details are encrypted at rest and never shown again after saving.",
+    "taskName": "Task name",
+    "taskNamePlaceholder": "Shop database backup",
+    "host": "Host",
+    "port": "Port",
+    "portPlaceholder": "Blank = default for the engine",
+    "user": "User",
+    "password": "Password",
+    "database": "Database name",
+    "requireSsl": "Require SSL",
+    "dryRunHint": "Dry run performs a real backup with these settings and immediately discards the result — it takes the same time and puts the same load on the database as a real scheduled backup would, but nothing is saved.",
+    "backupsToKeep": "Backups to keep",
+    "encrypt": "Encrypt backup files",
+    "encryptionPassword": "Encryption password",
+    "encryptionPlaceholder": "Only used if encryption is enabled above",
+    "encryptionHint": "Store this somewhere safe yourself — it is not recoverable from Backup Hub if lost.",
+    "create": "Create task"
+  },
+  "engines": {
+    "compatibility": {
+      "mysql": "Also MySQL-compatible services such as Amazon RDS / Aurora MySQL, PlanetScale and TiDB.",
+      "postgres": "Also Postgres-compatible services such as Supabase, Neon, Amazon RDS / Aurora PostgreSQL and TimescaleDB.",
+      "mongodb": "Self-hosted MongoDB and MongoDB Atlas — for Atlas, enter the cluster's host (e.g. cluster0.abcde.mongodb.net); it connects with TLS automatically."
+    }
+  },
+  "usage": {
+    "notUsed": "not used by any task",
+    "usedBy": "used by",
+    "addedBy": "added by {name}",
+    "taskOnly": "task-only"
+  },
+  "locationsPage": {
+    "title": "Save locations",
+    "intro": "Off-site places your backups get copied to. Saved locations can be used by any of your tasks — enter the credentials once, pick them from a task's page, and changing them here updates every task that uses them. Task-only locations belong to a single task and can't be used anywhere else. Nobody else, admins included, can see these.",
+    "savedTitle": "Saved locations",
+    "savedDescription": "Reusable across your tasks.",
+    "addLocation": "Add location",
+    "newLocation": "New save location",
+    "createNew": "Create new",
+    "noSaved": "No saved locations yet — add one, or make a task-only location reusable.",
+    "taskOnlyTitle": "Task-only locations",
+    "taskOnlyDescription": "Tied to one of your tasks. Locations someone you shared a task with added are listed too: you can remove them, but only they can change their credentials.",
+    "noTaskOnly": "No task-only locations.",
+    "edit": "Edit",
+    "editTitle": "Edit {name}",
+    "editIntroTaskOnly": "{provider} · task-only. Changes apply to the task using it from the next backup on.",
+    "editIntroSaved": "{provider} · saved location. Changes apply to every task using it from the next backup on."
+  },
+  "channelsPage": {
+    "title": "Notifications",
+    "intro": "Your notification channels: where your tasks send backup success/failure alerts — email, ntfy, Telegram or Discord. Saved channels can be used by any of your tasks: set them up once, pick them from a task's page, and changing them here updates every task that uses them. Task-only channels belong to a single task. Nobody else, admins included, can see these.",
+    "savedTitle": "Saved channels",
+    "savedDescription": "Reusable across your tasks.",
+    "addChannel": "Add channel",
+    "newChannel": "New notification channel",
+    "createNew": "Create new",
+    "noSaved": "No saved channels yet — add one, or make a task-only channel reusable.",
+    "taskOnlyTitle": "Task-only channels",
+    "taskOnlyDescription": "Tied to one of your tasks. Channels someone you shared a task with added are listed too: you can remove them, but only they can change their settings.",
+    "noTaskOnly": "No task-only channels.",
+    "edit": "Edit",
+    "editTitle": "Edit {name}",
+    "editIntroTaskOnly": "{type} · task-only. Changes apply to the task using it.",
+    "editIntroSaved": "{type} · saved channel. Changes apply to every task using it."
+  },
+  "systemPage": {
+    "title": "System notifications",
+    "intro": "Server-wide alerts for account and task-lifecycle events (email, ntfy, Telegram or Discord), managed by admins. Backup success/failure alerts are separate: each user sets those up under <link>Notifications</link> and on each task's page.",
+    "recipientsTitle": "Recipients",
+    "recipientsDescription": "Who is alerted about account and task-lifecycle events, and for which ones.",
+    "addRecipient": "Add recipient",
+    "newRecipient": "New system recipient",
+    "createNew": "Create new",
+    "noRecipients": "No system notification recipients yet."
+  },
+  "apiKeysPage": {
+    "title": "API keys",
+    "intro": "Used by external apps to call the REST API at <code>/api/v1/*</code>. Each key carries its own scopes and can be pinned to a single task. A key acts as you: it can never do more on a task than you can, and it stops working on a task if that task is unshared from you.",
+    "keysTitle": "Your API keys",
+    "keysDescription": "Revoke a key as soon as the app using it no longer needs access.",
+    "createKey": "Create key",
+    "newKey": "New API key",
+    "createNew": "Create new",
+    "noKeys": "No API keys yet.",
+    "oneTask": "One task",
+    "allTasks": "All tasks"
+  }
+}

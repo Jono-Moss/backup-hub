@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { useActionFormStatus } from "@/components/ui/common/ActionForm";
 
@@ -14,10 +15,12 @@ type SubmitButtonProps = {
 
 export function StandardSubmitButton({
   title,
-  pendingTitle = "Processing...",
+  pendingTitle: pendingTitleProp,
   variant = "standard",
   fullWidth = false
 }: SubmitButtonProps) {
+    const t = useTranslations("common");
+    const pendingTitle = pendingTitleProp ?? t("processing");
   // Works inside a plain <form action> (useFormStatus) and inside ActionForm.
   const formStatus = useFormStatus();
   const actionForm = useActionFormStatus();

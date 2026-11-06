@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { LuPlus, LuX } from "react-icons/lu";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
@@ -52,6 +53,7 @@ export function AddableSection({
   /** The list of existing entries — only rendered when count > 0. */
   children?: React.ReactNode;
 }) {
+  const t = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState(tabs[0]?.key);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -118,7 +120,7 @@ export function AddableSection({
               className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
             >
               <LuX size={16} aria-hidden="true" />
-              Cancel
+              {t("cancel")}
             </button>
           </div>
 

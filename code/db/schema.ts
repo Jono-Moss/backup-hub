@@ -287,6 +287,8 @@ export const appUser = mysqlTable("app_user", {
   // Argon2id hash (see lib/auth/password.ts) — never plaintext, never logged.
   hashedPassword: varchar("hashed_password", { length: 255 }).notNull(),
   role: mysqlEnum("role", ROLES).notNull().default("user"),
+  // Interface language (lib/i18n/locales.ts); null = follow the browser.
+  locale: varchar("locale", { length: 10 }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

@@ -1,3 +1,8 @@
+import createNextIntlPlugin from "next-intl/plugin";
+
+// Translations: see i18n/request.ts and translations/.
+const withNextIntl = createNextIntlPlugin();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // node-cron / child_process need the Node.js runtime, not edge
@@ -14,4 +19,4 @@ const nextConfig = {
   }
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

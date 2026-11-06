@@ -22,6 +22,8 @@ export interface SessionUser {
   role: Role;
   /** The session row this request is using — lets the UI mark "this device". */
   sessionId: string;
+  /** Chosen interface language, or null to follow the browser (see i18n/request.ts). */
+  locale: string | null;
 }
 
 // Creates a DB-backed session row and sets the httpOnly cookie. Only the
@@ -89,6 +91,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
       email: appUser.email,
       name: appUser.name,
       role: appUser.role,
+      locale: appUser.locale,
       sessionId: session.id,
       lastSeenAt: session.lastSeenAt,
       lastSeenIp: session.lastSeenIp,
@@ -106,7 +109,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
   if (!row) return null;
   await touchSession(row.sessionId, row.lastSeenAt, row.lastSeenIp);
-  return { id: row.userId, email: row.email, name: row.name, role: row.role, sessionId: row.sessionId };
+  return { id: row.userId, email: row.email, name: row.name, role: row.role, sessionId: row.sessionId, locale: row.locale };
 });
 
 // Records when and from where a session was last used, for Account → Active
@@ -150,6 +153,7 @@ export const getPendingTwoFactorUser = cache(async (): Promise<SessionUser | nul
       email: appUser.email,
       name: appUser.name,
       role: appUser.role,
+      locale: appUser.locale,
       sessionId: session.id,
     })
     .from(session)
@@ -164,7 +168,7 @@ export const getPendingTwoFactorUser = cache(async (): Promise<SessionUser | nul
     .limit(1);
 
   if (!row) return null;
-  return { id: row.userId, email: row.email, name: row.name, role: row.role, sessionId: row.sessionId };
+  return { id: row.userId, email: row.email, name: row.name, role: row.role, sessionId: row.sessionId, locale: row.locale };
 });
 
 // Called once /login/2fa accepts a valid TOTP or recovery code — flips the

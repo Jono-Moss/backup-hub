@@ -2,20 +2,23 @@
 
 import { shareTask } from "@/app/tasks/actions";
 import { ActionForm } from "@/components/ui/common/ActionForm";
-import { SCOPE_OPTIONS } from "@/components/ui/api-keys/scopeOptions";
+import { useScopes } from "@/components/ui/api-keys/scopeOptions";
+import { useTranslations } from "next-intl";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 
 export function ShareTaskForm({ taskId }: { taskId: string }) {
+  const t = useTranslations("sharing");
+  const scopes = useScopes();
   return (
     <ActionForm
       action={(formData) => shareTask(taskId, formData)}
-      success="Sharing saved"
+      success={t("saved")}
       resetOnSuccess
       className="space-y-4"
     >
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="share-email">
-          User&apos;s email
+          {t("userEmail")}
         </label>
         <input
           id="share-email"
@@ -27,7 +30,7 @@ export function ShareTaskForm({ taskId }: { taskId: string }) {
       </div>
 
       <div className="space-y-2">
-        {SCOPE_OPTIONS.map((scope) => (
+        {scopes.options.map((scope) => (
           <label key={scope.value} className="flex items-start gap-2">
             <input
               type="checkbox"
@@ -45,11 +48,10 @@ export function ShareTaskForm({ taskId }: { taskId: string }) {
       </div>
 
       <p className="text-xs text-muted">
-        Restoring a backup into the database is never shareable — only you can do that. Share again with the same
-        email to change someone&apos;s permissions.
+        {t("note")}
       </p>
 
-      <StandardSubmitButton title="Share" pendingTitle="Sharing..." />
+      <StandardSubmitButton title={t("share")} pendingTitle={t("sharing")} />
     </ActionForm>
   );
 }

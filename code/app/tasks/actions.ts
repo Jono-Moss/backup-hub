@@ -1,6 +1,7 @@
 "use server";
 
 import { fail } from "@/lib/action-result";
+import { getTranslations } from "next-intl/server";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -78,7 +79,10 @@ export type AttentionItem = {
   taskId: string;
   taskName: string;
   kind: FailureKind | "verify" | "upload";
-  title: string;
+  /** Message key under "dashboard.attention" (translated by the page). */
+  titleKey: "runAuth" | "runConnection" | "runFailed" | "uploadAuth" | "uploadFailed" | "verifyRestore" | "verifyCheck";
+  /** Save location name, for the upload messages. */
+  location?: string | null;
   /** Raw error — null when the viewer isn't allowed to see it. */
   message: string | null;
   at: Date;
@@ -159,12 +163,7 @@ export async function getDashboardSummary() {
         taskId: task.id,
         taskName: task.name,
         kind,
-        title:
-          kind === "auth"
-            ? "Last backup couldn't sign in to the database"
-            : kind === "connection"
-              ? "Last backup couldn't reach the database"
-              : "Last backup failed",
+        titleKey: kind === "auth" ? "runAuth" : kind === "connection" ? "runConnection" : "runFailed",
         message: last.errorMessage,
         at: last.startedAt,
       });
@@ -177,9 +176,8 @@ export async function getDashboardSummary() {
           taskId: task.id,
           taskName: task.name,
           kind: auth ? "auth" : "upload",
-          title: auth
-            ? `Couldn't sign in to "${u.label ?? "save location"}" — reconnect it`
-            : `Copy to "${u.label ?? "save location"}" failed`,
+          titleKey: auth ? "uploadAuth" : "uploadFailed",
+          location: u.label,
           message,
           at: u.startedAt,
         });
@@ -189,7 +187,7 @@ export async function getDashboardSummary() {
           taskId: task.id,
           taskName: task.name,
           kind: "verify",
-          title: lastCompleted.verifyLevel === "restore" ? "Latest backup failed its test restore" : "Latest backup failed its check",
+          titleKey: lastCompleted.verifyLevel === "restore" ? "verifyRestore" : "verifyCheck",
           message: lastCompleted.verifyMessage,
           at: lastCompleted.startedAt,
         });
@@ -396,7 +394,7 @@ export async function runNow(taskId: string) {
   } catch (err) {
     // The failed run is already recorded in the history with its error.
     revalidatePath(`/tasks/${taskId}`);
-    return fail(`Backup failed: ${err instanceof Error ? err.message : String(err)}`.slice(0, 500));
+    return fail((await getTranslations("errors"))("backupFailed", { reason: (err instanceof Error ? err.message : String(err)).slice(0, 450) }));
   }
   revalidatePath(`/tasks/${taskId}`);
 }
@@ -455,7 +453,7 @@ export async function testRestoreBackupRun(taskId: string, runId: string) {
   await requireTaskScope(taskId, "runs:trigger");
   await assertRunInTask(taskId, runId);
   const [task] = await db.select({ engine: backupTask.engine }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
-  if (!task || !testRestoreAvailable(task.engine)) return fail("Test restores aren't set up on this server");
+  if (!task || !testRestoreAvailable(task.engine)) return fail((await getTranslations("errors"))("testRestoreUnavailable"));
   await enqueueVerify([runId], "restore");
   revalidatePath(`/tasks/${taskId}`);
 }
@@ -476,7 +474,7 @@ export async function verifyAllBackupRuns(taskId: string) {
 export async function testRestoreAllBackupRuns(taskId: string) {
   await requireTaskScope(taskId, "runs:trigger");
   const [task] = await db.select({ engine: backupTask.engine }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
-  if (!task || !testRestoreAvailable(task.engine)) return fail("Test restores aren't set up on this server");
+  if (!task || !testRestoreAvailable(task.engine)) return fail((await getTranslations("errors"))("testRestoreUnavailable"));
   const runs = await db
     .select({ id: backupRun.id })
     .from(backupRun)
@@ -535,7 +533,7 @@ export async function attachSavedChannel(taskId: string, formData: FormData) {
     .limit(1);
   if (!channel) throw new Error("Notification channel not found");
   const links = await listChannelLinksForTask(taskId);
-  if (links.some((l) => l.channel.id === channel.id)) return fail("This task already uses that notification channel");
+  if (links.some((l) => l.channel.id === channel.id)) return fail((await getTranslations("errors"))("channelAlreadyUsed"));
 
   await linkChannel(taskId, channel.id, formData.get("notifyOnSuccess") === "on", formData.get("notifyOnFailure") === "on");
   revalidatePath(`/tasks/${taskId}`);
@@ -676,7 +674,7 @@ export async function attachSavedDestination(taskId: string, formData: FormData)
 
   const subfolder = getDestination(dest.type).subfolderField ? normalizeSubfolder(String(formData.get("subfolder") ?? "")) : null;
   const links = await listLinksForTask(taskId);
-  if (links.some((l) => l.destination.id === dest.id)) return fail("This task already uses that save location");
+  if (links.some((l) => l.destination.id === dest.id)) return fail((await getTranslations("errors"))("locationAlreadyUsed"));
 
   await linkDestination(taskId, dest.id, subfolder);
   revalidatePath(`/tasks/${taskId}`);
@@ -777,7 +775,7 @@ export async function removeTaskDestination(taskId: string, linkId: string) {
 export async function testExistingTaskDestination(taskId: string, linkId: string) {
   const { access } = await requireTaskScope(taskId, "tasks:write");
   const row = await getLink(taskId, linkId);
-  if (!row) return { ok: false as const, message: "Destination not found." };
+  if (!row) return { ok: false as const, message: (await getTranslations("errors"))("destinationNotFound") };
 
   const config = readConfig(row.destination);
   const result = await getDestination(row.destination.type).testConnection(
@@ -789,7 +787,7 @@ export async function testExistingTaskDestination(taskId: string, linkId: string
   if (access.isOwner) return result;
   return result.ok
     ? { ok: true }
-    : { ok: false, message: "connection failed (details are only shown to the task owner)" };
+    : { ok: false, message: (await getTranslations("errors"))("connectionFailedHidden") };
 }
 
 // --- "Connect your account" (OAuth device flow) ---
@@ -810,9 +808,9 @@ export async function startDestinationConnect(taskId: string | null, type: Desti
   if (taskId) await requireTaskScope(taskId, "tasks:write");
   const me = await requireUser();
   const connector = getDestination(type).connect;
-  if (!connector) return { ok: false as const, message: "This provider doesn't support signing in." };
+  if (!connector) return { ok: false as const, message: (await getTranslations("errors"))("noSignInSupport") };
   if (!connector.isAvailable()) {
-    return { ok: false as const, message: "Sign-in isn't set up on this server yet — ask an admin to configure it (see the README), or use your own credentials under Advanced." };
+    return { ok: false as const, message: (await getTranslations("errors"))("signInNotSetUp") };
   }
 
   try {
@@ -857,17 +855,17 @@ export async function pollDestinationConnect(
   try {
     payload = JSON.parse(unwrapSecret(token));
   } catch {
-    return { status: "error", message: "Invalid or tampered sign-in session. Please start again." };
+    return { status: "error", message: (await getTranslations("errors"))("signInTampered") };
   }
   if (payload.taskId !== taskId || payload.userId !== me.id) {
-    return { status: "error", message: "This sign-in session belongs to a different task. Please start again." };
+    return { status: "error", message: (await getTranslations("errors"))("signInOtherTask") };
   }
   if (Date.now() > payload.expiresAt) {
-    return { status: "error", message: "The code expired before it was approved. Try again." };
+    return { status: "error", message: (await getTranslations("errors"))("codeExpired") };
   }
 
   const destination = getDestination(payload.type);
-  if (!destination.connect) return { status: "error", message: "This provider doesn't support signing in." };
+  if (!destination.connect) return { status: "error", message: (await getTranslations("errors"))("noSignInSupport") };
 
   const result = await destination.connect.poll(payload.state);
   if (result.status !== "complete") return result;
@@ -922,14 +920,14 @@ export async function shareTask(
   const me = await requireTaskOwner(taskId);
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!email) return { ok: false, message: "Enter the email of the user to share with." };
+  if (!email) return { ok: false, message: (await getTranslations("errors"))("shareEmailRequired") };
 
   const requested = formData.getAll("scopes").map(String);
   const scopes = SCOPES.filter((s) => s === "tasks:read" || requested.includes(s)) as Scope[];
 
   const [target] = await db.select({ id: appUser.id }).from(appUser).where(eq(appUser.email, email)).limit(1);
-  if (!target) return { ok: false, message: "No user with that email." };
-  if (target.id === me.id) return { ok: false, message: "You already own this task." };
+  if (!target) return { ok: false, message: (await getTranslations("errors"))("shareNoUser") };
+  if (target.id === me.id) return { ok: false, message: (await getTranslations("errors"))("shareOwnTask") };
 
   const [existing] = await db
     .select({ id: taskShare.id })

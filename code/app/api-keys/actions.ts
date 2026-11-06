@@ -1,6 +1,7 @@
 "use server";
 
 import { fail } from "@/lib/action-result";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { apiKey, SCOPES, type Scope } from "@/db/schema";
 import { eq, isNull, desc, and } from "drizzle-orm";
@@ -40,7 +41,7 @@ export async function createApiKey(formData: FormData) {
   const scopes = formData.getAll("scopes").map(String).filter((s): s is Scope => (SCOPES as readonly string[]).includes(s));
 
   if (!name || scopes.length === 0) {
-    return fail("Name and at least one scope are required");
+    return fail((await getTranslations("errors"))("apiKeyFields"));
   }
   if (taskId && !(await getTaskAccess(me.id, taskId))) {
     throw new Error("Task not found");

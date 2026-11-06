@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa";
 import { BsTwitterX } from "react-icons/bs";
 import { FaMastodon } from "react-icons/fa";
@@ -17,6 +18,7 @@ const SOCIAL_LINK =
 const LABEL = "mb-1.5 sm:mb-2 text-[9px] sm:text-[10px] font-semibold uppercase leading-tight tracking-[0.15em] sm:tracking-[0.25em] text-slate-500";
 
 export function StandardFooter() {
+    const t = useTranslations("footer");
     return (
         <footer className="border-t border-line bg-gray-50">
             <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-5 sm:py-8">
@@ -25,7 +27,7 @@ export function StandardFooter() {
 
                     {/* Byteswop */}
                     <div className="flex flex-col items-center px-2 text-center sm:items-start sm:px-0 sm:text-left">
-                        <p className={LABEL}>A product by</p>
+                        <p className={LABEL}>{t("productBy")}</p>
                         <a
                             href="https://byteswop.com/"
                             target="_blank"
@@ -38,7 +40,7 @@ export function StandardFooter() {
 
                     {/* MyFin */}
                     <div className="flex flex-col items-center px-2 text-center border-l border-line sm:border-x">
-                        <p className={LABEL}>Try our accounting software</p>
+                        <p className={LABEL}>{t("tryAccounting")}</p>
                         <a
                             href="https://myfin-hub.com/"
                             target="_blank"
@@ -89,19 +91,19 @@ export function StandardFooter() {
                 {/* Copyright */}
                 <div className="mt-5 sm:mt-8 flex flex-col items-center gap-1 border-t border-line pt-4 sm:pt-5 text-center sm:flex-row sm:justify-between">
                     <p className="text-xs text-slate-500">
-                        © 2026 Byteswop · Backup Hub · Open Source ·{" "}
+                        © 2026 Byteswop · Backup Hub · {t("openSource")} ·{" "}
                         <a
                             href="https://github.com/Jono-Moss/backup-hub/blob/main/LICENSE"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="font-medium text-slate-400 transition-colors hover:text-slate-600"
                         >
-                            MIT License
+                            {t("license")}
                         </a>
                     </p>
 
                     <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                        Backup the world
+                        {t("tagline")}
                     </p>
                 </div>
             </div>

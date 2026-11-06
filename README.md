@@ -37,6 +37,7 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
 - A scoped REST API (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`) for driving Backup Hub from other tools
 - Everything encrypted at rest — stored DB credentials, save-location and notification credentials, backup passwords, and (optionally) the backup files themselves
 - Works on your phone as well as your desktop
+- Available in **English, Spanish, German, French and Simplified Chinese** — it follows your browser's language, or pick one on your Account page (see [languages](code/README.md#languages))
 
 ## Screenshots
 

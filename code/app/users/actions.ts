@@ -1,6 +1,9 @@
 "use server";
 
 import { fail } from "@/lib/action-result";
+import { cookies } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
+import { LOCALE_COOKIE, isLocale } from "@/lib/i18n/locales";
 import { db } from "@/db";
 import {
   appUser,
@@ -74,10 +77,10 @@ export async function createUser(formData: FormData) {
   const role = String(formData.get("role") ?? "user") as Role;
 
   if (!email || !name || !password) {
-    return fail("Name, email, and password are required");
+    return fail((await getTranslations("errors"))("nameEmailPasswordRequired"));
   }
   if (!isPasswordStrongEnough(password)) {
-    return fail("Password must be at least 8 characters");
+    return fail((await getTranslations("errors"))("passwordTooShort"));
   }
 
   await db.insert(appUser).values({
@@ -105,13 +108,13 @@ export async function updateUser(userId: string, formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (admin.id === userId && role !== "admin") {
-    return fail("You can't remove your own admin role");
+    return fail((await getTranslations("errors"))("ownAdminRole"));
   }
 
   const updates: Record<string, unknown> = { name, role };
   if (password) {
     if (!isPasswordStrongEnough(password)) {
-      return fail("Password must be at least 8 characters");
+      return fail((await getTranslations("errors"))("passwordTooShort"));
     }
     updates.hashedPassword = await hashPassword(password);
   }
@@ -127,7 +130,7 @@ export async function updateUser(userId: string, formData: FormData) {
 export async function deleteUser(userId: string, deleteFiles: boolean) {
   const admin = await requireAdmin();
   if (admin.id === userId) {
-    return fail("You can't delete your own account");
+    return fail((await getTranslations("errors"))("deleteSelf"));
   }
 
   const [target] = await db.select().from(appUser).where(eq(appUser.id, userId)).limit(1);
@@ -207,44 +210,54 @@ export async function getCurrentUserProfile() {
 
 export async function updateOwnProfile(formData: FormData) {
   const me = await requireUser();
+  const t = await getTranslations("errors");
   const name = String(formData.get("name") ?? "").trim();
   const currentPassword = String(formData.get("currentPassword") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
+  // "" = follow the browser; anything unknown is treated the same.
+  const rawLocale = String(formData.get("locale") ?? "");
+  const locale = isLocale(rawLocale) ? rawLocale : null;
 
-  if (!name) return fail("Name is required");
+  if (!name) return fail(t("nameRequired"));
 
   const [user] = await db.select().from(appUser).where(eq(appUser.id, me.id)).limit(1);
   if (!user) throw new Error("User not found");
 
-  const updates: Record<string, unknown> = { name };
+  const updates: Record<string, unknown> = { name, locale };
 
   if (newPassword) {
     const { verifyPassword } = await import("@/lib/auth/password");
     if (!currentPassword || !(await verifyPassword(user.hashedPassword, currentPassword))) {
-      return fail("Current password is incorrect");
+      return fail(t("currentPasswordIncorrect"));
     }
     if (!isPasswordStrongEnough(newPassword)) {
-      return fail("New password must be at least 8 characters");
+      return fail(t("newPasswordTooShort"));
     }
     updates.hashedPassword = await hashPassword(newPassword);
   }
 
   await db.update(appUser).set(updates).where(eq(appUser.id, me.id));
 
+  // Remember the language for the sign-in pages too, and re-render every
+  // page so the change shows straight away.
+  const store = await cookies();
+  if (locale) store.set(LOCALE_COOKIE, locale, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
+  else store.delete(LOCALE_COOKIE);
+  revalidatePath("/", "layout");
+
+  // Reply in the language just chosen.
+  const tAccount = await getTranslations({ locale: locale ?? (await getLocale()), namespace: "account" });
+
   // A new password should lock out anyone holding an old session cookie.
   // This device stays signed in.
   if (newPassword) {
     const ended = await endOtherSessions(me.id, me.sessionId);
-    revalidatePath("/account");
     return {
       ok: true as const,
-      message:
-        ended > 0
-          ? `Password changed — signed out ${ended} other session${ended === 1 ? "" : "s"}`
-          : "Password changed",
+      message: ended > 0 ? tAccount("passwordChangedSignedOut", { count: ended }) : tAccount("passwordChanged"),
     };
   }
-  revalidatePath("/account");
+  return { ok: true as const, message: tAccount("profileSaved") };
 }
 
 // --- Sign-in lockouts (lib/auth/lockout.ts) ---

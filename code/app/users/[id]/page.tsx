@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { notFound } from "next/navigation";
 import { getUser, updateUser, getUserAuthFactors, adminResetAuthFactors, getUserLockout, unlockUser } from "../actions";
@@ -28,15 +29,16 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   const resetAuthFactors = adminResetAuthFactors.bind(null, user.id);
   const unlock = unlockUser.bind(null, user.id);
 
+  const t = await getTranslations("users");
   return (
     <div className="max-w-2xl space-y-8">
       <div>
         <a href="/users" className="inline-flex items-center gap-1 text-sm text-muted hover:text-primary mb-3">
-          <LuArrowLeft size={14} aria-hidden="true" /> All users
+          <LuArrowLeft size={14} aria-hidden="true" /> {t("allUsers")}
         </a>
         <h1 className="text-xl font-semibold text-ink mb-1">{user.name}</h1>
         <p className="text-sm text-muted">
-          {user.email} · owns {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
+          {user.email} · {t("ownsTasks", { count: user.taskCount })}
         </p>
       </div>
 
@@ -45,29 +47,31 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
           <p className="flex items-start gap-2 text-sm text-ink">
             <LuLock size={16} className="mt-0.5 shrink-0 text-danger" aria-hidden="true" />
             <span>
-              <span className="font-semibold">Sign-in locked</span> after repeated failed attempts, until{" "}
-              <LocalTime value={lockout.until} />. Passkeys still work.
+              {t.rich("locked", {
+                strong: (chunks) => <span className="font-semibold">{chunks}</span>,
+                time: () => <LocalTime value={lockout.until} />,
+              })}
             </span>
           </p>
-          <StandardActionButton title="Unlock now" variant="outline" compact action={unlock} successMessage="Account unlocked" />
+          <StandardActionButton title={t("unlock")} variant="outline" compact action={unlock} successMessage={t("unlocked")} />
         </div>
       )}
 
       <StandardSection id="details">
         <StandardSectionHeader
-          title="Account details"
+          title={t("detailsTitle")}
           icon={<LuUser />}
-          description="Name, role, and a password reset if they're locked out."
+          description={t("detailsDescription")}
           action={
             <StandardBadge tone={user.role === "admin" ? "primary" : "neutral"}>
               {user.role === "admin" ? "Admin" : "User"}
             </StandardBadge>
           }
         />
-        <ActionForm action={save} success="Changes saved" resetOnSuccess className="space-y-5 max-w-md">
+        <ActionForm action={save} success={t("changesSaved")} resetOnSuccess className="space-y-5 max-w-md">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
-              Name
+              {t("name")}
             </label>
             <input
               id="name"
@@ -80,17 +84,17 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
 
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="role">
-              Role
+              {t("role")}
             </label>
             {isSelf ? (
               <>
                 <input type="hidden" name="role" value={user.role} />
                 <input
                   disabled
-                  value={user.role}
+                  value={user.role === "admin" ? t("roleAdmin") : t("roleUser")}
                   className="w-full border border-line px-3 py-2 text-sm bg-paper text-muted"
                 />
-                <p className="text-xs text-muted mt-1">You can't change your own role.</p>
+                <p className="text-xs text-muted mt-1">{t("ownRole")}</p>
               </>
             ) : (
               <select
@@ -99,58 +103,58 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
                 defaultValue={user.role}
                 className="w-full border border-line px-3 py-2 text-sm bg-white"
               >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="user">{t("roleUser")}</option>
+                <option value="admin">{t("roleAdmin")}</option>
               </select>
             )}
           </div>
 
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="password">
-              Reset password
+              {t("resetPassword")}
             </label>
             <input
               id="password"
               name="password"
               type="password"
-              placeholder="Leave blank to keep current password"
+              placeholder={t("keepPassword")}
               minLength={8}
               className="w-full border border-line px-3 py-2 text-sm"
             />
           </div>
 
-          <StandardSubmitButton title="Save changes" />
+          <StandardSubmitButton title={t("saveChanges")} />
         </ActionForm>
       </StandardSection>
 
       {!isSelf && (
         <StandardSection id="security">
           <StandardSectionHeader
-            title="Two-factor authentication & passkeys"
+            title={t("securityTitle")}
             icon={<LuShieldCheck />}
-            description="Reset these if the user has lost their authenticator app or security key."
+            description={t("securityDescription")}
           />
           {authFactors.totpEnabled || authFactors.passkeyCount > 0 ? (
             <div className="space-y-4">
               <div className="flex flex-wrap gap-1.5">
                 <StandardBadge tone={authFactors.totpEnabled ? "primary" : "neutral"}>
-                  {authFactors.totpEnabled ? "Authenticator app enabled" : "No authenticator app"}
+                  {authFactors.totpEnabled ? t("authenticatorOn") : t("authenticatorOff")}
                 </StandardBadge>
                 <StandardBadge tone={authFactors.passkeyCount > 0 ? "primary" : "neutral"}>
-                  {authFactors.passkeyCount} passkey{authFactors.passkeyCount === 1 ? "" : "s"}
+                  {t("passkeyCount", { count: authFactors.passkeyCount })}
                 </StandardBadge>
               </div>
               <StandardActionButton
-                title="Reset 2FA & passkeys"
+                title={t("resetFactors")}
                 variant="danger"
-                confirmMessage={`Remove all two-factor authentication and passkeys for ${user.name}? They'll be able to sign in with just their password afterward, and will need to re-enroll from their own account page.`}
+                confirmMessage={t("resetFactorsConfirm", { name: user.name })}
                 action={resetAuthFactors}
-                successMessage="2FA and passkeys reset"
+                successMessage={t("factorsReset")}
               />
             </div>
           ) : (
             <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
-              No authenticator app or passkeys set up — this user signs in with a password only.
+              {t("noFactors")}
             </div>
           )}
         </StandardSection>
