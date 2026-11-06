@@ -7,9 +7,11 @@ export function RunNowButton({ taskId }: { taskId: string }) {
   return (
     <StandardActionButton
       title="Run backup now"
+      shortTitle="Run now"
       pendingTitle="Running…"
       action={() => runNow(taskId)}
       successMessage="Backup completed"
+      fullWidth
     />
   );
 }

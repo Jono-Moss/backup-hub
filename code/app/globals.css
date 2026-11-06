@@ -46,3 +46,19 @@ body {
 @media (prefers-reduced-motion: reduce) {
   [class*="animate-[toast-in"] { animation: none; }
 }
+
+/* Tailwind v4 dropped the pointer cursor from buttons (links still get it
+   from the browser), so clickable things looked inconsistent. Restore it for
+   everything you can click; disabled controls keep their own cursor. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  label:has(> input[type="checkbox"]:not(:disabled)),
+  label:has(> input[type="radio"]:not(:disabled)) {
+    cursor: pointer;
+  }
+}

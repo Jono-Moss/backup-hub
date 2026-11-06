@@ -7,12 +7,14 @@ Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a mul
 - **Backup tasks** — each task owns one database connection, a cron schedule, a retention count, and an optional encryption password. Connection details and passwords are encrypted at rest with `BACKUP_MASTER_KEY`.
 - **Multi-user accounts** with two roles: `admin` (manages users and system notifications) and `user`. Backup tasks are **private to the user who created them** — even admins can't see them unless the owner shares them. Passwords are hashed with Argon2id.
 - **Two-factor authentication & passkeys** — users can enable TOTP (any authenticator app) with recovery codes, and/or register WebAuthn passkeys (Touch ID, Face ID, Windows Hello, security keys). A passkey login counts as its own second factor. Admins can reset a user's 2FA/passkeys for account recovery.
-- **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password.
+- **Web UI**, session-gated with real DB-backed sessions — create/edit tasks, view run history, run a backup on demand, download or delete backup files, manage users, manage notification recipients, change your own password. Every save, add and delete confirms with a short success or error message.
+- **Dashboard** — the home page summarises the last 7 days (successful and failed backups, off-site copy failures, failed sign-ins to your account), lists anything that **needs attention** (a task whose latest backup failed, couldn't sign in to its database or save location, failed to copy off-site, or failed its check), shows recent activity across all your tasks, and gives each task a strip of its last 14 results.
+- **Sign-in security** — every sign-in attempt is recorded (with IP and browser) and shown to the account owner; repeated failures **lock the account** for a while (configurable); users can **reset a forgotten password by email**; and the Account page lists your **active sessions** so you can sign out any you don't recognise. See [Sign-in security](#sign-in-security).
 - **Notifications** by email, [ntfy](https://ntfy.sh), Telegram or Discord — per-task recipients for backup success/failure, plus admin-managed system-wide recipients for logins, user creation/deletion, and task creation/deletion. Notifications are best-effort: if SMTP isn't configured or a push service is unreachable, everything else keeps working and the notification is skipped (and logged).
 - **Off-site save locations** — a task can copy each completed backup to any number of remote destinations (S3-compatible storage, Google Drive, OneDrive, OpenCloud, FTP, FTPS, SFTP) on top of the always-kept local copy. Google Drive and OneDrive connect with a one-click sign-in, and small enough backups can be emailed to any address as an attachment. Pluggable like the DB engines: implement `BackupDestination` in `lib/backup/destinations/` to add a new provider.
 - **REST API** at `/api/v1/*`, authenticated with scoped API keys (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`), optionally pinned to a single task. This is separate from user accounts — API keys are their own credential type.
 - **In-process cron scheduler** (`node-cron`, booted via `instrumentation.ts`) — one job per enabled task.
-- **`proxy.ts`** (Next.js 16's replacement for `middleware.ts`) does real DB session validation on every request — not just a signed-cookie check — and enforces admin-only access to `/users` and `/notifications`.
+- **Access checks** live in `lib/auth/session.ts` (`requireUser()` / `requireAdmin()`), which every page, server action and data function calls: they validate the session against the database and redirect expired, revoked or 2FA-pending sessions to sign in. `proxy.ts` (Next.js 16's replacement for `middleware.ts`) only does a quick "is there a session cookie" check so signed-out visitors go straight to `/login` — it is deliberately not the security boundary, following the Next.js authentication guide.
 
 ## Getting started
 
@@ -22,7 +24,7 @@ cp example.env-file .env
 openssl rand -hex 32   # → BACKUP_MASTER_KEY
 
 npm install
-npm run db:migrate     # applies the checked-in migration to APP_DATABASE_URL
+npm run db:migrate     # applies the checked-in migrations to APP_DATABASE_URL (re-run after pulling updates)
 # after editing db/schema.ts: npm run db:generate first
 npm run dev
 ```
@@ -131,7 +133,7 @@ Implement `BackupDestination` in `lib/backup/destinations/` and register it in `
 Two independent notification surfaces:
 
 1. **Per-task** (task detail page → Notifications section): pick a channel and choose whether it gets notified on success, failure, or both. Different tasks can have entirely different recipients.
-2. **System-wide** (Admin menu → **System notifications**, `/notifications`, admin-only): recipients for account/task lifecycle events — `user_login`, `user_created`, `user_deleted`, `task_created`, `task_deleted`, `security_reset`.
+2. **System-wide** (Admin menu → **System notifications**, `/notifications`, admin-only): recipients for account/task lifecycle events — `user_login`, `user_created`, `user_deleted`, `task_created`, `task_deleted`, `security_reset` (an admin reset someone's 2FA/passkeys or unlocked their account, or a user reset their password by email).
 
 Per-task channels work like save locations: **saved channels** (on the **Notifications** page (top menu), or "Save to my account" when adding one to a task) are set up once and picked from any of your tasks, and editing one updates every task using it; **task-only** channels (the default when adding from a task) belong to that one task and can be made reusable later. The same privacy rules apply: only the task owner sees where a channel sends to, and a shared user's channel can be removed by the owner but not edited or reused. System-wide recipients are separate and admin-managed.
 
@@ -180,6 +182,10 @@ VERIFY_POSTGRES_URL="postgres://verify:secret@scratch-postgres:5432/postgres"  #
 The scheduler is an **in-process cron job** — it only fires reliably on a long-running Node server (Docker, a VM, PM2, etc., as in the provided `docker-compose.yml`). On serverless platforms like Vercel, the process doesn't stay warm between requests, so `node-cron` won't reliably fire. If you deploy serverless, point an external cron (e.g. Vercel Cron, or a system crontab hitting a protected endpoint) at each due task instead of relying on `instrumentation.ts`.
 
 `argon2` ships prebuilt native binaries for common platforms — no build toolchain needed in the container.
+
+**Behind a reverse proxy**, make sure it sets `X-Forwarded-For` (and strips any value the client sent). Sign-in history, active sessions and the per-IP lockout read the client's IP from it.
+
+**Upgrades and open browser tabs.** `docker/build.sh` gives every image build its own Next.js deployment ID (`NEXT_DEPLOYMENT_ID`, set in the Dockerfile). After you upgrade, a tab still open on the old version reloads itself on its next request instead of failing with "Server Action unavailable". If you build another way, set `NEXT_DEPLOYMENT_ID` to something unique per build.
 
 ## Using the REST API from another app
 
@@ -257,11 +263,56 @@ Both are opt-in, per-user, and set up from `/account`:
 
 - **TOTP (authenticator app)**: scan the QR code with any TOTP app (1Password, Google Authenticator, Authy, etc.), confirm with a 6-digit code to enable, and save the 10 single-use recovery codes shown once at that point. From then on, password login is followed by a `/login/2fa` step. Recovery codes can be regenerated any time (invalidates the old batch); disabling 2FA requires re-entering your password.
 - **Passkeys**: "Add a passkey" registers a WebAuthn credential (Touch ID, Face ID, Windows Hello, a security key, or a password manager's synced passkey) via the browser's own UI. The login page's "Sign in with a passkey" button uses usernameless/discoverable authentication — no email typed first, the OS picker handles it. A successful passkey login is treated as satisfying 2FA on its own (it's phishing-resistant by construction), even if the account also has TOTP enabled.
-- **Admin recovery**: if a user loses their authenticator app and their passkey device, an admin can hit "Reset 2FA & passkeys" on `/users/[id]` — this wipes all their second factors and revokes their sessions, dropping them back to password-only login so they can re-enroll.
+- **Admin recovery**: if a user loses their authenticator app and their passkey device, an admin can hit "Reset 2FA & passkeys" on `/users/[id]` — this wipes all their second factors and revokes their sessions, dropping them back to password-only login so they can re-enroll. A **password reset by email** does *not* skip 2FA: the next sign-in still asks for the code.
 
 **Passkeys require correct `WEBAUTHN_*` configuration in production.** `WEBAUTHN_RP_ID` must be exactly your domain (no scheme, no port — e.g. `backup.yourdomain.com`) and `WEBAUTHN_ORIGIN` must be the exact origin the browser sees (e.g. `https://backup.yourdomain.com`). Both default to `localhost`/`http://localhost:3000` for local dev, where WebAuthn is allowed over plain HTTP as a special case — everywhere else, WebAuthn requires HTTPS outright. Changing `WEBAUTHN_RP_ID` after people have registered passkeys will make their existing passkeys stop being offered (the browser scopes passkeys to the RP ID they were created under), so treat it like you would a domain migration.
 
 TOTP secrets are encrypted at rest with `BACKUP_MASTER_KEY` (same mechanism as DB connection credentials); recovery codes and passkey public keys are stored hashed/as-is respectively, following the same "never store what you can verify instead" pattern as API keys and sessions.
+
+## Sign-in security
+
+### Sign-in history
+
+Every sign-in attempt is recorded in `login_attempt`: success, wrong password, unknown account, wrong 2FA code, rejected passkey, blocked by a lockout, unlocked by an admin, and password reset by email — with the IP address and browser. Records are kept for 90 days.
+
+- **Everyone** sees their own history under **Account → Recent sign-in activity**, and a summary on the dashboard (previous sign-in, recent failures). If someone entered your correct password but the wrong 2FA code, the dashboard shows a red warning, since that means your password may be known.
+- **Admins** also see failures across the whole server on the dashboard: totals, attempts on emails that have no account, and which IPs and accounts have the most failures.
+- Deleting a user deletes their history.
+
+### Lockouts
+
+Too many failed sign-ins block password sign-in for a while. Set the limits in `.env` (`BH_`-prefixed in `docker/.env`):
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `LOGIN_MAX_FAILED_ATTEMPTS` | `2` | Failed password / 2FA attempts for one account, within the lockout window, before it locks. `0` turns account lockouts off. |
+| `LOGIN_MAX_FAILED_ATTEMPTS_PER_IP` | `20` | Failed attempts of any kind (all accounts) from one IP address before that address is blocked. `0` turns it off. |
+| `LOGIN_LOCKOUT_MINUTES` | `15` | How long a lock lasts, counted from the last real failure. |
+
+- Retrying while locked doesn't extend the lock, and a successful sign-in, an admin unlock or a password reset clears the count.
+- **Passkeys skip the account lock**, so someone guessing passwords can't keep the real owner out. The per-IP lock still applies to them.
+- Unknown emails lock the same way, so the message can't be used to discover which emails have accounts.
+- An admin can lift a lock early with **Unlock now** on the user's page (`/users/[id]`).
+- A low limit makes it easy for anyone who knows an email address to lock that user out for a while — raise it if that's a concern.
+- The per-IP limit relies on `X-Forwarded-For`, so it only works behind a reverse proxy that sets that header. Without one, clients can send any value. The per-account limit doesn't depend on IPs.
+
+### Forgot password
+
+**Forgot password?** on the sign-in page emails a reset link. It works once and expires after 30 minutes; each account gets at most 3 links an hour, and the page answers the same way whether or not the email has an account. Completing a reset:
+
+- sets the new password and signs the account out everywhere,
+- lifts any lockout (so it's also the way back in for a locked-out admin),
+- emails the user that their password changed, and sends a `security_reset` system notification.
+
+It needs the `SMTP_*` settings, plus **`APP_URL`** — the address people open Backup Hub at, used to build the link (it falls back to `WEBAUTHN_ORIGIN`). Links are never built from the request's own address, so a forged `Host` header can't redirect them. Without SMTP, the page tells users to ask an admin instead.
+
+### Active sessions
+
+**Account → Active sessions** lists everywhere you're signed in: browser and device, when and from which IP it signed in, and when it was last active. A session whose IP has changed since it signed in is flagged. **Sign out** ends one session; **Sign out everywhere else** ends all but this one.
+
+**Changing your password signs out all your other sessions** (this device stays signed in), and an admin setting a user's password signs that user out everywhere — so a stolen session cookie stops working.
+
+Session cookies are `HttpOnly`, `SameSite=Lax`, `Secure` in production, and only their hash is stored. Sessions last 7 days.
 
 ## Encrypted backups
 
@@ -280,15 +331,15 @@ If a task has encryption enabled, downloaded files are `.sql.gz.enc` — Backup 
 - **Destinations**: S3-compatible, Google Drive, OneDrive, and email only. Same pluggable pattern as engines — see `lib/backup/destinations/`.
 - **Destination secrets aren't re-validated on save**: "Test connection" is a manual step in the add-destination form, not an automatic check before saving — a destination with bad credentials will save successfully and only surface the failure on the next real upload (visible per-run in the backup history, or via the "Test" button next to it afterwards).
 - **Large encrypted files**: decryption reads the whole ciphertext into memory (fine for typical dumps; swap for chunked authenticated decryption if you expect multi-GB encrypted files).
-- **No password reset via email** — a forgotten password requires an admin to reset it from `/users/[id]`. Self-serve "forgot password" would need its own token-based email flow.
-- **Session management UI** — sessions are DB-backed and revocable (deleting a user cascades to their sessions), but there's no "view/revoke your other active sessions" page yet.
+- **Password reset needs SMTP** — without `SMTP_*` configured, "Forgot password?" tells users to ask an admin. A server with no SMTP and a single admin who forgets their password has no way back in short of editing the database.
+- **Sessions aren't tied to an IP address** — on purpose: IPs change constantly (mobile networks, VPNs, IPv6 privacy addresses) and `X-Forwarded-For` can be faked without a trusted reverse proxy. Instead, Account → Active sessions flags a session whose IP has changed so you can sign it out.
 - **2FA enforcement**: enabling TOTP/passkeys is opt-in per user, not something an admin can mandate account-wide yet.
 - **REST API has no 2FA equivalent** — API keys are a separate credential type from user accounts and aren't affected by a user's 2FA/passkey settings (this is intentional: API keys are meant for machine-to-machine use where an interactive second factor doesn't apply).
 
 ## Project layout
 
 ```
-db/                        schema (users, sessions, tasks, shares, runs, destinations, API keys, notification recipients, 2FA/passkeys) + drizzle client
+db/                        schema (users, sessions, tasks, shares, runs, destinations, API keys, notification recipients, 2FA/passkeys, sign-in attempts, reset links) + drizzle client
 lib/backup/crypto.ts        secret wrapping, file encryption, API key hashing
 lib/backup/engines/         per-database dump implementations (mysql, postgres)
 lib/backup/destinations/    pluggable off-site upload implementations (s3, google_drive, onedrive, email)
@@ -296,10 +347,15 @@ lib/backup/purge.ts         removes a task (and everything hanging off it) from 
 lib/backup/runner.ts        runs a backup end-to-end: dump → encrypt → check → record → prune → upload to destinations → notify
 lib/backup/verify.ts        backup file checks (fingerprint, read-back, test restore) and their background queue
 lib/backup/scheduler.ts     node-cron job management
+lib/backup/failureKind.ts   groups backup/upload errors (sign-in problem, can't connect, other) for the dashboard
 lib/auth/api-key.ts         REST API scoped-key authentication
 lib/auth/password.ts        Argon2id password hashing
-lib/auth/session.ts         DB-backed multi-user sessions, 2FA-pending state, role checks
-lib/auth/token-hash.ts      shared session-token hashing (used by session.ts and proxy.ts)
+lib/auth/session.ts         DB-backed sessions + the access checks (requireUser/requireAdmin), active-session tracking
+lib/auth/token-hash.ts      session-token hashing
+lib/auth/login-attempts.ts  records every sign-in attempt (and reads the client IP / browser)
+lib/auth/lockout.ts         sign-in lockouts, worked out from the sign-in history
+lib/auth/password-reset.ts  "forgot password" email links
+lib/action-result.ts        fail("…") — how server actions report errors the user should see
 lib/auth/totp.ts            RFC 6238 TOTP implementation (secret gen, code gen/verify, otpauth URI)
 lib/auth/recovery-codes.ts  2FA recovery code generation/hashing
 lib/auth/webauthn.ts        WebAuthn RP config + ephemeral challenge-cookie helpers
@@ -310,10 +366,14 @@ app/api/v1/                 the public REST API
 app/setup/                  first-run admin account creation
 app/login/                  email/password login, logout, passkey login
 app/login/2fa/              TOTP/recovery-code verification step
-app/account/                self-service profile, password, 2FA, and passkey management
+app/login/forgot/, reset/   forgot-password request and reset pages
+app/account/                self-service profile, password, 2FA, passkeys, sign-in history, active sessions
 app/users/                  admin-only user management, incl. 2FA/passkey reset
 app/notifications/          admin-only system notification recipients
 app/tasks/, app/api-keys/   the first-party UI + its server actions
-proxy.ts                    Next.js request interception: session + 2FA-pending + role gating
+app/page.tsx                the dashboard
+components/ui/              UI components, one folder per area (standard, common, modal, tasks, runs,
+                            locations, notifications, auth, api-keys, users, dashboard)
+proxy.ts                    quick session-cookie check that sends signed-out visitors to /login
 instrumentation.ts          boots the scheduler on server start
 ```

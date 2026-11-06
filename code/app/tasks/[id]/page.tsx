@@ -158,7 +158,8 @@ export default async function TaskDetailPage({
             {!task.access.isOwner && ` · shared by ${task.ownerName}`}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Phones: two equal halves side by side; wider screens: natural width. */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 sm:[&>*]:w-auto">
           {can.manage && <ToggleEnabledButton taskId={task.id} enabled={task.enabled} />}
           {can.trigger && <RunNowButton taskId={task.id} />}
         </div>

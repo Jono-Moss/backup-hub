@@ -9,6 +9,8 @@ type ActionButtonVariant = "standard" | "danger" | "outline" | "link";
 
 type ActionButtonProps = {
     title: string;
+    /** Shorter label for phones (below the `sm` breakpoint), so the button stays on one line. */
+    shortTitle?: string;
     /** May return fail("…") (lib/action-result) to report a failure. */
     action: () => unknown | Promise<unknown>;
     /** Toast shown when the action succeeds. Failures always show an error toast. */
@@ -26,6 +28,7 @@ type ActionButtonProps = {
 
 export function StandardActionButton({
     title,
+    shortTitle,
     action,
     variant = "standard",
     confirmMessage,
@@ -41,7 +44,12 @@ export function StandardActionButton({
     const { confirm } = useModal();
     const run = useActionFeedback();
 
-    const sizeStyle = compact ? "px-2.5 py-1 text-xs" : "px-5 py-2.5 text-sm";
+    // With a phone label, phones also get slightly tighter padding.
+    const sizeStyle = compact
+        ? "px-2.5 py-1 text-xs"
+        : shortTitle
+          ? "px-3 py-2.5 text-sm sm:px-5 whitespace-nowrap"
+          : "px-5 py-2.5 text-sm";
 
     let buttonStyle = "";
 
@@ -87,7 +95,16 @@ export function StandardActionButton({
             className={`${Icon ? "inline-flex items-center gap-1.5" : ""} rounded-md font-medium ${sizeStyle} transition-colors disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed ${buttonStyle} ${fullWidth === true ? 'w-full' : ''}`}
         >
             {Icon && <Icon size={compact ? 14 : 16} aria-hidden="true" className="shrink-0" />}
-            {isPending ? pendingTitle : title}
+            {isPending ? (
+                pendingTitle
+            ) : shortTitle ? (
+                <>
+                    <span className="sm:hidden">{shortTitle}</span>
+                    <span className="hidden sm:inline">{title}</span>
+                </>
+            ) : (
+                title
+            )}
         </button>
     );
 

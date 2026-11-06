@@ -14,9 +14,11 @@ export function ToggleEnabledButton({
   return (
     <StandardActionButton
       title={enabled ? "Disable schedule" : "Enable schedule"}
+      shortTitle={enabled ? "Disable" : "Enable"}
       action={() => toggleTaskEnabled(taskId, !enabled)}
       successMessage={enabled ? "Schedule disabled" : "Schedule enabled"}
       variant="outline"
+      fullWidth
     />
   );
 }

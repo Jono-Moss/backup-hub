@@ -12,7 +12,7 @@
 </div>
 
 <p align="center">
-  <img src="docs/screenshots/task.png" alt="A backup task in Backup Hub: run history with off-site upload status, check results, and a download button with a menu of more actions for each backup" width="900" />
+  <img src="docs/screenshots/task.png" alt="A backup task in Backup Hub: a section menu, then the run history with off-site upload status, check results, pagination, and a download button with a menu of more actions for each backup" width="900" />
 </p>
 
 ---
@@ -25,7 +25,9 @@ Point it at a database, give it a cron schedule and a retention count, and it ha
 
 A few highlights (the full list, with all the detail, is in [`code/README.md`](code/README.md)):
 
+- A **dashboard** that shows at a glance what succeeded, what failed and what needs attention — including backups that couldn't sign in to their database or save location
 - Multi-user accounts with two roles (`admin` / `user`), TOTP + passkey two-factor auth, and per-task sharing
+- **Sign-in security**: a history of every sign-in attempt, lockouts after repeated failures, "forgot password" reset links by email, and a list of your active sessions you can sign out of
 - One-click **restore**, and a **dry run** button to test a backup before you save the task
 - **Backup checks**: every backup is read back and fingerprinted automatically, and can be **test-restored** into a throwaway database on a scratch server, so you know it actually restores
 - **Off-site copies** to S3-compatible storage (AWS, Backblaze B2, Wasabi, R2, MinIO…), Google Drive, OneDrive, OpenCloud, FTP/FTPS, SFTP or email — set a location up once and reuse it across tasks
@@ -36,9 +38,9 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
 
 ## Screenshots
 
-**Your backup tasks** — each with its own database, schedule and retention.
+**The dashboard** — the last 7 days at a glance, what needs attention (like a database password that changed, or an expired cloud key), recent activity, and every task with its latest result and a strip of its recent backups.
 
-<img src="docs/screenshots/tasks.png" alt="The task list: three backup tasks with their engine, schedule and retention" width="900" />
+<img src="docs/screenshots/dashboard.png" alt="The dashboard: counts of successful and failed backups, off-site copy failures and failed sign-ins; two tasks needing attention because of credential problems; recent activity; and five tasks with their last result and a history strip" width="900" />
 
 **Every backup's actions in one place** — download, restore, verify the file, test-restore it, or delete it. Check results show under each backup's status.
 
@@ -57,23 +59,23 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
   </tr>
 </table>
 
-**On your phone** — backup history, every backup's actions in a bottom drawer, and the navigation menu.
+**On your phone** — a compact dashboard with your tasks up front, a jump-to menu for a task's sections, and every backup's actions in a bottom drawer.
 
-<img src="docs/screenshots/mobile.png" alt="Three phone screenshots: a task's backup history, the actions drawer for one backup (download, restore, verify, test restore, delete), and the navigation menu" width="900" />
+<img src="docs/screenshots/mobile.png" alt="Three phone screenshots: the compact dashboard with a row of counts, an attention banner and the task list; a task page with its section menu open; and the actions drawer for one backup (download, restore, verify, test restore, delete)" width="900" />
 
 <details>
-<summary><b>More screenshots</b> — task details, new task, account, users, API keys and sign-in</summary>
+<summary><b>More screenshots</b> — task details, new task, account and security, users, API keys and sign-in</summary>
 <br />
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <b>Task notifications</b> — pick saved channels or add one just for this task, and choose success and/or failure.<br /><br />
-      <img src="docs/screenshots/task-notifications.png" alt="A task's notifications: two saved channels, and forms to use a saved channel or add a new one" />
+      <b>Task notifications</b> — what's set up, at a glance; <b>+ Add</b> opens a panel to use a saved channel or create one just for this task.<br /><br />
+      <img src="docs/screenshots/task-notifications.png" alt="A task's notifications: three channels with their success/failure badges, and the add panel open on 'Use a saved channel'" />
     </td>
     <td width="50%" valign="top">
-      <b>Task save locations</b> — attach saved locations (each with its own subfolder) or add a task-only one.<br /><br />
-      <img src="docs/screenshots/task-save-locations.png" alt="A task's save locations: two saved locations with subfolders, and forms to use a saved location or add a new one" />
+      <b>Task save locations</b> — saved locations (each with its own subfolder) with test, disable and remove; <b>+ Add</b> opens the form for a new one.<br /><br />
+      <img src="docs/screenshots/task-save-locations.png" alt="A task's save locations: two saved locations with subfolders, and the add panel open with the provider form" />
     </td>
   </tr>
 </table>
@@ -94,12 +96,12 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
 <table>
   <tr>
     <td width="50%" valign="top">
-      <b>Your account</b> — name and password, two-factor authentication with recovery codes, and passkeys.<br /><br />
-      <img src="docs/screenshots/account.png" alt="The account page: name and password, two-factor authentication enabled, and two passkeys" />
+      <b>Your account</b> — password, two-factor authentication, passkeys, your active sessions (sign out any you don't recognise) and your sign-in history.<br /><br />
+      <img src="docs/screenshots/account.png" alt="The account page: profile and password, two-factor authentication enabled, two passkeys, three active sessions with one flagged for a changed IP address, and recent sign-in attempts including blocked ones" />
     </td>
     <td width="50%" valign="top">
       <b>Users (admin)</b> — admins add and manage users; tasks stay private to their owner.<br /><br />
-      <img src="docs/screenshots/users.png" alt="The admin users page: three users with their roles and task counts, and a form to add a user" />
+      <img src="docs/screenshots/users.png" alt="The admin users page: three users with their roles and task counts" />
     </td>
   </tr>
 </table>
@@ -108,18 +110,18 @@ A few highlights (the full list, with all the detail, is in [`code/README.md`](c
   <tr>
     <td width="50%" valign="top">
       <b>API keys</b> — scoped keys for the REST API, optionally pinned to one task.<br /><br />
-      <img src="docs/screenshots/api-keys.png" alt="The API keys page: a form to create a scoped key, and an existing key" />
+      <img src="docs/screenshots/api-keys.png" alt="The API keys page: two keys with their scopes, one pinned to a single task" />
     </td>
     <td width="50%" valign="top">
-      <b>Sign in</b> — with a password (plus two-factor) or a passkey.<br /><br />
-      <img src="docs/screenshots/login.png" alt="The sign-in page with email and password fields and a passkey button" />
+      <b>Sign in</b> — with a password (plus two-factor) or a passkey, with a "Forgot password?" link.<br /><br />
+      <img src="docs/screenshots/login.png" alt="The sign-in page with email and password fields, a forgot-password link and a passkey button" />
     </td>
   </tr>
 </table>
 
 </details>
 
-<sub>Screenshots show demo data.</sub>
+<sub>Screenshots show demo data, generated with the scripts in <a href="code/scripts/screenshots/"><code>code/scripts/screenshots/</code></a>.</sub>
 
 ## Repository layout
 
@@ -156,6 +158,15 @@ docker compose up -d
 
 Visit `http://localhost:3000` — there are no users yet, so you'll land on `/setup` to create the first admin account.
 
+Worth setting in `.env` before you rely on it day to day:
+
+- **`BH_APP_URL`** — the address people open Backup Hub at (e.g. `https://backup.yourdomain.com`). Password-reset emails link to it.
+- **`BH_SMTP_*`** — needed for email notifications and for "Forgot password?". Without SMTP, users who forget their password have to ask an admin.
+- **`BH_LOGIN_MAX_FAILED_ATTEMPTS`** (default `2`), **`BH_LOGIN_MAX_FAILED_ATTEMPTS_PER_IP`** (default `20`) and **`BH_LOGIN_LOCKOUT_MINUTES`** (default `15`) — how many failed sign-ins lock an account or an IP address, and for how long. `0` turns a limit off.
+- If Backup Hub sits **behind a reverse proxy**, have it set `X-Forwarded-For`; sign-in history, active sessions and the per-IP lockout use it to see the visitor's IP.
+
+**Upgrading:** pull the new image and `docker compose up -d` again. Database migrations run automatically on start.
+
 ### What's actually in `docker/docker-compose.yml`
 
 For reference, here's the shape of it — Backup Hub itself, plus a MySQL container it depends on and waits for to be healthy before starting:
@@ -191,6 +202,12 @@ services:
       WEBAUTHN_RP_NAME: "${BH_WEBAUTHN_RP_NAME}"
       WEBAUTHN_RP_ID: "${BH_WEBAUTHN_RP_ID}"
       WEBAUTHN_ORIGIN: "${BH_WEBAUTHN_ORIGIN}"
+      APP_URL: "${BH_APP_URL:-${BH_WEBAUTHN_ORIGIN}}"
+
+      # Optional: sign-in lockouts (see example.env-file).
+      LOGIN_MAX_FAILED_ATTEMPTS: "${BH_LOGIN_MAX_FAILED_ATTEMPTS:-2}"
+      LOGIN_MAX_FAILED_ATTEMPTS_PER_IP: "${BH_LOGIN_MAX_FAILED_ATTEMPTS_PER_IP:-20}"
+      LOGIN_LOCKOUT_MINUTES: "${BH_LOGIN_LOCKOUT_MINUTES:-15}"
 
       # Optional: servers for test restores (see example.env-file).
       VERIFY_MYSQL_URL: "${BH_VERIFY_MYSQL_URL:-}"
@@ -253,7 +270,7 @@ If you'd rather build locally instead of pulling `myfin/backup-hub:latest`, use 
 ./docker/build.sh 1.0.0 myfin/backup-hub --push    # builds & pushes (multi-arch)
 ```
 
-It builds from `docker/dockerfile` with the repo root as build context, so run it from the repo root as shown above.
+It builds from `docker/dockerfile` with the repo root as build context, so run it from the repo root as shown above. Each build gets its own deployment ID (version + build number), so after an upgrade, browser tabs still open on the old version reload themselves instead of erroring.
 
 ### Running without Docker
 
@@ -261,7 +278,7 @@ You can also run Backup Hub directly with Node — see [`code/README.md`](code/R
 
 ## Full documentation
 
-Everything else — the full feature list, user roles and permissions, the REST API reference, two-factor auth and passkeys, how encrypted backups work, and a troubleshooting guide for common `mysqldump`/`pg_dump` version-mismatch errors — lives in [`code/README.md`](code/README.md).
+Everything else — the full feature list, user roles and permissions, the REST API reference, two-factor auth and passkeys, [sign-in security](code/README.md#sign-in-security) (history, lockouts, password reset, active sessions), how encrypted backups work, and a troubleshooting guide for common `mysqldump`/`pg_dump` version-mismatch errors — lives in [`code/README.md`](code/README.md).
 
 ## License
 
