@@ -12,7 +12,6 @@ export function AddTaskRecipientForm({ taskId, canSaveToAccount = false }: { tas
       action={bound}
       className="space-y-4 max-w-xl"
     >
-      <p className="text-sm font-semibold text-ink">Add a new notification channel</p>
       <NotificationChannelFields idPrefix="task-recipient" showLabel />
 
       <div className="flex flex-wrap items-center gap-4">

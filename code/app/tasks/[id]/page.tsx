@@ -37,6 +37,13 @@ import { ShareTaskForm } from "@/components/ui/tasks/ShareTaskForm";
 import { RevokeTaskShareButton } from "@/components/ui/tasks/RevokeTaskShareButton";
 import { scopeLabel } from "@/components/ui/api-keys/scopeOptions";
 import { canDo } from "@/lib/auth/task-access";
+import { LuBell, LuCloudUpload, LuHistory, LuSettings, LuUsers } from "react-icons/lu";
+import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
+import { StandardBadge } from "@/components/ui/standard/StandardBadge";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { AddableSection, type AddTab } from "@/components/ui/common/AddableSection";
+import { TaskSectionNav, type SectionNavItem } from "@/components/ui/tasks/TaskSectionNav";
+import { RunsPagination, paginateRuns, parseRunsPage } from "@/components/ui/runs/RunsPagination";
 
 export const dynamic = "force-dynamic";
 
@@ -54,8 +61,15 @@ const statusStyle: Record<string, string> = {
   running: "text-warn",
 };
 
-export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TaskDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ runsPage?: string | string[] }>;
+}) {
   const { id } = await params;
+  const { runsPage } = await searchParams;
   const task = await getTask(id);
   if (!task) notFound();
   const [runs, recipients, shares, destinations, destinationProviders, attachable, attachableChannels] = await Promise.all([
@@ -71,7 +85,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   const canTestRestore = testRestoreAvailable(task.engine);
   const checking = runs.some(isChecking);
   const completedCount = runs.filter((r) => r.status === "completed").length;
-  const uploads = await listRunUploads(id, runs.map((r) => r.id));
+  const page = parseRunsPage(runsPage, runs.length);
+  const visibleRuns = paginateRuns(runs, page);
+  const uploads = await listRunUploads(id, visibleRuns.map((r) => r.id));
   const uploadsByRun = new Map<string, typeof uploads>();
   for (const u of uploads) {
     uploadsByRun.set(u.runId, [...(uploadsByRun.get(u.runId) ?? []), u]);
@@ -89,6 +105,48 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
     restore: task.access.isOwner,
   };
 
+  const navItems: SectionNavItem[] = [
+    { id: "backups", label: "Backups", count: runs.length },
+    { id: "notifications", label: "Notifications", count: recipients.length },
+    ...(can.manage ? [{ id: "locations", label: "Save locations", count: destinations.length }] : []),
+    ...(task.access.isOwner ? [{ id: "sharing", label: "Sharing", count: shares.length }] : []),
+    ...(can.manage ? [{ id: "settings", label: "Settings" }] : []),
+  ];
+
+  // "Use saved" is only offered when there's something to pick; otherwise
+  // the panel goes straight to the create form.
+  const notificationTabs: AddTab[] = [
+    ...(task.access.isOwner && attachableChannels.length > 0
+      ? [{ key: "saved", label: "Use a saved channel", content: <AttachSavedChannelForm taskId={task.id} saved={attachableChannels} /> }]
+      : []),
+    { key: "new", label: "Create new", content: <AddTaskRecipientForm taskId={task.id} canSaveToAccount={task.access.isOwner} /> },
+  ];
+  const locationTabs: AddTab[] = [
+    ...(task.access.isOwner && attachable.length > 0
+      ? [
+          {
+            key: "saved",
+            label: "Use a saved location",
+            content: (
+              <AttachSavedDestinationForm
+                taskId={task.id}
+                taskName={task.name}
+                saved={attachable}
+                providerLabels={providerLabels}
+              />
+            ),
+          },
+        ]
+      : []),
+    {
+      key: "new",
+      label: "Create new",
+      content: (
+        <AddTaskDestinationForm taskId={task.id} providers={destinationProviders} canSaveToAccount={task.access.isOwner} />
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -105,25 +163,34 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
-      <StandardSection>
+      <TaskSectionNav items={navItems} />
+
+      <StandardSection id="backups">
         <RefreshWhileChecking active={checking} />
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h2 className="text-sm font-semibold text-ink">Backup history</h2>
-          <BulkRunActions
-            taskId={task.id}
-            completedCount={completedCount}
-            failedCount={runs.filter((r) => r.status === "failed").length}
-            can={can}
-            testRestore={canTestRestore}
-          />
-        </div>
+        <StandardSectionHeader
+          title="Backup history"
+          icon={<LuHistory />}
+          count={runs.length}
+          description="Every backup this task has made, newest first."
+          action={
+            <BulkRunActions
+              taskId={task.id}
+              completedCount={completedCount}
+              failedCount={runs.filter((r) => r.status === "failed").length}
+              can={can}
+              testRestore={canTestRestore}
+            />
+          }
+        />
         {runs.length === 0 ? (
-          <p className="text-sm text-muted">No backups yet — run one now, or wait for the next scheduled run.</p>
+          <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+            No backups yet — run one now, or wait for the next scheduled run.
+          </div>
         ) : (
           <>
           {/* Phones and tablets: one card per run. The table needs ~900px. */}
           <div className="lg:hidden divide-y divide-line">
-            {runs.map((run) => (
+            {visibleRuns.map((run) => (
               <div key={run.id} className="py-3 space-y-1.5 text-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -175,7 +242,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                 </tr>
               </thead>
               <tbody>
-                {runs.map((run) => (
+                {visibleRuns.map((run) => (
                   <tr key={run.id} className="border-b border-line last:border-0">
                     <td className="py-2.5 pr-4 min-w-56 font-mono text-xs text-ink">
                       <span className="break-all">{run.filename ?? "—"}</span>
@@ -216,147 +283,140 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               </tbody>
             </table>
           </div>
+          <RunsPagination page={page} total={runs.length} />
           </>
         )}
       </StandardSection>
 
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-1">Notifications</h2>
-        <p className="text-sm text-muted mb-4">
-          Where to send this task's backup outcomes — email (requires SMTP, see .env), ntfy, Telegram or Discord.
-        </p>
-
-        {recipients.length > 0 && (
-          <div className="divide-y divide-line mb-4">
-            {recipients.map((r) => (
-              <div key={r.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
-                <div>
-                  <p className="text-sm text-ink">
-                    {r.label ?? (
-                      <>
-                        {r.channelLabel} <span className="text-muted">(details visible to the task owner only)</span>
-                      </>
-                    )}
-                  </p>
-                  <p className="text-xs text-muted">
-                    {r.target && r.target !== r.label && <>{r.target} · </>}
-                    {r.taskOnly ? "task-only" : task.access.isOwner ? "from your saved channels" : "saved channel"}
-                    {" · "}
-                    {[r.notifyOnSuccess && "on success", r.notifyOnFailure && "on failure"]
-                      .filter(Boolean)
-                      .join(", ") || "no events selected"}
-                  </p>
-                </div>
-                {can.manage && <RemoveTaskRecipientButton taskId={task.id} recipientId={r.id} taskOnly={r.taskOnly} />}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {task.access.isOwner && (
-          <div className="border-t border-line pt-4 mb-6">
-            <AttachSavedChannelForm taskId={task.id} saved={attachableChannels} />
-          </div>
-        )}
-
-        {can.manage && (
-          <div className="border-t border-line pt-4">
-            <AddTaskRecipientForm taskId={task.id} canSaveToAccount={task.access.isOwner} />
-          </div>
-        )}
-      </StandardSection>
+      <AddableSection
+        id="notifications"
+        title="Notifications"
+        icon={<LuBell />}
+        count={recipients.length}
+        description="Where this task's backup outcomes are sent — email (requires SMTP, see .env), ntfy, Telegram or Discord."
+        canAdd={can.manage}
+        addLabel="Add notification"
+        panelTitle="New notification"
+        tabs={notificationTabs}
+        emptyMessage="No notifications set — nobody is told when this task's backups succeed or fail."
+      >
+        <StandardEntryList>
+          {recipients.map((r) => (
+            <StandardEntryCard
+              key={r.id}
+              title={
+                r.label ?? (
+                  <>
+                    {r.channelLabel}{" "}
+                    <span className="font-normal text-muted">(details visible to the task owner only)</span>
+                  </>
+                )
+              }
+              meta={r.target && r.target !== r.label ? r.target : undefined}
+              badges={
+                <>
+                  {r.notifyOnSuccess && <StandardBadge tone="primary">On success</StandardBadge>}
+                  {r.notifyOnFailure && <StandardBadge tone="danger">On failure</StandardBadge>}
+                  {!r.notifyOnSuccess && !r.notifyOnFailure && <StandardBadge tone="warn">No events selected</StandardBadge>}
+                  <StandardBadge>
+                    {r.taskOnly ? "Task-only" : task.access.isOwner ? "From your saved channels" : "Saved channel"}
+                  </StandardBadge>
+                </>
+              }
+              actions={
+                can.manage && <RemoveTaskRecipientButton taskId={task.id} recipientId={r.id} taskOnly={r.taskOnly} />
+              }
+            />
+          ))}
+        </StandardEntryList>
+      </AddableSection>
 
       {can.manage && (
-        <StandardSection>
-          <h2 className="text-sm font-semibold text-ink mb-1">Remote Save locations</h2>
-          <p className="text-sm text-muted mb-4">
-            Every completed backup is always kept locally. Save locations also copy each file off-site — a task can
-            have any number, and each is tried independently, so one being down never affects the others or the
-            local copy.
-          </p>
-
-          {destinations.length > 0 && (
-            <div className="divide-y divide-line mb-4">
-              {destinations.map((d) => (
-                <div key={d.linkId} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
-                  <div className="min-w-0">
-                    <p className="text-sm text-ink truncate">
-                      {d.label}
-                      {!d.enabled && <span className="text-muted font-normal"> (disabled)</span>}
-                    </p>
-                    <p className="text-xs text-muted">
-                      {providerLabels[d.type] ?? d.type}
-                      {" · "}
-                      {d.taskOnly ? "task-only" : task.access.isOwner ? "from your saved locations" : "saved location"}
-                      {d.subfolder && (
-                        <>
-                          {" · subfolder "}
-                          <span className="font-mono">{d.subfolder}</span>
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
+        <AddableSection
+          id="locations"
+          title="Remote save locations"
+          icon={<LuCloudUpload />}
+          count={destinations.length}
+          description="Every completed backup is always kept locally. Save locations also copy each file off-site — each is tried independently, so one being down never affects the others or the local copy."
+          canAdd={can.manage && destinationProviders.length > 0}
+          addLabel="Add location"
+          panelTitle="New save location"
+          tabs={locationTabs}
+          emptyMessage="No remote save locations — backups are only kept on this server."
+        >
+          <StandardEntryList>
+            {destinations.map((d) => (
+              <StandardEntryCard
+                key={d.linkId}
+                title={d.label}
+                meta={
+                  d.subfolder && (
+                    <>
+                      Subfolder <span className="font-mono">{d.subfolder}</span>
+                    </>
+                  )
+                }
+                badges={
+                  <>
+                    <StandardBadge tone="primary">{providerLabels[d.type] ?? d.type}</StandardBadge>
+                    {!d.enabled && <StandardBadge tone="warn">Disabled</StandardBadge>}
+                    <StandardBadge>
+                      {d.taskOnly ? "Task-only" : task.access.isOwner ? "From your saved locations" : "Saved location"}
+                    </StandardBadge>
+                  </>
+                }
+                actions={
+                  <>
                     <TestTaskDestinationButton taskId={task.id} linkId={d.linkId} />
                     <ToggleTaskDestinationButton taskId={task.id} linkId={d.linkId} enabled={d.enabled} />
                     <RemoveTaskDestinationButton taskId={task.id} linkId={d.linkId} taskOnly={d.taskOnly} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {task.access.isOwner && (
-            <div className="border-t border-line pt-4 mb-6">
-              <AttachSavedDestinationForm
-                taskId={task.id}
-                taskName={task.name}
-                saved={attachable}
-                providerLabels={providerLabels}
+                  </>
+                }
               />
-            </div>
-          )}
-
-          <div className="border-t border-line pt-2">
-            <AddTaskDestinationForm
-              taskId={task.id}
-              providers={destinationProviders}
-              canSaveToAccount={task.access.isOwner}
-            />
-          </div>
-        </StandardSection>
+            ))}
+          </StandardEntryList>
+        </AddableSection>
       )}
 
       {task.access.isOwner && (
-        <StandardSection>
-          <h2 className="text-sm font-semibold text-ink mb-1">Sharing</h2>
-          <p className="text-sm text-muted mb-4">
-            You own this task. Only you and the people below can see it — not even admins can.
-          </p>
-
-          {shares.length > 0 && (
-            <div className="divide-y divide-line mb-6">
-              {shares.map((share) => (
-                <div key={share.id} className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between py-2.5">
-                  <div>
-                    <p className="text-sm text-ink">
-                      {share.name} <span className="text-muted">({share.email})</span>
-                    </p>
-                    <p className="text-xs text-muted">{share.scopes.map(scopeLabel).join(", ")}</p>
-                  </div>
-                  <RevokeTaskShareButton taskId={task.id} shareId={share.id} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          <ShareTaskForm taskId={task.id} />
-        </StandardSection>
+        <AddableSection
+          id="sharing"
+          title="Sharing"
+          icon={<LuUsers />}
+          count={shares.length}
+          description="You own this task. Only you and the people below can see it — not even admins can."
+          canAdd
+          addLabel="Share task"
+          panelTitle="Share with someone"
+          tabs={[{ key: "share", label: "Share", content: <ShareTaskForm taskId={task.id} /> }]}
+          emptyMessage="Not shared with anyone."
+        >
+          <StandardEntryList>
+            {shares.map((share) => (
+              <StandardEntryCard
+                key={share.id}
+                title={
+                  <>
+                    {share.name} <span className="font-normal text-muted">({share.email})</span>
+                  </>
+                }
+                badges={share.scopes.map((s) => (
+                  <StandardBadge key={s}>{scopeLabel(s)}</StandardBadge>
+                ))}
+                actions={<RevokeTaskShareButton taskId={task.id} shareId={share.id} />}
+              />
+            ))}
+          </StandardEntryList>
+        </AddableSection>
       )}
 
       {can.manage && (
-      <StandardSection>
-        <h2 className="text-sm font-semibold text-ink mb-4">Settings</h2>
+      <StandardSection id="settings">
+        <StandardSectionHeader
+          title="Settings"
+          icon={<LuSettings />}
+          description="Schedule, retention and encryption for this task."
+        />
         <form action={updateSettings} className="space-y-6">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">

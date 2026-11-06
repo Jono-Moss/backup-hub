@@ -29,7 +29,6 @@ export function AttachSavedChannelForm({
 
   return (
     <form action={bound} className="space-y-4 max-w-xl">
-      <p className="text-sm font-semibold text-ink">Use a saved channel</p>
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="attach-channel">
           Saved channel

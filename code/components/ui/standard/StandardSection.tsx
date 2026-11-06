@@ -5,9 +5,12 @@ type WidthTypeVariant = "full" | "half";
 export function StandardSection({
   children,
   WidthVariant = "full",
+  id,
 }: {
   children: React.ReactNode;
   WidthVariant?: WidthTypeVariant;
+  /** Anchor for in-page navigation (e.g. TaskSectionNav). */
+  id?: string;
 }) {
   let sectionStyle = "";
 
@@ -23,7 +26,9 @@ export function StandardSection({
 
   return (
     <section
-      className={`bg-white border border-line p-4 sm:p-6 rounded-md ${sectionStyle}`}
+      id={id}
+      // scroll-mt keeps a #hash jump clear of the sticky header + section nav.
+      className={`bg-white border border-line p-4 sm:p-6 rounded-md scroll-mt-28 md:scroll-mt-16 ${sectionStyle}`}
     >
       {children}
     </section>

@@ -43,7 +43,6 @@ export function AttachSavedDestinationForm({
 
   return (
     <form action={bound} className="space-y-4">
-      <p className="text-sm font-semibold text-ink">Use a saved location</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="attach-destination">
