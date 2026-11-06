@@ -1,5 +1,6 @@
 "use server";
 
+import { fail } from "@/lib/action-result";
 import { db } from "@/db";
 import { userTotp, userRecoveryCode, userPasskey, appUser, loginAttempt } from "@/db/schema";
 import { eq, and, desc, gte, inArray, isNull, sql } from "drizzle-orm";
@@ -60,11 +61,11 @@ export async function startTotpEnrollment() {
 export async function confirmTotpEnrollment(code: string) {
   const me = await requireUser();
   const [totp] = await db.select().from(userTotp).where(eq(userTotp.userId, me.id)).limit(1);
-  if (!totp) throw new Error("Start enrollment first");
+  if (!totp) return fail("Start enrollment first");
 
   const secret = unwrapSecret(totp.encryptedSecret);
   if (!verifyTotpCode(secret, code)) {
-    throw new Error("That code didn't match — check your authenticator app and try again.");
+    return fail("That code didn't match — check your authenticator app and try again.");
   }
 
   await db.update(userTotp).set({ enabled: true, verifiedAt: new Date() }).where(eq(userTotp.id, totp.id));
@@ -85,7 +86,7 @@ export async function disableTotp(formData: FormData) {
 
   const [user] = await db.select().from(appUser).where(eq(appUser.id, me.id)).limit(1);
   if (!user || !(await verifyPassword(user.hashedPassword, password))) {
-    throw new Error("Incorrect password");
+    return fail("Incorrect password");
   }
 
   await db.delete(userTotp).where(eq(userTotp.userId, me.id));
@@ -96,7 +97,7 @@ export async function disableTotp(formData: FormData) {
 export async function regenerateRecoveryCodes() {
   const me = await requireUser();
   const [totp] = await db.select().from(userTotp).where(eq(userTotp.userId, me.id)).limit(1);
-  if (!totp?.enabled) throw new Error("Two-factor authentication isn't enabled");
+  if (!totp?.enabled) return fail("Two-factor authentication isn't enabled");
 
   await db.delete(userRecoveryCode).where(eq(userRecoveryCode.userId, me.id));
   const codes = generateRecoveryCodes();
@@ -136,7 +137,7 @@ export async function startPasskeyRegistration() {
 export async function finishPasskeyRegistration(name: string, response: RegistrationResponseJSON) {
   const me = await requireUser();
   const challenge = await consumeChallengeCookie();
-  if (!challenge) throw new Error("This registration attempt expired — try again.");
+  if (!challenge) return fail("This registration attempt expired — try again.");
 
   const verification = await verifyRegistrationResponse({
     response,
@@ -146,7 +147,7 @@ export async function finishPasskeyRegistration(name: string, response: Registra
   });
 
   if (!verification.verified || !verification.registrationInfo) {
-    throw new Error("Passkey registration failed");
+    return fail("Passkey registration failed");
   }
 
   const { credential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;

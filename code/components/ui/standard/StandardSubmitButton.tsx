@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import { useActionFormStatus } from "@/components/ui/common/ActionForm";
 
 type SubmitButtonVariant = "standard" | "danger" | "disabled";
 
@@ -17,7 +18,10 @@ export function StandardSubmitButton({
   variant = "standard",
   fullWidth = false
 }: SubmitButtonProps) {
-  const { pending } = useFormStatus();
+  // Works inside a plain <form action> (useFormStatus) and inside ActionForm.
+  const formStatus = useFormStatus();
+  const actionForm = useActionFormStatus();
+  const pending = actionForm ? actionForm.pending : formStatus.pending;
 
   let buttonStyle = "";
 

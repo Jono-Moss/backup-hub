@@ -1,5 +1,6 @@
 "use server";
 
+import { fail } from "@/lib/action-result";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -395,7 +396,13 @@ export async function deleteTask(taskId: string, deleteFiles: boolean) {
 
 export async function runNow(taskId: string) {
   await requireTaskScope(taskId, "runs:trigger");
-  await runBackupForTask(taskId, "manual");
+  try {
+    await runBackupForTask(taskId, "manual");
+  } catch (err) {
+    // The failed run is already recorded in the history with its error.
+    revalidatePath(`/tasks/${taskId}`);
+    return fail(`Backup failed: ${err instanceof Error ? err.message : String(err)}`.slice(0, 500));
+  }
   revalidatePath(`/tasks/${taskId}`);
 }
 
@@ -453,7 +460,7 @@ export async function testRestoreBackupRun(taskId: string, runId: string) {
   await requireTaskScope(taskId, "runs:trigger");
   await assertRunInTask(taskId, runId);
   const [task] = await db.select({ engine: backupTask.engine }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
-  if (!task || !testRestoreAvailable(task.engine)) throw new Error("Test restores aren't set up on this server");
+  if (!task || !testRestoreAvailable(task.engine)) return fail("Test restores aren't set up on this server");
   await enqueueVerify([runId], "restore");
   revalidatePath(`/tasks/${taskId}`);
 }
@@ -474,7 +481,7 @@ export async function verifyAllBackupRuns(taskId: string) {
 export async function testRestoreAllBackupRuns(taskId: string) {
   await requireTaskScope(taskId, "runs:trigger");
   const [task] = await db.select({ engine: backupTask.engine }).from(backupTask).where(eq(backupTask.id, taskId)).limit(1);
-  if (!task || !testRestoreAvailable(task.engine)) throw new Error("Test restores aren't set up on this server");
+  if (!task || !testRestoreAvailable(task.engine)) return fail("Test restores aren't set up on this server");
   const runs = await db
     .select({ id: backupRun.id })
     .from(backupRun)
@@ -533,7 +540,7 @@ export async function attachSavedChannel(taskId: string, formData: FormData) {
     .limit(1);
   if (!channel) throw new Error("Notification channel not found");
   const links = await listChannelLinksForTask(taskId);
-  if (links.some((l) => l.channel.id === channel.id)) throw new Error("This task already uses that notification channel");
+  if (links.some((l) => l.channel.id === channel.id)) return fail("This task already uses that notification channel");
 
   await linkChannel(taskId, channel.id, formData.get("notifyOnSuccess") === "on", formData.get("notifyOnFailure") === "on");
   revalidatePath(`/tasks/${taskId}`);
@@ -674,7 +681,7 @@ export async function attachSavedDestination(taskId: string, formData: FormData)
 
   const subfolder = getDestination(dest.type).subfolderField ? normalizeSubfolder(String(formData.get("subfolder") ?? "")) : null;
   const links = await listLinksForTask(taskId);
-  if (links.some((l) => l.destination.id === dest.id)) throw new Error("This task already uses that save location");
+  if (links.some((l) => l.destination.id === dest.id)) return fail("This task already uses that save location");
 
   await linkDestination(taskId, dest.id, subfolder);
   revalidatePath(`/tasks/${taskId}`);

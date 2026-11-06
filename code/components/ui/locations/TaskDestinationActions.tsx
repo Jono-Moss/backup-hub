@@ -24,6 +24,7 @@ export function ToggleTaskDestinationButton({
     <StandardActionButton
       title={enabled ? "Disable" : "Enable"}
       action={() => toggleTaskDestinationEnabled(taskId, linkId, !enabled)}
+      successMessage={enabled ? "Save location disabled for this task" : "Save location enabled for this task"}
       variant="outline"
       compact
     />
@@ -43,6 +44,7 @@ export function RemoveTaskDestinationButton({
   return (
     <StandardActionButton
       action={bound}
+      successMessage="Save location removed from this task"
       title="Remove"
       variant="danger"
       pendingTitle="Removing..."

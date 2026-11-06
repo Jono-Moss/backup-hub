@@ -7,6 +7,7 @@ export function RemoveSystemRecipientButton({ id }: { id: string }) {
   return (
     <StandardActionButton
       action={() => removeSystemRecipient(id)}
+      successMessage="Recipient removed"
       title="Remove"
       variant="danger"
       compact

@@ -12,6 +12,7 @@ export function RevokeApiKeyButton({ id }: { id: string }) {
       pendingTitle="Revoking..."
       confirmMessage="Revoke this API key? Any app using it will immediately lose access."
       action={() => revokeApiKey(id)}
+      successMessage="API key revoked"
     />
   );
 }

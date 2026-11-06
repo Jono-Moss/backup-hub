@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { listUsers } from "./actions";
 import { createUser } from "./actions";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -39,7 +40,7 @@ export default async function UsersPage() {
             key: "new",
             label: "Create new",
             content: (
-              <form action={createUser} className="space-y-4 max-w-xl">
+              <ActionForm action={createUser} success="User created" resetOnSuccess className="space-y-4 max-w-xl">
                 <div>
                   <label className="block text-sm text-ink mb-1" htmlFor="name">
                     Name
@@ -81,7 +82,7 @@ export default async function UsersPage() {
                   </select>
                 </div>
                 <StandardSubmitButton title="Create user" />
-              </form>
+              </ActionForm>
             ),
           },
         ]}

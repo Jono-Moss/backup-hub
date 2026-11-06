@@ -1,5 +1,6 @@
 "use server";
 
+import { fail } from "@/lib/action-result";
 import { db } from "@/db";
 import {
   appUser,
@@ -18,7 +19,6 @@ import { eq, desc, sql } from "drizzle-orm";
 import { checkLockout } from "@/lib/auth/lockout";
 import { purgeTask } from "@/lib/backup/purge";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { hashPassword, isPasswordStrongEnough } from "@/lib/auth/password";
 import { requireAdmin, requireUser } from "@/lib/auth/session";
@@ -74,10 +74,10 @@ export async function createUser(formData: FormData) {
   const role = String(formData.get("role") ?? "user") as Role;
 
   if (!email || !name || !password) {
-    throw new Error("Name, email, and password are required");
+    return fail("Name, email, and password are required");
   }
   if (!isPasswordStrongEnough(password)) {
-    throw new Error("Password must be at least 8 characters");
+    return fail("Password must be at least 8 characters");
   }
 
   await db.insert(appUser).values({
@@ -93,7 +93,6 @@ export async function createUser(formData: FormData) {
   );
 
   revalidatePath("/users");
-  redirect("/users");
 }
 
 // Update name/role, and optionally reset the password (admin-initiated reset —
@@ -106,13 +105,13 @@ export async function updateUser(userId: string, formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (admin.id === userId && role !== "admin") {
-    throw new Error("You can't remove your own admin role");
+    return fail("You can't remove your own admin role");
   }
 
   const updates: Record<string, unknown> = { name, role };
   if (password) {
     if (!isPasswordStrongEnough(password)) {
-      throw new Error("Password must be at least 8 characters");
+      return fail("Password must be at least 8 characters");
     }
     updates.hashedPassword = await hashPassword(password);
   }
@@ -125,7 +124,7 @@ export async function updateUser(userId: string, formData: FormData) {
 export async function deleteUser(userId: string, deleteFiles: boolean) {
   const admin = await requireAdmin();
   if (admin.id === userId) {
-    throw new Error("You can't delete your own account");
+    return fail("You can't delete your own account");
   }
 
   const [target] = await db.select().from(appUser).where(eq(appUser.id, userId)).limit(1);
@@ -163,7 +162,6 @@ export async function deleteUser(userId: string, deleteFiles: boolean) {
   );
 
   revalidatePath("/users");
-  redirect("/users");
 }
 
 // --- Auth factors (2FA / passkeys) — admin visibility & account recovery ---
@@ -210,7 +208,7 @@ export async function updateOwnProfile(formData: FormData) {
   const currentPassword = String(formData.get("currentPassword") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
 
-  if (!name) throw new Error("Name is required");
+  if (!name) return fail("Name is required");
 
   const [user] = await db.select().from(appUser).where(eq(appUser.id, me.id)).limit(1);
   if (!user) throw new Error("User not found");
@@ -220,10 +218,10 @@ export async function updateOwnProfile(formData: FormData) {
   if (newPassword) {
     const { verifyPassword } = await import("@/lib/auth/password");
     if (!currentPassword || !(await verifyPassword(user.hashedPassword, currentPassword))) {
-      throw new Error("Current password is incorrect");
+      return fail("Current password is incorrect");
     }
     if (!isPasswordStrongEnough(newPassword)) {
-      throw new Error("New password must be at least 8 characters");
+      return fail("New password must be at least 8 characters");
     }
     updates.hashedPassword = await hashPassword(newPassword);
   }

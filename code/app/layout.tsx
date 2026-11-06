@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { StandardFooter } from "@/components/ui/standard/StandardFooter";
 import { StandardHeader } from "@/components/ui/standard/StandardHeader";
 import { ModalProvider } from "@/components/ui/modal/ModalProvider";
+import { ToastProvider } from "@/components/ui/common/ToastProvider";
 
 export const metadata: Metadata = {
     title: "Backup Hub",
@@ -20,6 +21,7 @@ export default async function RootLayout({
     return (
         <html lang="en">
             <body className="font-sans antialiased">
+                <ToastProvider>
                 <ModalProvider>
                     <div className="flex min-h-screen flex-col">
 
@@ -33,6 +35,7 @@ export default async function RootLayout({
 
                     </div>
                 </ModalProvider>
+                </ToastProvider>
             </body>
         </html>
     );

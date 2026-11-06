@@ -28,6 +28,7 @@ export function DeleteChannelButton({ id, usedByCount }: { id: string; usedByCou
   return (
     <StandardActionButton
       action={() => deleteChannelById(id)}
+      successMessage="Channel deleted"
       title="Delete"
       variant="danger"
       pendingTitle="Deleting…"
@@ -45,6 +46,7 @@ export function MakeChannelReusableButton({ id }: { id: string }) {
   return (
     <StandardActionButton
       action={() => makeChannelReusable(id)}
+      successMessage="Channel saved to your account — your other tasks can use it now"
       title="Make reusable"
       variant="outline"
       pendingTitle="Saving…"

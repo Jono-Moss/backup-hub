@@ -9,6 +9,7 @@ export function RunNowButton({ taskId }: { taskId: string }) {
       title="Run backup now"
       pendingTitle="Running…"
       action={() => runNow(taskId)}
+      successMessage="Backup completed"
     />
   );
 }

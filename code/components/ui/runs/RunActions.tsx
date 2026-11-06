@@ -11,6 +11,8 @@ import {
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { ActionMenu, type MenuAction } from "@/components/ui/common/ActionMenu";
 import { useModal } from "@/components/ui/modal/ModalProvider";
+import { useToast } from "@/components/ui/common/ToastProvider";
+import { useActionFeedback, type FeedbackOptions } from "@/components/ui/common/useActionFeedback";
 
 const RESTORE_WARNING =
   "Restoring will overwrite the current contents of the live database with this backup's data. This cannot be undone.";
@@ -34,17 +36,14 @@ interface RunActionsProps {
 export function RunActions({ taskId, run, can, testRestore, checking, variant, title, summary }: RunActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [restoreOpen, setRestoreOpen] = useState(false);
-  const { confirm, alertUser } = useModal();
+  const { confirm } = useModal();
+  const feedback = useActionFeedback();
   const completed = run.status === "completed";
   const downloadHref = `/tasks/${taskId}/runs/${run.id}/download`;
 
-  const runAction = (fn: () => Promise<unknown>) =>
+  const runAction = (fn: () => Promise<unknown>, success?: FeedbackOptions["success"]) =>
     startTransition(async () => {
-      try {
-        await fn();
-      } catch (err) {
-        alertUser(err instanceof Error ? err.message : String(err));
-      }
+      await feedback(fn, { success });
     });
 
   // Confirmations are asked *before* starting the transition: React holds
@@ -56,10 +55,7 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
     if (run.encrypted) return setRestoreOpen(true);
     const ok = await confirm({ title: "Restore this backup?", message: RESTORE_WARNING, confirmLabel: "Restore", danger: true });
     if (!ok) return;
-    runAction(async () => {
-      const result = await restoreBackupRun(taskId, run.id);
-      alertUser(result.ok ? "Restore completed successfully." : result.message);
-    });
+    runAction(() => restoreBackupRun(taskId, run.id), "Restore completed successfully");
   };
 
   const actions: MenuAction[] = [];
@@ -76,7 +72,7 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
       icon: LuShieldCheck,
       description: "Check it's intact and reads back completely",
       disabled: checking,
-      onSelect: () => runAction(() => verifyBackupRun(taskId, run.id)),
+      onSelect: () => runAction(() => verifyBackupRun(taskId, run.id), "Check started — the result shows under this backup"),
     });
     if (testRestore) {
       actions.push({
@@ -85,7 +81,7 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
         icon: LuDatabaseZap,
         description: "Restore into a temporary database, check it, then delete it",
         disabled: checking,
-        onSelect: () => runAction(() => testRestoreBackupRun(taskId, run.id)),
+        onSelect: () => runAction(() => testRestoreBackupRun(taskId, run.id), "Test restore started — the result shows under this backup"),
       });
     }
   }
@@ -98,7 +94,7 @@ export function RunActions({ taskId, run, can, testRestore, checking, variant, t
       danger: true,
       onSelect: async () => {
         const ok = await confirm({ title: "Delete this backup?", message: "The backup file is deleted. This cannot be undone.", confirmLabel: "Delete", danger: true });
-        if (ok) runAction(() => deleteBackupRun(taskId, run.id));
+        if (ok) runAction(() => deleteBackupRun(taskId, run.id), "Backup deleted");
       },
     });
   }
@@ -127,7 +123,7 @@ function RestorePasswordDialog({ taskId, runId, onClose }: { taskId: string; run
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const { alertUser } = useModal();
+  const toast = useToast();
 
   const submit = () => {
     if (!password) return setError("Enter the backup's encryption password.");
@@ -136,7 +132,7 @@ function RestorePasswordDialog({ taskId, runId, onClose }: { taskId: string; run
       const result = await restoreBackupRun(taskId, runId, password);
       if (!result.ok) return setError(result.message);
       onClose();
-      alertUser("Restore completed successfully.");
+      toast.success("Restore completed successfully");
     });
   };
 

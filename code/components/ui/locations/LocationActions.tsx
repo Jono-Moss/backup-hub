@@ -28,6 +28,7 @@ export function DeleteLocationButton({ id, usedByCount }: { id: string; usedByCo
   return (
     <StandardActionButton
       action={() => deleteLocation(id)}
+      successMessage="Save location deleted"
       title="Delete"
       variant="danger"
       pendingTitle="Deleting…"
@@ -45,6 +46,7 @@ export function MakeReusableButton({ id }: { id: string }) {
   return (
     <StandardActionButton
       action={() => makeLocationReusable(id)}
+      successMessage="Save location saved to your account — your other tasks can use it now"
       title="Make reusable"
       variant="outline"
       pendingTitle="Saving…"

@@ -6,15 +6,22 @@ import { SCOPE_OPTIONS } from "@/components/ui/api-keys/scopeOptions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { useAddPanel } from "@/components/ui/common/AddableSection";
+import { useToast } from "@/components/ui/common/ToastProvider";
+import { useActionFeedback } from "@/components/ui/common/useActionFeedback";
 
 
 export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string }[] }) {
   const [issuedKey, setIssuedKey] = useState<string | null>(null);
   const panel = useAddPanel();
+  const toast = useToast();
+  const run = useActionFeedback();
 
   async function handleSubmit(formData: FormData) {
-    const raw = await createApiKey(formData);
-    setIssuedKey(raw);
+    await run(async () => {
+      const result = await createApiKey(formData);
+      if (result.ok) setIssuedKey(result.key);
+      return result;
+    }, { success: "API key created — copy it now" });
   }
 
   if (issuedKey) {
@@ -28,6 +35,7 @@ export function CreateApiKeyForm({ tasks }: { tasks: { id: string; name: string 
           action={() => {
             setIssuedKey(null);
             panel?.close();
+            toast.success("Key saved. You can revoke it from this page at any time.");
           }}
           title="Done"
         />

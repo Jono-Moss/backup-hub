@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { createTask } from "../actions";
 import { TestConnectionButton } from "@/components/ui/tasks/TestConnectionButton";
@@ -12,7 +13,7 @@ export default function NewTaskPage() {
         Connection details are encrypted at rest and never shown again after saving.
       </p>
 
-      <form id="task-form" action={createTask} className="space-y-6 bg-white border border-line p-6">
+      <ActionForm id="task-form" action={createTask} className="space-y-6 bg-white border border-line p-6">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="name">
             Task name
@@ -146,7 +147,7 @@ export default function NewTaskPage() {
           </p>
         </div>
         <StandardSubmitButton title="Create task" />
-      </form>
+      </ActionForm>
     </div>
   );
 }

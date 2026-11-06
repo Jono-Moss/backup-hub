@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { notFound } from "next/navigation";
 import { testRestoreAvailable } from "@/lib/backup/verify";
 import { VerifyBadge } from "@/components/ui/runs/VerifyBadge";
@@ -417,7 +418,7 @@ export default async function TaskDetailPage({
           icon={<LuSettings />}
           description="Schedule, retention and encryption for this task."
         />
-        <form action={updateSettings} className="space-y-6">
+        <ActionForm action={updateSettings} success="Settings saved" resetOnSuccess className="space-y-6">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
               Task name
@@ -507,7 +508,7 @@ export default async function TaskDetailPage({
             <StandardSubmitButton title="Save settings" />
             <DeleteTaskButton taskId={task.id} />
           </div>
-        </form>
+        </ActionForm>
       </StandardSection>
       )}
     </div>

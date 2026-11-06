@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { testEditedLocation, updateLocation } from "@/app/locations/actions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
+import { ActionForm } from "@/components/ui/common/ActionForm";
 
 type ConfigField = {
   name: string;
@@ -37,12 +38,11 @@ export function EditLocationForm({
   const update = updateLocation.bind(null, location.id);
 
   return (
-    <form
-      ref={formRef}
-      action={async (formData) => {
-        await update(formData);
-        router.push("/locations");
-      }}
+    <ActionForm
+      formRef={formRef}
+      action={update}
+      success="Save location updated"
+      onSuccess={() => router.push("/locations")}
       className="space-y-4"
     >
       <div>
@@ -128,6 +128,6 @@ export function EditLocationForm({
           {result.ok ? result.message ?? "Connected successfully" : `Failed: ${result.message ?? "unknown error"}`}
         </p>
       )}
-    </form>
+    </ActionForm>
   );
 }

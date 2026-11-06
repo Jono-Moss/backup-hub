@@ -3,12 +3,16 @@
 import { useTransition } from "react";
 import type { IconType } from "react-icons";
 import { useModal } from "../modal/ModalProvider";
+import { useActionFeedback, type FeedbackOptions } from "@/components/ui/common/useActionFeedback";
 
 type ActionButtonVariant = "standard" | "danger" | "outline" | "link";
 
 type ActionButtonProps = {
     title: string;
-    action: () => void | Promise<void>;
+    /** May return fail("…") (lib/action-result) to report a failure. */
+    action: () => unknown | Promise<unknown>;
+    /** Toast shown when the action succeeds. Failures always show an error toast. */
+    successMessage?: FeedbackOptions["success"];
     variant?: ActionButtonVariant;
     confirmMessage?: string;
     pendingTitle?: string;
@@ -31,9 +35,11 @@ export function StandardActionButton({
     fullWidth = false,
     compact = false,
     icon: Icon,
+    successMessage,
 }: ActionButtonProps) {
     const [isPending, startTransition] = useTransition();
     const { confirm } = useModal();
+    const run = useActionFeedback();
 
     const sizeStyle = compact ? "px-2.5 py-1 text-xs" : "px-5 py-2.5 text-sm";
 
@@ -68,8 +74,8 @@ export function StandardActionButton({
             if (!confirmed) return;
         }
 
-        startTransition(() => {
-            action();
+        startTransition(async () => {
+            await run(action, { success: successMessage });
         });
     };
 

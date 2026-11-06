@@ -14,6 +14,7 @@ export function DeleteUserButton({ userId }: { userId: string }) {
       }
       keepNote="The backup files of their tasks stay on the server, each in a folder named after its task id inside the backup directory, so you can still recover them by hand."
       confirmLabel="Delete user"
+      successMessage="User deleted"
       onDelete={(deleteFiles) => deleteUser(userId, deleteFiles)}
     />
   );

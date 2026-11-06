@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { redirect } from "next/navigation";
 import { hasAnyUsers } from "@/lib/auth/session";
 import { createFirstAdmin } from "./actions";
@@ -15,7 +16,7 @@ export default async function SetupPage() {
         <h1 className="text-lg font-semibold text-ink mb-1">Welcome to Backup Hub</h1>
         <p className="text-sm text-muted mb-6">Create the first admin account to get started.</p>
 
-        <form action={createFirstAdmin} className="space-y-4">
+        <ActionForm action={createFirstAdmin} className="space-y-4">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
               Your name
@@ -55,7 +56,7 @@ export default async function SetupPage() {
             <p className="text-xs text-muted mt-1">At least 8 characters.</p>
           </div>
           <StandardSubmitButton title="Create admin account" />
-        </form>
+        </ActionForm>
       </div>
     </div>
   );

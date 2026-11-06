@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { attachSavedChannel } from "@/app/tasks/actions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 
@@ -28,7 +29,7 @@ export function AttachSavedChannelForm({
   }
 
   return (
-    <form action={bound} className="space-y-4 max-w-xl">
+    <ActionForm action={bound} success="Channel added to this task" className="space-y-4 max-w-xl">
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="attach-channel">
           Saved channel
@@ -56,6 +57,6 @@ export function AttachSavedChannelForm({
         </label>
       </div>
       <StandardSubmitButton title="Use this channel" />
-    </form>
+    </ActionForm>
   );
 }

@@ -17,6 +17,7 @@ export function RemoveTaskRecipientButton({
   return (
     <StandardActionButton
       action={bound}
+      successMessage="Notification removed"
       title="Remove"
       variant="danger"
       compact

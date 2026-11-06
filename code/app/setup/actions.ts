@@ -1,5 +1,6 @@
 "use server";
 
+import { fail } from "@/lib/action-result";
 import { db } from "@/db";
 import { appUser } from "@/db/schema";
 import { v4 as uuid } from "uuid";
@@ -11,7 +12,7 @@ import { createSession, hasAnyUsers } from "@/lib/auth/session";
 // fresh install, not a general "anyone can sign up" endpoint.
 export async function createFirstAdmin(formData: FormData) {
   if (await hasAnyUsers()) {
-    throw new Error("Setup has already been completed");
+    return fail("Setup has already been completed");
   }
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -19,10 +20,10 @@ export async function createFirstAdmin(formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (!email || !name || !password) {
-    throw new Error("Name, email, and password are all required");
+    return fail("Name, email, and password are all required");
   }
   if (!isPasswordStrongEnough(password)) {
-    throw new Error("Password must be at least 8 characters");
+    return fail("Password must be at least 8 characters");
   }
 
   const id = uuid();

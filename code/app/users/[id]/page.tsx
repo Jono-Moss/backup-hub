@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { notFound } from "next/navigation";
 import { getUser, updateUser, getUserAuthFactors, adminResetAuthFactors, getUserLockout, unlockUser } from "../actions";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -47,7 +48,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
               <LocalTime value={lockout.until} />. Passkeys still work.
             </span>
           </p>
-          <StandardActionButton title="Unlock now" variant="outline" compact action={unlock} />
+          <StandardActionButton title="Unlock now" variant="outline" compact action={unlock} successMessage="Account unlocked" />
         </div>
       )}
 
@@ -62,7 +63,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
             </StandardBadge>
           }
         />
-        <form action={save} className="space-y-5 max-w-md">
+        <ActionForm action={save} success="Changes saved" resetOnSuccess className="space-y-5 max-w-md">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
               Name
@@ -118,7 +119,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
           </div>
 
           <StandardSubmitButton title="Save changes" />
-        </form>
+        </ActionForm>
       </StandardSection>
 
       {!isSelf && (
@@ -143,6 +144,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
                 variant="danger"
                 confirmMessage={`Remove all two-factor authentication and passkeys for ${user.name}? They'll be able to sign in with just their password afterward, and will need to re-enroll from their own account page.`}
                 action={resetAuthFactors}
+                successMessage="2FA and passkeys reset"
               />
             </div>
           ) : (

@@ -7,6 +7,7 @@ import type { NotificationChannel } from "@/db/schema";
 import { NOTIFICATION_CHANNEL_DEFINITIONS } from "@/lib/notifications/channels/definitions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
+import { ActionForm } from "@/components/ui/common/ActionForm";
 
 // Password-type fields (tokens, webhook URLs) are never sent to the browser:
 // their inputs start blank, and leaving one blank keeps the saved value.
@@ -22,12 +23,11 @@ export function EditChannelForm({
   const definition = NOTIFICATION_CHANNEL_DEFINITIONS[channel.channel];
 
   return (
-    <form
-      ref={formRef}
-      action={async (formData) => {
-        await update(formData);
-        router.push("/notification-channels");
-      }}
+    <ActionForm
+      formRef={formRef}
+      action={update}
+      success="Channel updated"
+      onSuccess={() => router.push("/notification-channels")}
       className="space-y-4"
     >
       <div>
@@ -86,6 +86,6 @@ export function EditChannelForm({
           {result.ok ? `Test notification sent${result.message ? ` — ${result.message}` : ""}` : `Failed: ${result.message ?? "unknown error"}`}
         </p>
       )}
-    </form>
+    </ActionForm>
   );
 }

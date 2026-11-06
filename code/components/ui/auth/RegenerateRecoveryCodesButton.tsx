@@ -37,7 +37,8 @@ export function RegenerateRecoveryCodesButton() {
     <StandardActionButton
       action={async () => {
         const result = await regenerateRecoveryCodes();
-        setCodes(result.recoveryCodes);
+        if ("recoveryCodes" in result) setCodes(result.recoveryCodes);
+        return result;
       }}
       title="Regenerate recovery codes"
       pendingTitle="Generating…"

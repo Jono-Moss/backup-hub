@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { useState } from "react";
 import { attachSavedDestination } from "@/app/tasks/actions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
@@ -42,7 +43,7 @@ export function AttachSavedDestinationForm({
   }
 
   return (
-    <form action={bound} className="space-y-4">
+    <ActionForm action={bound} success="Save location added to this task" className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-ink mb-1" htmlFor="attach-destination">
@@ -82,6 +83,6 @@ export function AttachSavedDestinationForm({
         )}
       </div>
       <StandardSubmitButton title="Use this location" />
-    </form>
+    </ActionForm>
   );
 }

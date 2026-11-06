@@ -9,6 +9,7 @@ export function RevokeTaskShareButton({ taskId, shareId }: { taskId: string; sha
   return (
     <StandardActionButton
       action={bound}
+      successMessage="Access removed"
       title="Remove"
       variant="danger"
       compact

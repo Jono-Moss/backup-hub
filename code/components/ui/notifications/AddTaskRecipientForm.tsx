@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { addTaskRecipient } from "@/app/tasks/actions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { NotificationChannelFields } from "@/components/ui/notifications/NotificationChannelFields";
@@ -8,10 +9,7 @@ export function AddTaskRecipientForm({ taskId, canSaveToAccount = false }: { tas
   const bound = addTaskRecipient.bind(null, taskId);
 
   return (
-    <form
-      action={bound}
-      className="space-y-4 max-w-xl"
-    >
+    <ActionForm action={bound} success="Notification added" resetOnSuccess className="space-y-4 max-w-xl">
       <NotificationChannelFields idPrefix="task-recipient" showLabel />
 
       <div className="flex flex-wrap items-center gap-4">
@@ -44,8 +42,8 @@ export function AddTaskRecipientForm({ taskId, canSaveToAccount = false }: { tas
 
       <StandardSubmitButton
         title="Add"
-        pendingTitle="...Processing"
+        pendingTitle="Adding…"
       />
-    </form>
+    </ActionForm>
   );
 }

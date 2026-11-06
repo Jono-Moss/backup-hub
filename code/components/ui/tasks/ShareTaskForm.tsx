@@ -1,20 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { shareTask } from "@/app/tasks/actions";
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { SCOPE_OPTIONS } from "@/components/ui/api-keys/scopeOptions";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 
 export function ShareTaskForm({ taskId }: { taskId: string }) {
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-
-  async function handleSubmit(formData: FormData) {
-    const result = await shareTask(taskId, formData);
-    setMessage(result.ok ? { ok: true, text: "Saved." } : { ok: false, text: result.message });
-  }
-
   return (
-    <form action={handleSubmit} className="space-y-4">
+    <ActionForm
+      action={(formData) => shareTask(taskId, formData)}
+      success="Sharing saved"
+      resetOnSuccess
+      className="space-y-4"
+    >
       <div>
         <label className="block text-sm text-ink mb-1" htmlFor="share-email">
           User&apos;s email
@@ -51,10 +49,7 @@ export function ShareTaskForm({ taskId }: { taskId: string }) {
         email to change someone&apos;s permissions.
       </p>
 
-      <div className="flex items-center gap-4">
-        <StandardSubmitButton title="Share" pendingTitle="Sharing..." />
-        {message && <span className={`text-sm ${message.ok ? "text-primary" : "text-danger"}`}>{message.text}</span>}
-      </div>
-    </form>
+      <StandardSubmitButton title="Share" pendingTitle="Sharing..." />
+    </ActionForm>
   );
 }

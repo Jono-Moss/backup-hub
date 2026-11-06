@@ -10,6 +10,9 @@ import {
 import type { DestinationType } from "@/db/schema";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
+import { ActionForm } from "@/components/ui/common/ActionForm";
+import { useToast } from "@/components/ui/common/ToastProvider";
+import { fail } from "@/lib/action-result";
 
 type ConfigField = {
   name: string;
@@ -71,6 +74,7 @@ export function AddTaskDestinationForm({
   const [connectError, setConnectError] = useState<string | null>(null);
   const [connectedAccount, setConnectedAccount] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const toast = useToast();
 
   const provider = providers.find((p) => p.type === type);
   const bound = addDestination.bind(null, taskId);
@@ -145,6 +149,7 @@ export function AddTaskDestinationForm({
       } else if (res.status === "complete") {
         setFlow(null);
         setConnectedAccount(res.account ?? "your account");
+        toast.success(`Connected ${res.account ?? "your account"} — save location added`);
         formRef.current?.reset();
       } else {
         setConnectError(res.message);
@@ -162,19 +167,20 @@ export function AddTaskDestinationForm({
   if (providers.length === 0) return null;
 
   return (
-    <form
+    <ActionForm
       id={formId}
-      ref={formRef}
+      formRef={formRef}
       action={async (formData) => {
         // In Connect mode there's no submit button, but pressing Enter in a
         // text field would still submit — and save a destination with no
         // credentials. The destination is only ever created by the sign-in
         // flow itself in this mode.
-        if (connectMode) return;
+        if (connectMode) return fail("Use the Connect button to sign in to your account first.");
         setResult(null);
-        await bound(formData);
-        formRef.current?.reset();
+        return bound(formData);
       }}
+      success="Save location added"
+      resetOnSuccess
       className="space-y-4"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -335,6 +341,6 @@ export function AddTaskDestinationForm({
           </span>
         )}
       </div>
-    </form>
+    </ActionForm>
   );
 }

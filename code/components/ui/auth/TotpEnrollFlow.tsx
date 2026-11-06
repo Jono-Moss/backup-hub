@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { startTotpEnrollment, confirmTotpEnrollment } from "@/app/account/actions";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
+import { useToast } from "@/components/ui/common/ToastProvider";
 
 type Step = "idle" | "scanning" | "codes";
 
 export function TotpEnrollFlow() {
   const router = useRouter();
+  const toast = useToast();
   const [step, setStep] = useState<Step>("idle");
   const [error, setError] = useState<string | null>(null);
   const [enrollment, setEnrollment] = useState<{ secret: string; qrDataUrl: string } | null>(null);
@@ -29,15 +31,17 @@ export function TotpEnrollFlow() {
 
     try {
       const result = await confirmTotpEnrollment(code);
+      if (!("recoveryCodes" in result)) return setError(result.message);
       setRecoveryCodes(result.recoveryCodes);
       setStep("codes");
-    } catch (err: any) {
-      setError(err.message ?? "Couldn't verify that code.");
+    } catch {
+      setError("Couldn't verify that code — please try again.");
     }
 
   }
 
   function finish() {
+    toast.success("Two-factor authentication is on");
     setStep("idle");
     setEnrollment(null);
     setCode("");

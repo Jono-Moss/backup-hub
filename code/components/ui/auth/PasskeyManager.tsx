@@ -8,6 +8,8 @@ import { LocalTime } from "@/components/ui/common/LocalTime";
 import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
 import { LuPlus } from "react-icons/lu";
 import { useModal } from "@/components/ui/modal/ModalProvider";
+import { useToast } from "@/components/ui/common/ToastProvider";
+import { isActionFailure } from "@/lib/action-result";
 
 type Passkey = {
   id: string;
@@ -24,6 +26,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const { confirm } = useModal();
+  const toast = useToast();
 
   function addPasskey() {
     setError(null);
@@ -34,10 +37,13 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
       try {
         const options = await startPasskeyRegistration();
         const response = await startRegistration({ optionsJSON: options });
-        await finishPasskeyRegistration(name, response);
+        const result = await finishPasskeyRegistration(name, response);
+        if (isActionFailure(result)) return setError(result.message);
+        toast.success("Passkey added");
         router.refresh();
       } catch (err: any) {
-        setError(err?.name === "NotAllowedError" ? "Cancelled." : err.message ?? "Couldn't add that passkey.");
+        // Errors from the browser's passkey prompt (not the server) keep their own message.
+        setError(err?.name === "NotAllowedError" ? "Cancelled." : err?.message ?? "Couldn't add that passkey.");
       }
     });
   }
@@ -50,8 +56,13 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
     });
     if (!confirmed) return;
     startTransition(async () => {
-      await deletePasskey(id);
-      router.refresh();
+      try {
+        await deletePasskey(id);
+        toast.success("Passkey removed");
+        router.refresh();
+      } catch {
+        toast.error("Couldn't remove that passkey — please try again.");
+      }
     });
   }
 

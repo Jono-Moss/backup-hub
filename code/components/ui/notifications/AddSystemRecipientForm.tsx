@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { addSystemRecipient } from "@/app/notifications/actions";
 import { SYSTEM_NOTIFICATION_EVENTS, type SystemNotificationEvent } from "@/db/schema";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
@@ -17,10 +18,7 @@ const EVENT_LABELS: Record<SystemNotificationEvent, string> = {
 export function AddSystemRecipientForm() {
 
   return (
-    <form
-      action={(formData) => addSystemRecipient(formData)}
-      className="space-y-4"
-    >
+    <ActionForm action={addSystemRecipient} success="Recipient added" resetOnSuccess className="space-y-4">
       <NotificationChannelFields idPrefix="system-recipient" />
       <div>
         <p className="text-sm text-ink mb-2">Notify for</p>
@@ -34,6 +32,6 @@ export function AddSystemRecipientForm() {
         </div>
       </div>
       <StandardSubmitButton title="Add recipient" />
-    </form>
+    </ActionForm>
   );
 }

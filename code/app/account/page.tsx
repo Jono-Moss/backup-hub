@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/ui/common/ActionForm";
 import { requireUser } from "@/lib/auth/session";
 import { updateOwnProfile } from "@/app/users/actions";
 import { getTotpStatus, listPasskeys, listMyLoginAttempts } from "@/app/account/actions";
@@ -33,7 +34,7 @@ export default async function AccountPage() {
           icon={<LuUser />}
           description="Your display name, and your sign-in password."
         />
-        <form action={updateOwnProfile} className="space-y-5 max-w-md">
+        <ActionForm action={updateOwnProfile} success="Profile saved" resetOnSuccess className="space-y-5 max-w-md">
           <div>
             <label className="block text-sm text-ink mb-1" htmlFor="name">
               Name
@@ -77,7 +78,7 @@ export default async function AccountPage() {
           </div>
 
           <StandardSubmitButton title="Save changes" />
-        </form>
+        </ActionForm>
       </StandardSection>
 
       <StandardSection id="two-factor">

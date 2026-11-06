@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useActionFeedback } from "@/components/ui/common/useActionFeedback";
 
 // Delete confirmation that also asks what to do with backup files on disk.
 // The checkbox starts UNCHECKED: the safe default is to keep the files, so a
@@ -13,19 +14,24 @@ export function DeleteWithFilesButton({
   confirmLabel = "Delete",
   onDelete,
   compact = false,
+  successMessage,
 }: {
   buttonTitle: string;
   heading: string;
   description: string;
   keepNote: string;
   confirmLabel?: string;
-  onDelete: (deleteFiles: boolean) => Promise<void>;
+  /** May return fail("…") (lib/action-result) to report a failure. */
+  onDelete: (deleteFiles: boolean) => Promise<unknown>;
+  /** Toast shown after a successful delete. */
+  successMessage?: string;
   /** Smaller button, for use inside list rows. */
   compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [deleteFiles, setDeleteFiles] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const run = useActionFeedback();
 
   const close = () => {
     if (isPending) return;
@@ -87,7 +93,11 @@ export function DeleteWithFilesButton({
                 disabled={isPending}
                 onClick={() =>
                   startTransition(async () => {
-                    await onDelete(deleteFiles);
+                    const ok = await run(() => onDelete(deleteFiles), { success: successMessage });
+                    if (ok) {
+                      setOpen(false);
+                      setDeleteFiles(false);
+                    }
                   })
                 }
                 className="rounded-md bg-danger border-b-danger-dark text-white text-sm font-medium px-4 py-2 border-b-2 hover:border-b-transparent transition-colors disabled:opacity-40"

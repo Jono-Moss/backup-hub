@@ -1,5 +1,6 @@
 "use server";
 
+import { fail } from "@/lib/action-result";
 import { db } from "@/db";
 import { apiKey, SCOPES, type Scope } from "@/db/schema";
 import { eq, isNull, desc, and } from "drizzle-orm";
@@ -39,7 +40,7 @@ export async function createApiKey(formData: FormData) {
   const scopes = formData.getAll("scopes").map(String).filter((s): s is Scope => (SCOPES as readonly string[]).includes(s));
 
   if (!name || scopes.length === 0) {
-    throw new Error("Name and at least one scope are required");
+    return fail("Name and at least one scope are required");
   }
   if (taskId && !(await getTaskAccess(me.id, taskId))) {
     throw new Error("Task not found");
@@ -58,7 +59,7 @@ export async function createApiKey(formData: FormData) {
   });
 
   revalidatePath("/api-keys");
-  return raw;
+  return { ok: true as const, key: raw };
 }
 
 export async function revokeApiKey(id: string) {

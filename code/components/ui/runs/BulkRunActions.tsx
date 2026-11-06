@@ -6,6 +6,7 @@ import { clearFailedBackupRuns, testRestoreAllBackupRuns, verifyAllBackupRuns } 
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { ActionMenu, type MenuAction } from "@/components/ui/common/ActionMenu";
 import { useModal } from "@/components/ui/modal/ModalProvider";
+import { useActionFeedback } from "@/components/ui/common/useActionFeedback";
 
 // Actions on all of a task's backups at once, in the Backup history header.
 // They use the same icons as the matching per-backup actions (Verify file,
@@ -28,17 +29,19 @@ export function BulkRunActions({
   testRestore: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
-  const { confirm, alertUser } = useModal();
+  const { confirm } = useModal();
+  const feedback = useActionFeedback();
 
   const testAllMessage = `Test-restore all ${completedCount} backup${completedCount === 1 ? "" : "s"}? Each one is restored into a temporary database on the test-restore server, one after another, so this can take a while and puts load on that server.`;
   const clearMessage = "Remove all failed backup records for this task? This cannot be undone.";
 
   const verifyAll = () => verifyAllBackupRuns(taskId);
   const testRestoreAll = () => testRestoreAllBackupRuns(taskId);
-  const removeFailed = async () => {
-    const count = await clearFailedBackupRuns(taskId);
-    alertUser(count === 0 ? "No failed backups to remove." : `Removed ${count} failed backup${count === 1 ? "" : "s"}.`);
-  };
+  const removeFailed = () => clearFailedBackupRuns(taskId);
+  const verifyAllMessage = "Checks started for every backup — results show in the history";
+  const testRestoreAllMessage = "Test restores started — results show in the history";
+  const removedMessage = (count: unknown) =>
+    count === 0 ? "No failed backups to remove" : `Removed ${count} failed backup${count === 1 ? "" : "s"}`;
 
   const showVerify = can.trigger && completedCount > 0;
   const showTestRestore = showVerify && testRestore;
@@ -47,17 +50,13 @@ export function BulkRunActions({
 
   // Phone drawer. Confirmations are asked before starting the transition
   // (see RunActions.tsx for why).
-  const run = (fn: () => Promise<unknown>) =>
+  const run = (fn: () => Promise<unknown>, success: string | ((result: unknown) => string)) =>
     startTransition(async () => {
-      try {
-        await fn();
-      } catch (err) {
-        alertUser(err instanceof Error ? err.message : String(err));
-      }
+      await feedback(fn, { success });
     });
   const actions: MenuAction[] = [];
   if (showVerify) {
-    actions.push({ key: "verify-all", label: "Verify all", icon: LuShieldCheck, description: "Check every backup is intact and reads back completely", onSelect: () => run(verifyAll) });
+    actions.push({ key: "verify-all", label: "Verify all", icon: LuShieldCheck, description: "Check every backup is intact and reads back completely", onSelect: () => run(verifyAll, verifyAllMessage) });
   }
   if (showTestRestore) {
     actions.push({
@@ -66,7 +65,7 @@ export function BulkRunActions({
       icon: LuDatabaseZap,
       description: "Restore each backup into a temporary database, one at a time",
       onSelect: async () => {
-        if (await confirm({ title: "Test-restore all backups?", message: testAllMessage, confirmLabel: "Test-restore all" })) run(testRestoreAll);
+        if (await confirm({ title: "Test-restore all backups?", message: testAllMessage, confirmLabel: "Test-restore all" })) run(testRestoreAll, testRestoreAllMessage);
       },
     });
   }
@@ -78,7 +77,7 @@ export function BulkRunActions({
       description: `Clear ${failedCount} failed backup record${failedCount === 1 ? "" : "s"}`,
       danger: true,
       onSelect: async () => {
-        if (await confirm({ message: clearMessage, confirmLabel: "Remove", danger: true })) run(removeFailed);
+        if (await confirm({ message: clearMessage, confirmLabel: "Remove", danger: true })) run(removeFailed, removedMessage);
       },
     });
   }
@@ -95,6 +94,7 @@ export function BulkRunActions({
             pendingTitle="Queuing…"
             tooltip="Check every backup is intact and reads back completely"
             action={verifyAll}
+            successMessage={verifyAllMessage}
           />
         )}
         {showTestRestore && (
@@ -107,6 +107,7 @@ export function BulkRunActions({
             tooltip="Restore each backup into a temporary database, one at a time"
             confirmMessage={testAllMessage}
             action={testRestoreAll}
+            successMessage={testRestoreAllMessage}
           />
         )}
         {showRemoveFailed && (
@@ -119,6 +120,7 @@ export function BulkRunActions({
             tooltip={`Clear ${failedCount} failed backup record${failedCount === 1 ? "" : "s"}`}
             confirmMessage={clearMessage}
             action={removeFailed}
+            successMessage={removedMessage}
           />
         )}
       </div>

@@ -1,5 +1,6 @@
 "use server";
 
+import { fail } from "@/lib/action-result";
 import { db } from "@/db";
 import { systemNotificationRecipient, SYSTEM_NOTIFICATION_EVENTS, type SystemNotificationEvent } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -22,7 +23,7 @@ export async function addSystemRecipient(formData: FormData) {
   const events = formData.getAll("events") as SystemNotificationEvent[];
 
   if (events.length === 0) {
-    throw new Error("At least one event is required");
+    return fail("At least one event is required");
   }
 
   await db.insert(systemNotificationRecipient).values({ id: uuid(), ...recipientColumnsFromForm(formData), events });
