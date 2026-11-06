@@ -1,7 +1,7 @@
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { requireUser } from "@/lib/auth/session";
 import { updateOwnProfile } from "@/app/users/actions";
-import { getTotpStatus, listPasskeys, listMyLoginAttempts } from "@/app/account/actions";
+import { getTotpStatus, listPasskeys, listMyLoginAttempts, listMySessions, endSession, endAllOtherSessions } from "@/app/account/actions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { TotpEnrollFlow } from "@/components/ui/auth/TotpEnrollFlow";
@@ -10,7 +10,8 @@ import { RegenerateRecoveryCodesButton } from "@/components/ui/auth/RegenerateRe
 import { PasskeyManager } from "@/components/ui/auth/PasskeyManager";
 import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
 import { StandardBadge } from "@/components/ui/standard/StandardBadge";
-import { LuFingerprint, LuLogIn, LuShieldCheck, LuUser } from "react-icons/lu";
+import { LuFingerprint, LuLaptop, LuLogIn, LuShieldCheck, LuUser } from "react-icons/lu";
+import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { LocalTime } from "@/components/ui/common/LocalTime";
 import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
 import { METHOD_LABEL, OUTCOME_LABEL, describeUserAgent } from "@/components/ui/auth/loginAttemptLabels";
@@ -19,7 +20,13 @@ export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const me = await requireUser();
-  const [totpStatus, passkeys, attempts] = await Promise.all([getTotpStatus(), listPasskeys(), listMyLoginAttempts()]);
+  const [totpStatus, passkeys, attempts, sessions] = await Promise.all([
+    getTotpStatus(),
+    listPasskeys(),
+    listMyLoginAttempts(),
+    listMySessions(),
+  ]);
+  const otherSessions = sessions.filter((s) => !s.current).length;
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -116,6 +123,71 @@ export default async function AccountPage() {
           description="Sign in with Touch ID, Face ID, Windows Hello, or a security key — no password needed, and it counts as your second factor on its own."
         />
         <PasskeyManager passkeys={passkeys} />
+      </StandardSection>
+
+      <StandardSection id="sessions">
+        <StandardSectionHeader
+          title="Active sessions"
+          icon={<LuLaptop />}
+          count={sessions.length}
+          description="Everywhere you're signed in right now. If you don't recognise one — or its IP has changed unexpectedly — sign it out and change your password. Changing your password signs out every other session automatically."
+          action={
+            // Always shown so people know it exists; disabled when there's
+            // nothing to sign out.
+            <StandardActionButton
+              title="Sign out everywhere else"
+              variant="outline"
+              compact
+              disabled={otherSessions === 0}
+              tooltip={otherSessions === 0 ? "You're only signed in on this device" : undefined}
+              confirmMessage={`Sign out of the other ${otherSessions} session${otherSessions === 1 ? "" : "s"}? This device stays signed in.`}
+              action={endAllOtherSessions}
+            />
+          }
+        />
+        <StandardEntryList>
+          {sessions.map((s) => {
+            const ipChanged = Boolean(s.createdIp && s.lastSeenIp && s.createdIp !== s.lastSeenIp);
+            return (
+              <StandardEntryCard
+                key={s.id}
+                title={describeUserAgent(s.userAgent)}
+                meta={
+                  <>
+                    Signed in <LocalTime value={s.createdAt} />
+                    {s.createdIp && <> from {s.createdIp}</>}
+                    {s.lastSeenAt && (
+                      <>
+                        {" · last active "}
+                        <LocalTime value={s.lastSeenAt} />
+                        {ipChanged && <> from {s.lastSeenIp}</>}
+                      </>
+                    )}
+                  </>
+                }
+                badges={
+                  (s.current || ipChanged) && (
+                    <>
+                      {s.current && <StandardBadge tone="primary">This device</StandardBadge>}
+                      {ipChanged && <StandardBadge tone="warn">IP address changed</StandardBadge>}
+                    </>
+                  )
+                }
+                actions={
+                  !s.current && (
+                    <StandardActionButton
+                      title="Sign out"
+                      variant="danger"
+                      compact
+                      action={endSession.bind(null, s.id)}
+                      successMessage="Session signed out"
+                    />
+                  )
+                }
+              />
+            );
+          })}
+        </StandardEntryList>
       </StandardSection>
 
       <StandardSection id="sign-ins">

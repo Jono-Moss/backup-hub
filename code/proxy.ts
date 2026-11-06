@@ -1,59 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { session, appUser } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
-import { hashSessionToken } from "@/lib/auth/token-hash";
 
-// Only gates the first-party UI. The REST API (/api/v1/*) uses its own
-// scoped API-key auth (see lib/auth/api-key.ts) and is intentionally not
-// touched here.
+// An optimistic first pass, as the Next.js authentication guide recommends:
+// Proxy runs on every request (prefetches included), so it only looks at
+// whether a session cookie is present — no database lookups here. A visitor
+// with no cookie goes straight to /login, keeping where they were headed.
+//
+// It is NOT the access check. Every protected page, server action and data
+// function verifies the session itself through requireUser()/requireAdmin()
+// in lib/auth/session.ts, which rejects expired, revoked and 2FA-pending
+// sessions and non-admins on admin pages.
+//
+// The REST API (/api/v1/*) uses its own scoped API-key auth (see
+// lib/auth/api-key.ts) and is intentionally not touched here.
 const COOKIE_NAME = "bh_session";
-const ADMIN_ONLY_PREFIXES = ["/users", "/notifications"];
 const PUBLIC_PATHS = new Set(["/login", "/login/2fa", "/login/forgot", "/login/reset", "/setup"]);
 
-export async function proxy(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (pathname.startsWith("/api") || PUBLIC_PATHS.has(pathname) || pathname.startsWith("/_next")) {
+  if (pathname.startsWith("/api") || PUBLIC_PATHS.has(pathname)) {
     return NextResponse.next();
   }
 
-  const raw = req.cookies.get(COOKIE_NAME)?.value;
-  const redirectToLogin = () => {
+  if (!req.cookies.get(COOKIE_NAME)?.value) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
-  };
-
-  if (!raw) return redirectToLogin();
-
-  // Real DB lookup (proxy.ts runs on the Node.js runtime in Next.js),
-  // not just a signature check — a revoked/expired session or a deleted
-  // user is rejected here rather than only in individual pages/actions.
-  const [row] = await db
-    .select({ role: appUser.role, twoFactorVerified: session.twoFactorVerified })
-    .from(session)
-    .innerJoin(appUser, eq(session.userId, appUser.id))
-    .where(and(eq(session.hashedToken, hashSessionToken(raw)), gt(session.expiresAt, new Date())))
-    .limit(1);
-
-  if (!row) return redirectToLogin();
-
-  // Password verified but the second factor hasn't been — send them to
-  // finish it rather than either blocking entirely (they'd have no way to
-  // get to /login/2fa) or letting them through (defeats the point of 2FA).
-  if (!row.twoFactorVerified) {
-    const twoFactorUrl = new URL("/login/2fa", req.url);
-    twoFactorUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(twoFactorUrl);
-  }
-
-  if (ADMIN_ONLY_PREFIXES.some((p) => pathname.startsWith(p)) && row.role !== "admin") {
-    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png).*)"],
+  // Skip Next.js internals and static image files (public/ and app/icon.png),
+  // per the Proxy docs' negative-matching advice, so the login redirect never
+  // blocks an image. Pages and actions never end in these extensions.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)"],
 };

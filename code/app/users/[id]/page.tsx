@@ -1,7 +1,7 @@
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { notFound } from "next/navigation";
 import { getUser, updateUser, getUserAuthFactors, adminResetAuthFactors, getUserLockout, unlockUser } from "../actions";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, requireAdmin } from "@/lib/auth/session";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
@@ -13,6 +13,7 @@ import { LocalTime } from "@/components/ui/common/LocalTime";
 export const dynamic = "force-dynamic";
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin();
   const { id } = await params;
   const [user, me, authFactors, lockout] = await Promise.all([
     getUser(id),

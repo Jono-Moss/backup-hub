@@ -311,6 +311,14 @@ export const session = mysqlTable(
     twoFactorVerified: boolean("two_factor_verified").notNull().default(true),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    // Shown under Account → Active sessions so people can spot a session
+    // that isn't theirs and end it. Informational only — IPs come from
+    // X-Forwarded-For (see lib/auth/login-attempts.ts) and change routinely.
+    createdIp: varchar("created_ip", { length: 64 }),
+    userAgent: varchar("user_agent", { length: 512 }),
+    // Updated at most every few minutes (lib/auth/session.ts), not per request.
+    lastSeenAt: timestamp("last_seen_at"),
+    lastSeenIp: varchar("last_seen_ip", { length: 64 }),
   },
   (table) => ({
     userIdx: index("session_user_idx").on(table.userId),

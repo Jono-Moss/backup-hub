@@ -1,4 +1,5 @@
 import { listSystemRecipients } from "./actions";
+import { requireAdmin } from "@/lib/auth/session";
 import { AddSystemRecipientForm } from "@/components/ui/notifications/AddSystemRecipientForm";
 import { RemoveSystemRecipientButton } from "@/components/ui/notifications/RemoveSystemRecipientButton";
 import { StandardBadge } from "@/components/ui/standard/StandardBadge";
@@ -18,6 +19,7 @@ const EVENT_LABELS: Record<string, string> = {
 };
 
 export default async function SystemNotificationsPage() {
+  await requireAdmin();
   const recipients = await listSystemRecipients();
 
   return (

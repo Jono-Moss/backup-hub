@@ -1,11 +1,13 @@
 import { ActionForm } from "@/components/ui/common/ActionForm";
+import { requireUser } from "@/lib/auth/session";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { createTask } from "../actions";
 import { TestConnectionButton } from "@/components/ui/tasks/TestConnectionButton";
 import { DryRunButton } from "@/components/ui/tasks/DryRunButton";
 import { CronSchedulePicker } from "@/components/ui/tasks/CronSchedulePicker";
 
-export default function NewTaskPage() {
+export default async function NewTaskPage() {
+  await requireUser();
   return (
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold text-ink mb-1">New backup task</h1>

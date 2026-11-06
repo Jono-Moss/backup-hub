@@ -13,6 +13,13 @@ COPY code/package*.json ./
 RUN npm install
 
 COPY code ./
+
+# Version skew protection (Next.js `deploymentId`): every build gets its own
+# ID, so after the container is upgraded, a browser tab still open on the old
+# version does a full reload on its next request instead of calling server
+# actions that no longer exist ("Server Action unavailable"). Read at build
+# time and embedded in the output. BUILD_NUMBER is unique per build.sh run.
+ENV NEXT_DEPLOYMENT_ID="${BUILD_VERSION}-${BUILD_NUMBER}"
 RUN npm run build
 
 RUN npx drizzle-kit generate

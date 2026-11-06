@@ -1,7 +1,7 @@
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { listUsers } from "./actions";
 import { createUser } from "./actions";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, requireAdmin } from "@/lib/auth/session";
 import { DeleteUserButton } from "@/components/ui/users/DeleteUserButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
@@ -13,6 +13,7 @@ import { LuUsers } from "react-icons/lu";
 export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
+  await requireAdmin();
   const [users, me] = await Promise.all([listUsers(), getCurrentUser()]);
 
   return (

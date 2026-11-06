@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback } from "react";
-import { isActionFailure } from "@/lib/action-result";
+import { isActionFailure, successMessageOf } from "@/lib/action-result";
 import { useToast } from "@/components/ui/common/ToastProvider";
 
 const GENERIC_ERROR = "Something went wrong — please try again.";
+const STALE_PAGE = "This page is out of date — refresh it and try again.";
 
 // redirect() / notFound() inside a server action surface on the client as
 // errors with these digests. They're navigation, not failures: rethrow them
@@ -16,9 +17,18 @@ function isNavigation(err: unknown) {
 
 // Thrown messages are only meaningful in development: production replaces
 // them with Next.js's generic "Server Components render" text.
+//
+// "Server Action unavailable" / "Invalid Server Action request" mean the page
+// was loaded from an older (or newer) build than the server is running — after
+// a deploy, or a dev-server reload — and "unexpected response" usually means
+// the request was redirected (e.g. the session ended). A refresh fixes all of
+// them, so say so (the Next.js docs' "Deployment considerations" advice).
 function messageOf(err: unknown) {
   const message = err instanceof Error ? err.message : typeof err === "string" ? err : "";
-  if (!message || /Server Components render|unexpected response/i.test(message)) return GENERIC_ERROR;
+  if (/Server Action unavailable|Invalid Server Action request|Failed to find Server Action|unexpected response/i.test(message)) {
+    return STALE_PAGE;
+  }
+  if (!message || /Server Components render/i.test(message)) return GENERIC_ERROR;
   return message;
 }
 
@@ -43,7 +53,9 @@ export function useActionFeedback() {
           toast.error(result.message);
           return false;
         }
-        const success = typeof options.success === "function" ? options.success(result) : options.success;
+        const success =
+          successMessageOf(result) ??
+          (typeof options.success === "function" ? options.success(result) : options.success);
         if (success) toast.success(success);
         return true;
       } catch (err) {

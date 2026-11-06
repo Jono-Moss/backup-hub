@@ -2,14 +2,14 @@
 
 import { fail } from "@/lib/action-result";
 import { db } from "@/db";
-import { userTotp, userRecoveryCode, userPasskey, appUser, loginAttempt } from "@/db/schema";
-import { eq, and, desc, gte, inArray, isNull, sql } from "drizzle-orm";
+import { userTotp, userRecoveryCode, userPasskey, appUser, loginAttempt, session } from "@/db/schema";
+import { eq, and, desc, gt, gte, inArray, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
 import QRCode from "qrcode";
 import { generateRegistrationOptions, verifyRegistrationResponse } from "@simplewebauthn/server";
 import type { RegistrationResponseJSON } from "@simplewebauthn/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireUser, endOtherSessions } from "@/lib/auth/session";
 import { verifyPassword } from "@/lib/auth/password";
 import { wrapSecret, unwrapSecret } from "@/lib/backup/crypto";
 import { generateTotpSecret, verifyTotpCode, buildOtpAuthUri } from "@/lib/auth/totp";
@@ -266,5 +266,43 @@ export async function getSignInSummary() {
       topIps: topIps.map((r) => ({ ip: r.ip ?? "unknown", count: Number(r.n) })),
       topAccounts: topAccounts.map((r) => ({ email: r.email, count: Number(r.n) })),
     },
+  };
+}
+
+// --- Active sessions ---
+
+/** The signed-in user's current sessions (signed in and not expired), newest activity first. */
+export async function listMySessions() {
+  const me = await requireUser();
+  const rows = await db
+    .select({
+      id: session.id,
+      createdAt: session.createdAt,
+      createdIp: session.createdIp,
+      userAgent: session.userAgent,
+      lastSeenAt: session.lastSeenAt,
+      lastSeenIp: session.lastSeenIp,
+    })
+    .from(session)
+    .where(and(eq(session.userId, me.id), eq(session.twoFactorVerified, true), gt(session.expiresAt, new Date())))
+    .orderBy(desc(session.lastSeenAt));
+  return rows.map((r) => ({ ...r, current: r.id === me.sessionId }));
+}
+
+/** Ends one of the user's other sessions. (This device signs out with the normal Sign out.) */
+export async function endSession(sessionId: string) {
+  const me = await requireUser();
+  if (sessionId === me.sessionId) return fail("That's this device — use Sign out instead.");
+  await db.delete(session).where(and(eq(session.id, sessionId), eq(session.userId, me.id)));
+  revalidatePath("/account");
+}
+
+export async function endAllOtherSessions() {
+  const me = await requireUser();
+  const ended = await endOtherSessions(me.id, me.sessionId);
+  revalidatePath("/account");
+  return {
+    ok: true as const,
+    message: ended === 0 ? "No other sessions to sign out" : `Signed out ${ended} other session${ended === 1 ? "" : "s"}`,
   };
 }

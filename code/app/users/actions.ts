@@ -21,7 +21,7 @@ import { purgeTask } from "@/lib/backup/purge";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
 import { hashPassword, isPasswordStrongEnough } from "@/lib/auth/password";
-import { requireAdmin, requireUser } from "@/lib/auth/session";
+import { requireAdmin, requireUser, endOtherSessions } from "@/lib/auth/session";
 import { notifySystemEvent } from "@/lib/notifications/notify";
 import { deleteAccountDestinationsOf } from "@/lib/backup/destinations/store";
 import { deleteAccountChannelsOf } from "@/lib/notifications/store";
@@ -117,6 +117,9 @@ export async function updateUser(userId: string, formData: FormData) {
   }
 
   await db.update(appUser).set(updates).where(eq(appUser.id, userId));
+  // Their old sessions end with the old password. (An admin changing their
+  // own password here keeps this session, as on the Account page.)
+  if (password) await endOtherSessions(userId, userId === admin.id ? admin.sessionId : null);
   revalidatePath(`/users/${userId}`);
   revalidatePath("/users");
 }
@@ -227,6 +230,20 @@ export async function updateOwnProfile(formData: FormData) {
   }
 
   await db.update(appUser).set(updates).where(eq(appUser.id, me.id));
+
+  // A new password should lock out anyone holding an old session cookie.
+  // This device stays signed in.
+  if (newPassword) {
+    const ended = await endOtherSessions(me.id, me.sessionId);
+    revalidatePath("/account");
+    return {
+      ok: true as const,
+      message:
+        ended > 0
+          ? `Password changed — signed out ${ended} other session${ended === 1 ? "" : "s"}`
+          : "Password changed",
+    };
+  }
   revalidatePath("/account");
 }
 
