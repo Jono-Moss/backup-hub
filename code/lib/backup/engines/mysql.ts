@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import mysql from "mysql2/promise";
 import type { BackupEngine } from "./types";
+import { sqlDumpScanner } from "./sql-scanner";
 import { editLines } from "./lines";
 import type { ConnectionConfig } from "@/lib/backup/crypto";
 
@@ -403,8 +404,11 @@ export const mysqlEngine: BackupEngine = {
   },
 
   // Both mysqldump and MariaDB's dump end with this comment (comments are on).
-  completionMarker: /^-- Dump completed( on|$)/,
-  createTablePattern: /^CREATE TABLE /,
+  fileExtension: ".sql.gz",
+  objectNoun: "table",
+  formatName: "SQL",
+  // mysqldump ends every finished dump with "-- Dump completed on <date>".
+  createScanner: () => sqlDumpScanner(/^-- Dump completed( on|$)/, /^CREATE TABLE /),
 
   scratch: {
     async create(server, name) {

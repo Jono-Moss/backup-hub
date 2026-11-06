@@ -5,6 +5,7 @@ import { Transform } from "stream";
 import fs from "fs";
 import path from "path";
 import type { BackupEngine } from "./types";
+import { sqlDumpScanner } from "./sql-scanner";
 import { editLines } from "./lines";
 import type { ConnectionConfig } from "@/lib/backup/crypto";
 
@@ -227,9 +228,11 @@ export const postgresEngine: BackupEngine = {
   // The closing "\unrestrict" line (pairing with a "\restrict <key>" at the
   // top) is written since 17.6 / 16.10 / 15.14 / 14.19 / 13.22
   // (CVE-2025-8714). Skip it and the bare "--" to find the marker.
-  completionMarker: /^-- PostgreSQL database dump complete/,
-  trailerLines: /^(--|\\unrestrict\s+\S+)$/,
-  createTablePattern: /^CREATE TABLE /,
+  fileExtension: ".sql.gz",
+  objectNoun: "table",
+  formatName: "SQL",
+  createScanner: () =>
+    sqlDumpScanner(/^-- PostgreSQL database dump complete/, /^CREATE TABLE /, /^(--|\\unrestrict\s+\S+)$/),
 
   scratch: {
     async create(server, name) {

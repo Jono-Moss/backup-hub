@@ -30,6 +30,8 @@ const CONNECTION_PATTERNS = [
   /timed? ?out/i,
   /unknown (mysql )?server host|could not translate host name/i,
   /network is unreachable/i,
+  /server selection (error|timed? ?out)/i,
+  /no reachable servers/i,
 ];
 
 export function classifyFailure(message: string | null | undefined): FailureKind {

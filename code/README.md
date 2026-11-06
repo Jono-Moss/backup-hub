@@ -1,6 +1,6 @@
 # Backup Hub
 
-Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a multi-user web UI, role-based permissions, email/ntfy/Telegram/Discord notifications, and a scoped REST API so other apps can create, trigger, and manage backup tasks programmatically.
+Standalone, self-hostable scheduled backups for MySQL, MariaDB, PostgreSQL and MongoDB, with a multi-user web UI, role-based permissions, email/ntfy/Telegram/Discord notifications, and a scoped REST API so other apps can create, trigger, and manage backup tasks programmatically.
 
 ## What's here
 
@@ -15,6 +15,32 @@ Standalone, self-hostable scheduled backups for MySQL and PostgreSQL, with a mul
 - **REST API** at `/api/v1/*`, authenticated with scoped API keys (`tasks:read`, `tasks:write`, `runs:trigger`, `runs:download`, `runs:delete`), optionally pinned to a single task. This is separate from user accounts — API keys are their own credential type.
 - **In-process cron scheduler** (`node-cron`, booted via `instrumentation.ts`) — one job per enabled task.
 - **Access checks** live in `lib/auth/session.ts` (`requireUser()` / `requireAdmin()`), which every page, server action and data function calls: they validate the session against the database and redirect expired, revoked or 2FA-pending sessions to sign in. `proxy.ts` (Next.js 16's replacement for `middleware.ts`) only does a quick "is there a session cookie" check so signed-out visitors go straight to `/login` — it is deliberately not the security boundary, following the Next.js authentication guide.
+
+## Supported databases
+
+| Engine (in the app) | Covers | Dump tool |
+|---|---|---|
+| **MySQL / MariaDB** | MySQL and MariaDB, including hosted and compatible services such as Amazon RDS / Aurora MySQL, Azure Database for MySQL, Google Cloud SQL for MySQL, DigitalOcean, PlanetScale and TiDB | `mysqldump` or `mariadb-dump` |
+| **PostgreSQL** | PostgreSQL, including hosted and compatible services such as Amazon RDS / Aurora PostgreSQL, Azure Database for PostgreSQL, Google Cloud SQL, Supabase, Neon and TimescaleDB | `pg_dump` |
+| **MongoDB** | Self-hosted MongoDB (standalone or replica set) and MongoDB Atlas | `mongodump` / `mongorestore` (MongoDB Database Tools) |
+
+A few notes on compatible services:
+
+- **Managed MySQL** (RDS, DigitalOcean, PlanetScale…) often has `gtid_mode=ON` — Backup Hub already passes `--set-gtid-purged=OFF`, so a normal schema-scoped backup user works. See the [troubleshooting](#troubleshooting-mysqldumppg_dump-client-server-version-mismatches) section for the minimal grants.
+- **TimescaleDB** backs up with `pg_dump` like any Postgres database, but restoring (including test restores) needs the TimescaleDB extension installed on the target server, at the same version.
+- **Serverless Postgres** (Neon, Supabase) may need `?sslmode=require`-style TLS — tick the SSL option on the task — and a direct (non-pooled) connection string's host, since `pg_dump` doesn't work through transaction-mode connection poolers.
+- Keep the dump tool's version at or below the server's major version; see troubleshooting below.
+
+### MongoDB
+
+- **What's backed up:** one database per task, as a `mongodump` archive, gzipped (`.archive.gz`, or `.archive.gz.enc` when encrypted). Users and roles defined on the server aren't included, same as `mongodump --db` on its own.
+- **Connecting:** users are authenticated against the **Auth database** on the new-task form, `admin` by default (right for Atlas and most servers). For **MongoDB Atlas**, enter the cluster host (e.g. `cluster0.abcde.mongodb.net`): hosts ending in `.mongodb.net` connect with an SRV connection string and TLS automatically, and the port is ignored. Elsewhere, tick SSL to encrypt the connection (the certificate isn't verified, as with the other engines). The password is passed to the tools in a private temporary file, never on the command line.
+- **Permissions:** backing up needs `read` on the database (or the built-in `backup` role). Restoring needs `readWrite` on it.
+- **Restoring** replaces each collection that's in the backup (`mongorestore --drop`); collections that aren't in the backup are left alone. To restore a downloaded file by hand: `gunzip -c backup.archive.gz | mongorestore --uri "<connection string>" --archive --drop --nsFrom '$db$.$coll$' --nsTo '<database>.$coll$'` (decrypt `.enc` files first — see [Encrypted backups](#encrypted-backups)).
+- **Checks** read the archive back and make sure every collection it lists was written out completely. Test restores use `VERIFY_MONGODB_URL` (see below).
+- **Consistency:** `mongodump` reads collections one after another, so on a busy database the backup isn't a single point-in-time snapshot. That's fine for most apps; for strict consistency on a replica set, back up from a hidden/delayed secondary or pause writes.
+
+Not supported: Microsoft SQL Server, Redis and SQLite don't have a network dump tool that fits the same model. Adding another engine means implementing `BackupEngine` in `lib/backup/engines/` (see below).
 
 ## Getting started
 
@@ -151,7 +177,7 @@ Push notifications are best-effort like email: a failed send is logged and never
 A backup you can't restore is worse than none, because you only find out when you need it. Backup Hub checks backup files at three levels:
 
 1. **Fingerprint** — a SHA-256 of each file is recorded when it's made. A check recomputes it, so a file that has changed on disk since (damaged, truncated, tampered with) is caught.
-2. **Read-back** — the whole file is read back the way a restore would read it: decrypted (AES-GCM's integrity check fails on any damaged byte), decompressed (gzip checks its own checksum), and checked to end with the dump tool's "dump completed" line, which a dump that was cut short won't have.
+2. **Read-back** — the whole file is read back the way a restore would read it: decrypted (AES-GCM's integrity check fails on any damaged byte), decompressed (gzip checks its own checksum), and checked to be complete: SQL dumps must end with the dump tool's "dump completed" line, and MongoDB archives must close every collection they list. A dump that was cut short fails.
 3. **Test restore** — the backup is restored into a brand-new throwaway database on a separate scratch server, Backup Hub checks that tables came back, then drops the database again. This is the only way to be sure a backup really restores.
 
 **Automatically:** every new backup gets levels 1 and 2 before it's marked completed. If it fails, the run is marked **failed**, the broken file is removed, and the task's failure recipients are alerted, so you find out now and not at restore time. Each task can also opt in to **Test-restore each new backup** (task settings). It runs in the background after the backup and alerts on failure.
@@ -167,9 +193,10 @@ Test restores need a database server to restore into. Point these at a **separat
 ```bash
 VERIFY_MYSQL_URL="mysql://verify:secret@scratch-mysql:3306"                 # add ?ssl=true to require TLS
 VERIFY_POSTGRES_URL="postgres://verify:secret@scratch-postgres:5432/postgres"  # the path is the database to connect to; add ?sslmode=require for TLS
+VERIFY_MONGODB_URL="mongodb://verify:secret@scratch-mongo:27017"               # add ?tls=true for TLS, ?authSource=<db> if the user isn't in "admin"
 ```
 
-(In Docker, set `BH_VERIFY_MYSQL_URL` / `BH_VERIFY_POSTGRES_URL` in `docker/.env`.) Leave one unset and test restores are simply not offered for that engine.
+(In Docker, set `BH_VERIFY_MYSQL_URL` / `BH_VERIFY_POSTGRES_URL` / `BH_VERIFY_MONGODB_URL` in `docker/.env`.) Leave one unset and test restores are simply not offered for that engine. For MongoDB, the account needs to create and drop databases (for example the `root` role, or `readWriteAnyDatabase` plus `dbAdminAnyDatabase`, which also covers dropping and listing databases).
 
 - The account needs permission to create and drop the test databases. For MySQL/MariaDB, ``GRANT ALL ON `bh\_verify\_%`.* TO 'verify'@'%';`` limits it to just those. For Postgres, use a role with `CREATEDB`.
 - Each test creates a database named `bh_verify_<time>_<random>`, restores into it, and always drops it afterwards, even if the test fails. Databases left behind by a server that stopped mid-test are dropped at the next start once they're over 6 hours old.
@@ -316,7 +343,7 @@ Session cookies are `HttpOnly`, `SameSite=Lax`, `Secure` in production, and only
 
 ## Encrypted backups
 
-If a task has encryption enabled, downloaded files are `.sql.gz.enc` — Backup Hub never decrypts server-side on download, so the backup password is only ever held in memory during the dump itself. To decrypt locally, the file layout is `[salt(16 bytes)][iv(12 bytes)][ciphertext][authTag(16 bytes)]`, AES-256-GCM, key derived via scrypt from your password + the salt. A small decrypt script would look like:
+If a task has encryption enabled, downloaded files end in `.enc` (`.sql.gz.enc`, or `.archive.gz.enc` for MongoDB) — Backup Hub never decrypts server-side on download, so the backup password is only ever held in memory during the dump itself. To decrypt locally, the file layout is `[salt(16 bytes)][iv(12 bytes)][ciphertext][authTag(16 bytes)]`, AES-256-GCM, key derived via scrypt from your password + the salt. A small decrypt script would look like:
 
 ```js
 // see lib/backup/crypto.ts:decryptFile for the reference implementation
@@ -327,7 +354,7 @@ If a task has encryption enabled, downloaded files are `.sql.gz.enc` — Backup 
 - **Permissions**: two flat roles (`admin`/`user`), not per-task ACLs. See the table above.
 - **Key rotation**: no built-in `BACKUP_MASTER_KEY` versioning — rotating it means decrypting all stored secrets with the old key and re-encrypting with the new one in a one-off script.
 - **Task connection edits**: the UI doesn't yet support editing a task's DB connection after creation (only schedule/retention/encryption) — delete and recreate, or use `PATCH /api/v1/tasks/:id`.
-- **Engines**: MySQL and Postgres only. Adding another engine means implementing `BackupEngine` in `lib/backup/engines/` and registering it in `lib/backup/engines/index.ts`.
+- **Engines**: MySQL/MariaDB, PostgreSQL and MongoDB (plus compatible services — see [Supported databases](#supported-databases)). Adding another engine means implementing `BackupEngine` in `lib/backup/engines/` (including its `createScanner()` completeness check), registering it in `lib/backup/engines/index.ts`, and adding its label and default port in `lib/backup/engines/labels.ts`.
 - **Destinations**: S3-compatible, Google Drive, OneDrive, and email only. Same pluggable pattern as engines — see `lib/backup/destinations/`.
 - **Destination secrets aren't re-validated on save**: "Test connection" is a manual step in the add-destination form, not an automatic check before saving — a destination with bad credentials will save successfully and only surface the failure on the next real upload (visible per-run in the backup history, or via the "Test" button next to it afterwards).
 - **Large encrypted files**: decryption reads the whole ciphertext into memory (fine for typical dumps; swap for chunked authenticated decryption if you expect multi-GB encrypted files).
@@ -341,7 +368,7 @@ If a task has encryption enabled, downloaded files are `.sql.gz.enc` — Backup 
 ```
 db/                        schema (users, sessions, tasks, shares, runs, destinations, API keys, notification recipients, 2FA/passkeys, sign-in attempts, reset links) + drizzle client
 lib/backup/crypto.ts        secret wrapping, file encryption, API key hashing
-lib/backup/engines/         per-database dump implementations (mysql, postgres)
+lib/backup/engines/         per-database dump implementations (mysql, postgres, mongodb) + their completeness checks
 lib/backup/destinations/    pluggable off-site upload implementations (s3, google_drive, onedrive, email)
 lib/backup/purge.ts         removes a task (and everything hanging off it) from the DB, optionally its files too
 lib/backup/runner.ts        runs a backup end-to-end: dump → encrypt → check → record → prune → upload to destinations → notify

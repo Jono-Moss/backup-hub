@@ -26,7 +26,8 @@ import { classifyFailure, type FailureKind } from "@/lib/backup/failureKind";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v4 as uuid } from "uuid";
-import { wrapConnection, wrapSecret, unwrapSecret } from "@/lib/backup/crypto";
+import { wrapConnection, wrapSecret, unwrapSecret, type ConnectionConfig } from "@/lib/backup/crypto";
+import { DEFAULT_PORTS } from "@/lib/backup/engines/labels";
 import { runBackupForTask, deleteRun, restoreRun, clearFailedRuns } from "@/lib/backup/runner";
 import { enqueueVerify, testRestoreAvailable } from "@/lib/backup/verify";
 import { resyncTask } from "@/lib/backup/scheduler";
@@ -271,14 +272,7 @@ export async function createTask(formData: FormData) {
     ownerId: me.id,
     name,
     engine,
-    encryptedConnection: wrapConnection({
-      host: String(formData.get("host")),
-      port: Number(formData.get("port")) || (engine === "postgres" ? 5432 : 3306),
-      user: String(formData.get("user")),
-      password: String(formData.get("password")),
-      database: String(formData.get("database")),
-      ssl: formData.get("ssl") === "on",
-    }),
+    encryptedConnection: wrapConnection(connectionFromForm(formData, engine)),
     cronExpression: String(formData.get("cronExpression") || "0 3 * * *"),
     retentionCount: Number(formData.get("retentionCount")) || 7,
     encryptionEnabled,
@@ -295,17 +289,25 @@ export async function createTask(formData: FormData) {
   redirect(`/tasks/${id}`);
 }
 
+// The new-task form's connection fields. Blank port = the engine's default;
+// authSource (MongoDB's "auth database") is only sent for MongoDB.
+function connectionFromForm(formData: FormData, engine: Engine): ConnectionConfig {
+  const authSource = String(formData.get("authSource") ?? "").trim();
+  return {
+    host: String(formData.get("host")).trim(),
+    port: Number(formData.get("port")) || DEFAULT_PORTS[engine],
+    user: String(formData.get("user")),
+    password: String(formData.get("password")),
+    database: String(formData.get("database")).trim(),
+    ssl: formData.get("ssl") === "on",
+    ...(engine === "mongodb" && authSource ? { authSource } : {}),
+  };
+}
+
 export async function testConnection(formData: FormData) {
   await requireUser();
   const engine = String(formData.get("engine")) as Engine;
-  const result = await getEngine(engine).testConnection({
-    host: String(formData.get("host")),
-    port: Number(formData.get("port")) || (engine === "postgres" ? 5432 : 3306),
-    user: String(formData.get("user")),
-    password: String(formData.get("password")),
-    database: String(formData.get("database")),
-    ssl: formData.get("ssl") === "on",
-  });
+  const result = await getEngine(engine).testConnection(connectionFromForm(formData, engine));
   return result;
 }
 
@@ -322,16 +324,9 @@ export async function testConnection(formData: FormData) {
 export async function dryRunBackup(formData: FormData) {
   await requireUser();
   const engine = String(formData.get("engine")) as Engine;
-  const conn = {
-    host: String(formData.get("host")),
-    port: Number(formData.get("port")) || (engine === "postgres" ? 5432 : 3306),
-    user: String(formData.get("user")),
-    password: String(formData.get("password")),
-    database: String(formData.get("database")),
-    ssl: formData.get("ssl") === "on",
-  };
+  const conn = connectionFromForm(formData, engine);
 
-  const tempPath = path.join(os.tmpdir(), `dryrun-${uuid()}.sql.gz`);
+  const tempPath = path.join(os.tmpdir(), `dryrun-${uuid()}${getEngine(engine).fileExtension}`);
   try {
     await getEngine(engine).dump(conn, tempPath);
     const stat = await fs.promises.stat(tempPath);

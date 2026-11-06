@@ -1,3 +1,4 @@
+import { EngineSelect } from "@/components/ui/tasks/EngineSelect";
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { requireUser } from "@/lib/auth/session";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
@@ -29,19 +30,7 @@ export default async function NewTaskPage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-ink mb-1" htmlFor="engine">
-            Database engine
-          </label>
-          <select
-            id="engine"
-            name="engine"
-            className="w-full border border-line px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="mysql">MySQL</option>
-            <option value="postgres">PostgreSQL</option>
-          </select>
-        </div>
+        <EngineSelect />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -58,7 +47,7 @@ export default async function NewTaskPage() {
               id="port"
               name="port"
               type="number"
-              placeholder="3306 / 5432"
+              placeholder="Blank = default for the engine"
               className="w-full border border-line px-3 py-2 text-sm"
             />
           </div>

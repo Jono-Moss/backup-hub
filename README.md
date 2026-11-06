@@ -3,12 +3,14 @@
 
   # Backup Hub
 
-  **Self-hostable, scheduled backups for MySQL and PostgreSQL — with a web UI, a REST API, and encryption at rest.**
+  **Self-hostable, scheduled backups for MySQL, MariaDB, PostgreSQL and MongoDB — with a web UI, a REST API, and encryption at rest.**
 
   [![License: MIT](https://img.shields.io/badge/license-MIT-35be9e.svg)](code/LICENSE)
   ![Docker](https://img.shields.io/badge/deploy-Docker-35be9e.svg)
   ![MySQL](https://img.shields.io/badge/MySQL-supported-35be9e.svg)
+  ![MariaDB](https://img.shields.io/badge/MariaDB-supported-35be9e.svg)
   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-supported-35be9e.svg)
+  ![MongoDB](https://img.shields.io/badge/MongoDB-supported-35be9e.svg)
 </div>
 
 <p align="center">
@@ -19,7 +21,7 @@
 
 ## What is this?
 
-Backup Hub is a small, self-hostable service that takes scheduled, encrypted backups of your MySQL and PostgreSQL databases, and gives you a web UI and a REST API to manage them.
+Backup Hub is a small, self-hostable service that takes scheduled, encrypted backups of your MySQL, MariaDB, PostgreSQL and MongoDB databases, and gives you a web UI and a REST API to manage them. Hosted databases work too — Amazon RDS / Aurora, PlanetScale and TiDB with the MySQL engine; Supabase, Neon and TimescaleDB with the PostgreSQL engine; MongoDB Atlas with the MongoDB engine (see [supported databases](code/README.md#supported-databases)).
 
 Point it at a database, give it a cron schedule and a retention count, and it handles the rest: running `mysqldump`/`pg_dump` on schedule, compressing and optionally encrypting the result, pruning old backups, copying them off-site, notifying you if a run fails, and letting you download — or restore — any backup from the browser.
 
@@ -212,6 +214,7 @@ services:
       # Optional: servers for test restores (see example.env-file).
       VERIFY_MYSQL_URL: "${BH_VERIFY_MYSQL_URL:-}"
       VERIFY_POSTGRES_URL: "${BH_VERIFY_POSTGRES_URL:-}"
+      VERIFY_MONGODB_URL: "${BH_VERIFY_MONGODB_URL:-}"
 
     volumes:
       - ./data/backups:/var/backups/backup-hub
@@ -259,7 +262,7 @@ A few things worth knowing about this setup:
 
 - **`./data/backups` and `./data/mysql`** are bind-mounted into `docker/data/` on the host, so both your backup files and Backup Hub's own database survive a `docker compose down`/`up`.
 - **`entrypoint.sh`** (baked into the image) waits for MySQL to report healthy, creates the database/user if they don't exist yet, runs any pending migrations, then starts the app — so `docker compose up -d` alone is enough on a first run.
-- The image already includes `mysqldump`/`mariadb-dump` and `pg_dump`/`pg_isready`, so it can back up either engine out of the box — you don't need to install anything extra to back up a Postgres database even though the bundled `db` service here is MySQL (that MySQL container is only for Backup Hub's own data).
+- The image already includes `mariadb-dump` (which backs up MySQL and MariaDB), `pg_dump`/`pg_isready`, and `mongodump`/`mongorestore`, so it can back up every engine out of the box — you don't need to install anything extra to back up a Postgres or MongoDB database even though the bundled `db` service here is MySQL (that MySQL container is only for Backup Hub's own data).
 
 ### Building the image yourself
 

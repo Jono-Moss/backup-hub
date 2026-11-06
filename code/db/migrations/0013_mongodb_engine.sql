@@ -1,0 +1,1 @@
+ALTER TABLE `backup_task` MODIFY COLUMN `engine` enum('mysql','postgres','mongodb') NOT NULL;

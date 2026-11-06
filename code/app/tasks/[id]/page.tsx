@@ -1,3 +1,4 @@
+import { ENGINE_LABELS } from "@/lib/backup/engines/labels";
 import { ActionForm } from "@/components/ui/common/ActionForm";
 import { notFound } from "next/navigation";
 import { testRestoreAvailable } from "@/lib/backup/verify";
@@ -48,7 +49,7 @@ import { RunsPagination, paginateRuns, parseRunsPage } from "@/components/ui/run
 
 export const dynamic = "force-dynamic";
 
-const engineLabel: Record<string, string> = { mysql: "MySQL", postgres: "Postgres" };
+const engineLabel: Record<string, string> = ENGINE_LABELS;
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return "—";

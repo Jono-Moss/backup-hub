@@ -45,6 +45,8 @@ export interface ConnectionConfig {
   password: string;
   database: string;
   ssl?: boolean;
+  /** MongoDB only: the database the user is defined in (default "admin"). */
+  authSource?: string;
 }
 
 export function wrapConnection(conn: ConnectionConfig): string {

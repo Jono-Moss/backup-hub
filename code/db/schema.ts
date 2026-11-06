@@ -12,7 +12,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/mysql-core";
 
-export const ENGINES = ["mysql", "postgres"] as const;
+export const ENGINES = ["mysql", "postgres", "mongodb"] as const;
 export type Engine = (typeof ENGINES)[number];
 
 export const RUN_STATUSES = ["running", "completed", "failed"] as const;

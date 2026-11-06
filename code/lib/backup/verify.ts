@@ -2,7 +2,6 @@ import crypto from "crypto";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { Writable } from "stream";
 import { pipeline } from "stream/promises";
 import { createGunzip } from "zlib";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
@@ -10,6 +9,8 @@ import { db } from "@/db";
 import { backupRun, backupTask, ENGINES, type Engine, type VerifyLevel } from "@/db/schema";
 import { decryptFile, decryptStreams, keyCheckForFile, unwrapSecret, type ConnectionConfig } from "@/lib/backup/crypto";
 import { getEngine } from "@/lib/backup/engines";
+import { DEFAULT_PORTS } from "@/lib/backup/engines/labels";
+import type { DumpScanner } from "@/lib/backup/engines/types";
 import { notifyVerifyFailure } from "@/lib/notifications/notify";
 import { getRunFilePath } from "./paths";
 
@@ -18,11 +19,13 @@ import { getRunFilePath } from "./paths";
 //   1. Fingerprint — the SHA-256 recorded when the backup was made still
 //      matches, so the file hasn't changed on disk since.
 //   2. Read-back — the whole file decrypts (AES-GCM's auth tag fails on any
-//      damaged byte), decompresses (gzip checks its own CRC), and ends with
-//      the dump tool's "dump completed" line, so it wasn't cut short.
+//      damaged byte), decompresses (gzip checks its own CRC), and is a
+//      complete dump: SQL dumps end with the dump tool's "dump completed"
+//      line, MongoDB archives close every collection (see each engine's
+//      createScanner), so it wasn't cut short.
 //   3. Test restore — restore it into a brand-new throwaway database on an
-//      admin-configured scratch server, check tables came back, then drop
-//      the database again.
+//      admin-configured scratch server, check tables/collections came back,
+//      then drop the database again.
 //
 // "check" runs 1+2, "restore" runs 1+2+3. A check runs automatically after
 // every backup; a test restore after every backup is a per-task option.
@@ -39,29 +42,38 @@ export interface CheckOutcome {
 
 // --- Test-restore server (admin-configured) ---
 
-const SCRATCH_ENV: Record<Engine, string> = { mysql: "VERIFY_MYSQL_URL", postgres: "VERIFY_POSTGRES_URL" };
+const SCRATCH_ENV: Record<Engine, string> = {
+  mysql: "VERIFY_MYSQL_URL",
+  postgres: "VERIFY_POSTGRES_URL",
+  mongodb: "VERIFY_MONGODB_URL",
+};
 const SCRATCH_PREFIX = "bh_verify_";
 // Leftover databases (from a server stopped mid-test) older than this are dropped at startup.
 const LEFTOVER_AGE_MS = 6 * 60 * 60 * 1000;
 
 /**
- * The scratch server for an engine, from VERIFY_MYSQL_URL / VERIFY_POSTGRES_URL:
+ * The scratch server for an engine, from VERIFY_MYSQL_URL / VERIFY_POSTGRES_URL / VERIFY_MONGODB_URL:
  *   mysql://user:pass@host:3306              (add ?ssl=true to require TLS)
  *   postgres://user:pass@host:5432/postgres  (the path is the database to connect to for CREATE/DROP DATABASE)
+ *   mongodb://user:pass@host:27017           (add ?tls=true for TLS, ?authSource=<db> if the user isn't in "admin")
  */
 export function scratchServerFor(engine: Engine): ConnectionConfig | null {
   const raw = process.env[SCRATCH_ENV[engine]]?.trim();
   if (!raw) return null;
   try {
     const url = new URL(raw);
-    const ssl = url.searchParams.get("ssl") === "true" || url.searchParams.get("sslmode") === "require";
+    const ssl =
+      url.searchParams.get("ssl") === "true" ||
+      url.searchParams.get("sslmode") === "require" ||
+      url.searchParams.get("tls") === "true";
     return {
       host: url.hostname,
-      port: Number(url.port) || (engine === "mysql" ? 3306 : 5432),
+      port: Number(url.port) || DEFAULT_PORTS[engine],
       user: decodeURIComponent(url.username),
       password: decodeURIComponent(url.password),
       database: engine === "postgres" ? decodeURIComponent(url.pathname.slice(1)) || "postgres" : "",
       ssl,
+      ...(engine === "mongodb" && url.searchParams.get("authSource") ? { authSource: url.searchParams.get("authSource")! } : {}),
     };
   } catch {
     console.error(`[verify] ${SCRATCH_ENV[engine]} isn't a valid URL — test restores are disabled for ${engine}.`);
@@ -85,34 +97,6 @@ export function fileSha256(filePath: string): Promise<string> {
   });
 }
 
-/**
- * Reads decompressed SQL, remembering the last non-empty line (ignoring
- * lines matching `trailer`, which the dump tool writes after its completion
- * marker) and counting CREATE TABLEs.
- */
-function sqlScanner(createTable: RegExp, trailer?: RegExp) {
-  const stats = { lastLine: "", createTables: 0, bytes: 0 };
-  let partial = "";
-  const take = (line: string) => {
-    if (createTable.test(line)) stats.createTables++;
-    if (line.trim() && !trailer?.test(line.trim())) stats.lastLine = line;
-  };
-  const sink = new Writable({
-    write(chunk: Buffer, _enc, cb) {
-      stats.bytes += chunk.length;
-      const lines = (partial + chunk.toString("latin1")).split("\n");
-      partial = lines.pop() ?? "";
-      lines.forEach(take);
-      cb();
-    },
-    final(cb) {
-      if (partial) take(partial);
-      cb();
-    },
-  });
-  return { sink, stats };
-}
-
 // Turns low-level stream errors into something a person can act on.
 function describeReadError(err: unknown, stage: "decrypt" | "decompress", keyConfirmed: boolean): string {
   const msg = String((err as Error)?.message ?? err);
@@ -129,12 +113,13 @@ function describeReadError(err: unknown, stage: "decrypt" | "decompress", keyCon
 
 interface FileCheck extends CheckOutcome {
   sha256?: string;
-  createTables?: number;
+  /** Tables/collections in the dump (sanity-checks a test restore). */
+  objects?: number;
 }
 
 /**
  * Levels 1 and 2. For encrypted backups, `decryptedCopy` (if given) receives
- * the decrypted .sql.gz so a test restore can use it — only after it has
+ * the decrypted dump (.sql.gz / .archive.gz) so a test restore can use it — only after it has
  * passed the integrity check.
  */
 async function checkFile(run: Run, task: Task, filePath: string, decryptedCopy?: string): Promise<FileCheck> {
@@ -147,7 +132,8 @@ async function checkFile(run: Run, task: Task, filePath: string, decryptedCopy?:
   }
 
   const engine = getEngine(task.engine);
-  const { sink, stats } = sqlScanner(engine.createTablePattern, engine.trailerLines);
+  const scanner = engine.createScanner();
+  const sink = scanner.sink;
   let gzPath = filePath;
 
   if (run.encrypted) {
@@ -185,7 +171,7 @@ async function checkFile(run: Run, task: Task, filePath: string, decryptedCopy?:
           const stage = decryptFailed || !keyConfirmed ? "decrypt" : "decompress";
           return { ok: false, message: describeReadError(err, stage, keyConfirmed) };
         }
-        return finishCheck(engine.completionMarker, stats, sha256);
+        return finishCheck(scanner, sha256, engine.objectNoun, engine.formatName);
       }
     } catch (err) {
       return { ok: false, message: describeReadError(err, "decrypt", keyConfirmed) };
@@ -197,23 +183,20 @@ async function checkFile(run: Run, task: Task, filePath: string, decryptedCopy?:
   } catch (err) {
     return { ok: false, message: describeReadError(err, "decompress", false) };
   }
-  return finishCheck(engine.completionMarker, stats, sha256);
+  return finishCheck(scanner, sha256, engine.objectNoun, engine.formatName);
 }
 
-function finishCheck(marker: RegExp, stats: { lastLine: string; createTables: number; bytes: number }, sha256: string): FileCheck {
-  if (!marker.test(stats.lastLine.trim())) {
-    return {
-      ok: false,
-      sha256,
-      message: "The dump is incomplete: it doesn't end with the database tool's \"dump completed\" line, so it was probably cut short.",
-    };
+function finishCheck(scanner: DumpScanner, sha256: string, noun: string, formatName: string): FileCheck {
+  const scan = scanner.result();
+  if (!scan.complete) {
+    return { ok: false, sha256, message: `The dump is incomplete: ${scan.problem ?? "it was probably cut short"}.` };
   }
-  const mb = (stats.bytes / 1024 / 1024).toFixed(1);
+  const mb = (scan.bytes / 1024 / 1024).toFixed(1);
   return {
     ok: true,
     sha256,
-    createTables: stats.createTables,
-    message: `File intact: reads back completely (${mb} MB of SQL, ${stats.createTables} table${stats.createTables === 1 ? "" : "s"}).`,
+    objects: scan.objects,
+    message: `File intact: reads back completely (${mb} MB of ${formatName}, ${scan.objects} ${noun}${scan.objects === 1 ? "" : "s"}).`,
   };
 }
 
@@ -224,7 +207,7 @@ function finishCheck(marker: RegExp, stats: { lastLine: string; createTables: nu
 // server log, and show users a generic message.
 class ScratchSetupError extends Error {}
 
-async function testRestore(task: Task, gzPath: string, createTables: number): Promise<CheckOutcome> {
+async function testRestore(task: Task, gzPath: string, expectedObjects: number): Promise<CheckOutcome> {
   const server = scratchServerFor(task.engine);
   if (!server) {
     return { ok: false, message: `Test restores aren't set up on this server (an admin can set ${SCRATCH_ENV[task.engine]}).` };
@@ -247,17 +230,18 @@ async function testRestore(task: Task, gzPath: string, createTables: number): Pr
       return { ok: false, message: `The test restore failed: ${String(err.message ?? err).slice(0, 1500)}` };
     }
 
-    let tables: number;
+    let found: number;
     try {
-      tables = await engine.scratch.countTables(target);
+      found = await engine.scratch.countTables(target);
     } catch (err) {
       console.error(`[verify] couldn't inspect test database ${name}:`, err);
       throw new ScratchSetupError();
     }
-    if (createTables > 0 && tables === 0) {
-      return { ok: false, message: `The test restore finished, but no tables came back (the dump creates ${createTables}).` };
+    const noun = engine.objectNoun;
+    if (expectedObjects > 0 && found === 0) {
+      return { ok: false, message: `The test restore finished, but no ${noun}s came back (the dump has ${expectedObjects}).` };
     }
-    return { ok: true, message: `Test restore passed: restored into a temporary database with ${tables} table${tables === 1 ? "" : "s"}, then removed it.` };
+    return { ok: true, message: `Test restore passed: restored into a temporary database with ${found} ${noun}${found === 1 ? "" : "s"}, then removed it.` };
   } catch (err) {
     if (err instanceof ScratchSetupError) {
       return { ok: false, message: "Couldn't prepare the temporary test database. An admin should check the test-restore server settings (see the server log)." };
@@ -307,7 +291,9 @@ export async function verifyRun(runId: string, level: VerifyLevel): Promise<Chec
   const source = getRunFilePath(run.taskId, run.filename!);
   // Encrypted + test restore: decrypt once into a private temp file, used by both steps.
   const decryptedCopy =
-    level === "restore" && run.encrypted ? path.join(os.tmpdir(), `bh-verify-${runId}-${Date.now()}.sql.gz`) : undefined;
+    level === "restore" && run.encrypted
+      ? path.join(os.tmpdir(), `bh-verify-${runId}-${Date.now()}${getEngine(task.engine).fileExtension}`)
+      : undefined;
 
   let outcome: CheckOutcome;
   let sha256: string | undefined;
@@ -317,7 +303,7 @@ export async function verifyRun(runId: string, level: VerifyLevel): Promise<Chec
     if (!file.ok || level === "check") {
       outcome = file;
     } else {
-      const restored = await testRestore(task, decryptedCopy ?? source, file.createTables ?? 0);
+      const restored = await testRestore(task, decryptedCopy ?? source, file.objects ?? 0);
       outcome = restored.ok ? { ok: true, message: `${file.message} ${restored.message}` } : restored;
     }
   } catch (err: any) {

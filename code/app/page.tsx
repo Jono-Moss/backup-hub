@@ -1,3 +1,4 @@
+import { ENGINE_LABELS } from "@/lib/backup/engines/labels";
 import Link from "next/link";
 import {
   LuCircleCheck,
@@ -28,7 +29,7 @@ import { describeCron } from "@/lib/cron/cronUtils";
 
 export const dynamic = "force-dynamic";
 
-const engineLabel: Record<string, string> = { mysql: "MySQL", postgres: "Postgres" };
+const engineLabel: Record<string, string> = ENGINE_LABELS;
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return "—";

@@ -1,3 +1,4 @@
+import type { Writable } from "stream";
 import type { ConnectionConfig } from "@/lib/backup/crypto";
 
 export interface RestoreOptions {
@@ -26,24 +27,39 @@ export interface ScratchDatabaseOps {
   countTables(conn: ConnectionConfig): Promise<number>;
 }
 
+/**
+ * Reads a decompressed dump as it streams past (lib/backup/verify.ts feeds
+ * it) and decides whether it's complete. Each engine knows its own format:
+ * SQL text for MySQL/Postgres, a binary archive for MongoDB.
+ */
+export interface DumpScanner {
+  sink: Writable;
+  result(): {
+    /** The dump reached its proper end (wasn't cut short). */
+    complete: boolean;
+    /** Tables (or collections) the dump contains — sanity-checks a test restore. */
+    objects: number;
+    /** Decompressed bytes read. */
+    bytes: number;
+    /** Why it's incomplete, for the check message. */
+    problem?: string;
+  };
+}
+
 export interface BackupEngine {
+  /** Extension of the (gzip-compressed) dump file, e.g. ".sql.gz". */
+  readonly fileExtension: string;
+  /** What the dump contains, for messages: "table" or "collection". */
+  readonly objectNoun: "table" | "collection";
+  /** What the decompressed dump is, for messages: "SQL" or "archive". */
+  readonly formatName: string;
   /** Runs the native dump tool and writes a gzip-compressed dump to destPath. */
   dump(conn: ConnectionConfig, destPath: string): Promise<void>;
   /** Restores a gzip-compressed dump (as written by dump()) from srcPath into the target database. */
   restore(conn: ConnectionConfig, srcPath: string, options?: RestoreOptions): Promise<void>;
   /** Quick connectivity check used by the "test connection" UI action. */
   testConnection(conn: ConnectionConfig): Promise<{ ok: boolean; message?: string }>;
-  /**
-   * The last line a complete dump from this engine ends with — a dump
-   * without it was cut short (tool killed, disk full, ...).
-   */
-  readonly completionMarker: RegExp;
-  /**
-   * Lines the dump tool may write *after* the completion marker, skipped
-   * when looking for it (e.g. pg_dump's closing `\unrestrict <key>`).
-   */
-  readonly trailerLines?: RegExp;
-  /** Counts the tables a dump creates (lines it'd run). Used to sanity-check a test restore. */
-  readonly createTablePattern: RegExp;
+  /** A fresh scanner for checking one dump file (see DumpScanner). */
+  createScanner(): DumpScanner;
   readonly scratch: ScratchDatabaseOps;
 }

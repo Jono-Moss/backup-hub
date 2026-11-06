@@ -19,8 +19,10 @@ COPY code ./
 # version does a full reload on its next request instead of calling server
 # actions that no longer exist ("Server Action unavailable"). Read at build
 # time and embedded in the output. BUILD_NUMBER is unique per build.sh run.
-ENV NEXT_DEPLOYMENT_ID="${BUILD_VERSION}-${BUILD_NUMBER}"
-RUN npm run build
+# Next.js only accepts letters, digits, "-" and "_" in it, so anything else
+# (the dots in "1.0.0") becomes "_": 1.0.0 + 1793280397 -> 1_0_0-1793280397.
+RUN NEXT_DEPLOYMENT_ID="$(printf '%s-%s' "${BUILD_VERSION}" "${BUILD_NUMBER}" | tr -c 'A-Za-z0-9_-' '_')" \
+    npm run build
 
 RUN npx drizzle-kit generate
 
@@ -41,7 +43,14 @@ LABEL com.buckup-hub.image.version="${BUILD_VERSION}" \
 
 WORKDIR /app
 
-RUN apk update && apk upgrade --no-cache && apk add --no-cache mariadb-client mariadb-connector-c postgresql-client
+# Dump tools for each engine: mariadb-dump (MySQL/MariaDB), pg_dump/psql
+# (PostgreSQL) and mongodump/mongorestore (MongoDB, from Alpine's community
+# repository). Only the two MongoDB tools Backup Hub uses are kept, which
+# saves ~70 MB.
+RUN apk update && apk upgrade --no-cache && \
+    apk add --no-cache mariadb-client mariadb-connector-c postgresql-client mongodb-tools && \
+    cd /usr/bin && rm -f bsondump mongoexport mongofiles mongoimport mongostat mongotop && \
+    mongodump --version && mongorestore --version
 
 ENV NEXT_TELEMETRY_DISABLED=1
 

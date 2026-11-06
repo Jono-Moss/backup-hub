@@ -25,7 +25,7 @@ export async function runBackupForTask(taskId: string, triggeredBy: RunTrigger =
 
   const runId = uuid();
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const baseName = `${task.name.replace(/[^a-z0-9-_]+/gi, "-")}-${timestamp}.sql.gz`;
+  const baseName = `${task.name.replace(/[^a-z0-9-_]+/gi, "-")}-${timestamp}${getEngine(task.engine).fileExtension}`;
   const dir = taskDir(task.id);
   const rawPath = path.join(dir, baseName);
 
