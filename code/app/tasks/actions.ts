@@ -96,7 +96,7 @@ export async function getDashboardSummary() {
   const taskById = new Map(tasks.map((t) => [t.id, t]));
   const since = new Date(Date.now() - SUMMARY_DAYS * 24 * 60 * 60 * 1000);
 
-  const empty = { completed: 0, failed: 0, uploadFailed: 0, authIssues: 0 };
+  const empty = { completed: 0, failed: 0, uploadFailed: 0 };
   if (ids.length === 0) return { tasks: [], stats: empty, attention: [] as AttentionItem[], recent: [], days: SUMMARY_DAYS };
 
   const runColumns = {
@@ -112,7 +112,7 @@ export async function getDashboardSummary() {
     verifyMessage: backupRun.verifyMessage,
   };
 
-  const [perTask, counts, recentFailures, failedUploads] = await Promise.all([
+  const [perTask, counts, failedUploads] = await Promise.all([
     Promise.all(
       ids.map((id) =>
         db.select(runColumns).from(backupRun).where(eq(backupRun.taskId, id)).orderBy(desc(backupRun.startedAt)).limit(STRIP_RUNS)
@@ -123,10 +123,6 @@ export async function getDashboardSummary() {
       .from(backupRun)
       .where(and(inArray(backupRun.taskId, ids), gte(backupRun.startedAt, since)))
       .groupBy(backupRun.status),
-    db
-      .select({ errorMessage: backupRun.errorMessage })
-      .from(backupRun)
-      .where(and(inArray(backupRun.taskId, ids), eq(backupRun.status, "failed"), gte(backupRun.startedAt, since))),
     db
       .select({
         runId: backupRunUpload.runId,
@@ -147,9 +143,6 @@ export async function getDashboardSummary() {
     completed: countOf("completed"),
     failed: countOf("failed"),
     uploadFailed: failedUploads.length,
-    authIssues:
-      recentFailures.filter((r) => classifyFailure(r.errorMessage) === "auth").length +
-      failedUploads.filter((u) => taskById.get(u.taskId)?.isOwner && classifyFailure(u.errorMessage) === "auth").length,
   };
 
   const attention: AttentionItem[] = [];

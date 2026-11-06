@@ -28,6 +28,12 @@ services:
       WEBAUTHN_RP_NAME: "${BH_WEBAUTHN_RP_NAME}"
       WEBAUTHN_RP_ID: "${BH_WEBAUTHN_RP_ID}"
       WEBAUTHN_ORIGIN: "${BH_WEBAUTHN_ORIGIN}"
+      APP_URL: "${BH_APP_URL:-${BH_WEBAUTHN_ORIGIN}}"
+
+      # Optional: sign-in lockouts (see example.env-file).
+      LOGIN_MAX_FAILED_ATTEMPTS: "${BH_LOGIN_MAX_FAILED_ATTEMPTS:-2}"
+      LOGIN_MAX_FAILED_ATTEMPTS_PER_IP: "${BH_LOGIN_MAX_FAILED_ATTEMPTS_PER_IP:-20}"
+      LOGIN_LOCKOUT_MINUTES: "${BH_LOGIN_LOCKOUT_MINUTES:-15}"
 
       # Optional: servers for test restores (see example.env-file).
       VERIFY_MYSQL_URL: "${BH_VERIFY_MYSQL_URL:-}"

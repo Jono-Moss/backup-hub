@@ -1,23 +1,30 @@
 import { notFound } from "next/navigation";
-import { getUser, updateUser, getUserAuthFactors, adminResetAuthFactors } from "../actions";
+import { getUser, updateUser, getUserAuthFactors, adminResetAuthFactors, getUserLockout, unlockUser } from "../actions";
 import { getCurrentUser } from "@/lib/auth/session";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardActionButton } from "@/components/ui/standard/StandardActionButton";
 import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
 import { StandardBadge } from "@/components/ui/standard/StandardBadge";
-import { LuArrowLeft, LuShieldCheck, LuUser } from "react-icons/lu";
+import { LuArrowLeft, LuLock, LuShieldCheck, LuUser } from "react-icons/lu";
+import { LocalTime } from "@/components/ui/common/LocalTime";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [user, me, authFactors] = await Promise.all([getUser(id), getCurrentUser(), getUserAuthFactors(id)]);
+  const [user, me, authFactors, lockout] = await Promise.all([
+    getUser(id),
+    getCurrentUser(),
+    getUserAuthFactors(id),
+    getUserLockout(id),
+  ]);
   if (!user) notFound();
 
   const isSelf = user.id === me?.id;
   const save = updateUser.bind(null, user.id);
   const resetAuthFactors = adminResetAuthFactors.bind(null, user.id);
+  const unlock = unlockUser.bind(null, user.id);
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -30,6 +37,19 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
           {user.email} · owns {user.taskCount} task{user.taskCount === 1 ? "" : "s"}
         </p>
       </div>
+
+      {lockout.locked && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border border-danger bg-danger-light px-4 py-3">
+          <p className="flex items-start gap-2 text-sm text-ink">
+            <LuLock size={16} className="mt-0.5 shrink-0 text-danger" aria-hidden="true" />
+            <span>
+              <span className="font-semibold">Sign-in locked</span> after repeated failed attempts, until{" "}
+              <LocalTime value={lockout.until} />. Passkeys still work.
+            </span>
+          </p>
+          <StandardActionButton title="Unlock now" variant="outline" compact action={unlock} />
+        </div>
+      )}
 
       <StandardSection id="details">
         <StandardSectionHeader

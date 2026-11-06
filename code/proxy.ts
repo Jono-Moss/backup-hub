@@ -9,7 +9,7 @@ import { hashSessionToken } from "@/lib/auth/token-hash";
 // touched here.
 const COOKIE_NAME = "bh_session";
 const ADMIN_ONLY_PREFIXES = ["/users", "/notifications"];
-const PUBLIC_PATHS = new Set(["/login", "/login/2fa", "/setup"]);
+const PUBLIC_PATHS = new Set(["/login", "/login/2fa", "/login/forgot", "/login/reset", "/setup"]);
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

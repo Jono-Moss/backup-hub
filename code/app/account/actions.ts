@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { userTotp, userRecoveryCode, userPasskey, appUser } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { userTotp, userRecoveryCode, userPasskey, appUser, loginAttempt } from "@/db/schema";
+import { eq, and, desc, gte, inArray, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
 import QRCode from "qrcode";
@@ -170,4 +170,100 @@ export async function deletePasskey(id: string) {
   const me = await requireUser();
   await db.delete(userPasskey).where(and(eq(userPasskey.id, id), eq(userPasskey.userId, me.id)));
   revalidatePath("/account");
+}
+// --- Sign-in history ---
+
+const SIGN_IN_DAYS = 7;
+
+const attemptColumns = {
+  id: loginAttempt.id,
+  method: loginAttempt.method,
+  outcome: loginAttempt.outcome,
+  ipAddress: loginAttempt.ipAddress,
+  userAgent: loginAttempt.userAgent,
+  createdAt: loginAttempt.createdAt,
+};
+
+/** The signed-in user's own recent sign-in attempts, newest first. */
+export async function listMyLoginAttempts(limit = 15) {
+  const me = await requireUser();
+  return db
+    .select(attemptColumns)
+    .from(loginAttempt)
+    .where(eq(loginAttempt.userId, me.id))
+    .orderBy(desc(loginAttempt.createdAt))
+    .limit(limit);
+}
+
+// For the dashboard: the user's own sign-in picture, plus — for admins only —
+// failures across the whole server (including emails with no account).
+export async function getSignInSummary() {
+  const me = await requireUser();
+  const since = new Date(Date.now() - SIGN_IN_DAYS * 24 * 60 * 60 * 1000);
+  const failed = inArray(loginAttempt.outcome, ["bad_password", "unknown_user", "bad_2fa", "passkey_failed"]);
+
+  const [successes, myFailures] = await Promise.all([
+    // [0] is normally this very session's sign-in; [1] is the one before.
+    db
+      .select(attemptColumns)
+      .from(loginAttempt)
+      .where(and(eq(loginAttempt.userId, me.id), eq(loginAttempt.outcome, "success")))
+      .orderBy(desc(loginAttempt.createdAt))
+      .limit(2),
+    db
+      .select(attemptColumns)
+      .from(loginAttempt)
+      .where(and(eq(loginAttempt.userId, me.id), failed, gte(loginAttempt.createdAt, since)))
+      .orderBy(desc(loginAttempt.createdAt)),
+  ]);
+
+  const mine = {
+    previousSuccess: successes[1] ?? null,
+    failedCount: myFailures.length,
+    // Right password, wrong 2FA code: someone may know the password.
+    secondFactorFailures: myFailures.filter((a) => a.outcome === "bad_2fa").length,
+    recentFailures: myFailures.slice(0, 5),
+  };
+
+  if (me.role !== "admin") return { days: SIGN_IN_DAYS, mine, server: null };
+
+  const recentFailed = and(failed, gte(loginAttempt.createdAt, since));
+  const [totals, unknown, blocked, topIps, topAccounts] = await Promise.all([
+    db.select({ n: sql<number>`count(*)` }).from(loginAttempt).where(recentFailed),
+    db
+      .select({ n: sql<number>`count(*)` })
+      .from(loginAttempt)
+      .where(and(eq(loginAttempt.outcome, "locked_out"), gte(loginAttempt.createdAt, since))),
+    db
+      .select({ n: sql<number>`count(*)` })
+      .from(loginAttempt)
+      .where(and(recentFailed, isNull(loginAttempt.userId))),
+    db
+      .select({ ip: loginAttempt.ipAddress, n: sql<number>`count(*)` })
+      .from(loginAttempt)
+      .where(recentFailed)
+      .groupBy(loginAttempt.ipAddress)
+      .orderBy(desc(sql`count(*)`))
+      .limit(3),
+    db
+      .select({ email: appUser.email, n: sql<number>`count(*)` })
+      .from(loginAttempt)
+      .innerJoin(appUser, eq(appUser.id, loginAttempt.userId))
+      .where(recentFailed)
+      .groupBy(appUser.email)
+      .orderBy(desc(sql`count(*)`))
+      .limit(3),
+  ]);
+
+  return {
+    days: SIGN_IN_DAYS,
+    mine,
+    server: {
+      failedCount: Number(totals[0]?.n ?? 0),
+      unknownAccountCount: Number(unknown[0]?.n ?? 0),
+      blockedCount: Number(blocked[0]?.n ?? 0),
+      topIps: topIps.map((r) => ({ ip: r.ip ?? "unknown", count: Number(r.n) })),
+      topAccounts: topAccounts.map((r) => ({ email: r.email, count: Number(r.n) })),
+    },
+  };
 }

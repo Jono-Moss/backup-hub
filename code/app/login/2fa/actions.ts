@@ -9,6 +9,8 @@ import { unwrapSecret } from "@/lib/backup/crypto";
 import { verifyTotpCode } from "@/lib/auth/totp";
 import { hashRecoveryCode } from "@/lib/auth/recovery-codes";
 import { notifySystemEvent } from "@/lib/notifications/notify";
+import { clientInfo, recordLoginAttempt } from "@/lib/auth/login-attempts";
+import { checkLockout, minutesLeft } from "@/lib/auth/lockout";
 
 export async function verifyTwoFactorLogin(formData: FormData) {
   const user = await getPendingTwoFactorUser();
@@ -17,6 +19,16 @@ export async function verifyTwoFactorLogin(formData: FormData) {
   const next = String(formData.get("next") ?? "/");
   const code = String(formData.get("code") ?? "").trim();
   const useRecoveryCode = formData.get("mode") === "recovery";
+  const method = useRecoveryCode ? "recovery_code" : "totp";
+
+  // Wrong 2FA codes count towards the same lock as wrong passwords. Once
+  // locked, the half-signed-in session is dropped: they start again at /login.
+  const lock = await checkLockout({ email: user.email, ip: (await clientInfo()).ipAddress });
+  if (lock.locked) {
+    await recordLoginAttempt({ userId: user.id, email: user.email, method, outcome: "locked_out" });
+    await destroySession();
+    redirect(`/login?error=locked&minutes=${minutesLeft(lock.until)}&next=${encodeURIComponent(next)}`);
+  }
 
   let ok = false;
 
@@ -39,11 +51,13 @@ export async function verifyTwoFactorLogin(formData: FormData) {
   }
 
   if (!ok) {
+    await recordLoginAttempt({ userId: user.id, email: user.email, method, outcome: "bad_2fa" });
     const mode = useRecoveryCode ? "&mode=recovery" : "";
     redirect(`/login/2fa?error=1&next=${encodeURIComponent(next)}${mode}`);
   }
 
   await markCurrentSessionTwoFactorVerified();
+  await recordLoginAttempt({ userId: user.id, email: user.email, method, outcome: "success" });
 
   notifySystemEvent("user_login", `${user.name} (${user.email}) logged in.`).catch((err) =>
     console.error("[notify] login email failed:", err)

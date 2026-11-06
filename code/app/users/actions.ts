@@ -10,9 +10,12 @@ import {
   backupTask,
   taskShare,
   apiKey,
+  loginAttempt,
+  passwordResetToken,
   type Role,
 } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import { checkLockout } from "@/lib/auth/lockout";
 import { purgeTask } from "@/lib/backup/purge";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -148,6 +151,8 @@ export async function deleteUser(userId: string, deleteFiles: boolean) {
   await db.delete(apiKey).where(eq(apiKey.userId, userId));
 
   await db.delete(session).where(eq(session.userId, userId));
+  await db.delete(loginAttempt).where(eq(loginAttempt.userId, userId));
+  await db.delete(passwordResetToken).where(eq(passwordResetToken.userId, userId));
   await db.delete(appUser).where(eq(appUser.id, userId));
 
   notifySystemEvent(
@@ -225,4 +230,33 @@ export async function updateOwnProfile(formData: FormData) {
 
   await db.update(appUser).set(updates).where(eq(appUser.id, me.id));
   revalidatePath("/account");
+}
+
+// --- Sign-in lockouts (lib/auth/lockout.ts) ---
+
+/** Whether this user's account is currently locked by failed sign-ins (admins only). */
+export async function getUserLockout(userId: string) {
+  await requireAdmin();
+  const [target] = await db.select({ email: appUser.email }).from(appUser).where(eq(appUser.id, userId)).limit(1);
+  if (!target) return { locked: false as const };
+  return checkLockout({ email: target.email, ip: null });
+}
+
+// Records an "unlocked" attempt, which resets the failure count. Doesn't
+// lift a per-IP lock — that one protects every account from that address.
+export async function unlockUser(userId: string) {
+  const admin = await requireAdmin();
+  const [target] = await db.select().from(appUser).where(eq(appUser.id, userId)).limit(1);
+  if (!target) return;
+  await db.insert(loginAttempt).values({
+    id: uuid(),
+    userId: target.id,
+    email: target.email,
+    method: "password",
+    outcome: "unlocked",
+  });
+  notifySystemEvent("security_reset", `${admin.name} unlocked sign-in for ${target.name} (${target.email}).`).catch((err) =>
+    console.error("[notify] unlock email failed:", err)
+  );
+  revalidatePath(`/users/${userId}`);
 }

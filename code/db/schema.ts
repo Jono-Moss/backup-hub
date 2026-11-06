@@ -380,6 +380,80 @@ export const userPasskey = mysqlTable(
   })
 );
 
+// --- Sign-in history ---
+
+export const LOGIN_METHODS = ["password", "totp", "recovery_code", "passkey"] as const;
+export type LoginMethod = (typeof LOGIN_METHODS)[number];
+
+// "bad_password" also covers a correct email with a wrong password; an
+// email with no account is "unknown_user". "bad_2fa" = the password was
+// right but the authenticator/recovery code wasn't — worth flagging, since
+// it means someone may know the password.
+// "locked_out" = refused without checking the password because of too many
+// recent failures (lib/auth/lockout.ts) — not itself counted as a failure,
+// so retrying during a lockout doesn't extend it. "unlocked" = an admin
+// cleared the lockout; like "success", it resets the failure count.
+// "password_reset" = the password was changed via an emailed reset link
+// (lib/auth/password-reset.ts); it also resets the failure count.
+export const LOGIN_OUTCOMES = [
+  "success",
+  "bad_password",
+  "unknown_user",
+  "bad_2fa",
+  "passkey_failed",
+  "locked_out",
+  "unlocked",
+  "password_reset",
+] as const;
+export type LoginOutcome = (typeof LOGIN_OUTCOMES)[number];
+
+// One row per sign-in attempt, successful or not, written by
+// lib/auth/login-attempts.ts. userId is null when the email didn't match an
+// account (or an unknown passkey was used); `email` keeps what was typed so
+// admins can see which addresses are being tried. ipAddress comes from
+// X-Forwarded-For / X-Real-IP when present, so it's only as trustworthy as
+// the reverse proxy in front of the app. Rows older than 90 days are pruned.
+export const loginAttempt = mysqlTable(
+  "login_attempt",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    userId: varchar("user_id", { length: 36 }),
+    email: varchar("email", { length: 255 }),
+    method: mysqlEnum("method", LOGIN_METHODS).notNull(),
+    outcome: mysqlEnum("outcome", LOGIN_OUTCOMES).notNull(),
+    ipAddress: varchar("ip_address", { length: 64 }),
+    userAgent: varchar("user_agent", { length: 512 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userCreatedIdx: index("login_attempt_user_created_idx").on(table.userId, table.createdAt),
+    createdIdx: index("login_attempt_created_idx").on(table.createdAt),
+    // Lockout lookups (lib/auth/lockout.ts).
+    emailCreatedIdx: index("login_attempt_email_created_idx").on(table.email, table.createdAt),
+    ipCreatedIdx: index("login_attempt_ip_created_idx").on(table.ipAddress, table.createdAt),
+  })
+);
+
+// One-time "forgot password" links. Only the SHA-256 of the token is stored;
+// the raw token is only ever in the emailed link. A token is single-use
+// (usedAt) and short-lived (expiresAt), and every other unused token for the
+// user is deleted when one is used.
+export const passwordResetToken = mysqlTable(
+  "password_reset_token",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    requestedIp: varchar("requested_ip", { length: 64 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index("password_reset_token_user_idx").on(table.userId),
+  })
+);
+
 // --- Notifications ---
 
 // Events that can trigger an email for a specific backup task.

@@ -10,8 +10,12 @@ import {
   LuActivity,
   LuDatabase,
   LuPlugZap,
+  LuLogIn,
+  LuShieldX,
 } from "react-icons/lu";
 import { getDashboardSummary, type AttentionItem } from "./tasks/actions";
+import { getSignInSummary } from "./account/actions";
+import { OUTCOME_LABEL, describeUserAgent } from "@/components/ui/auth/loginAttemptLabels";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
@@ -40,7 +44,7 @@ const attentionIcon: Record<AttentionItem["kind"], React.ReactNode> = {
 };
 
 const attentionBadge: Record<AttentionItem["kind"], { text: string; tone: "danger" | "warn" }> = {
-  auth: { text: "Sign-in problem", tone: "danger" },
+  auth: { text: "Credentials", tone: "danger" },
   connection: { text: "Can't connect", tone: "danger" },
   other: { text: "Failed", tone: "danger" },
   upload: { text: "Off-site copy", tone: "warn" },
@@ -68,7 +72,7 @@ function RunStatus({ status }: { status: string }) {
 }
 
 export default async function DashboardPage() {
-  const { tasks, stats, attention, recent, days } = await getDashboardSummary();
+  const [{ tasks, stats, attention, recent, days }, signIn] = await Promise.all([getDashboardSummary(), getSignInSummary()]);
 
   return (
     <div className="space-y-8">
@@ -83,6 +87,22 @@ export default async function DashboardPage() {
           <StandardLinkButton href="/tasks/new" title="New task" variant="standard" />
         </div>
       </div>
+
+      {signIn.mine.secondFactorFailures > 0 && (
+        <Link
+          href="/account#sign-ins"
+          className="flex items-start gap-3 rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-ink hover:underline"
+        >
+          <LuShieldX size={18} className="mt-0.5 shrink-0 text-danger" aria-hidden="true" />
+          <span>
+            <span className="font-semibold">
+              Someone entered your correct password but the wrong 2FA code {signIn.mine.secondFactorFailures} time
+              {signIn.mine.secondFactorFailures === 1 ? "" : "s"} in the last {signIn.days} days.
+            </span>{" "}
+            If that wasn&apos;t you, change your password now.
+          </span>
+        </Link>
+      )}
 
       {tasks.length > 0 && (
         <>
@@ -109,11 +129,11 @@ export default async function DashboardPage() {
               hint={`Last ${days} days`}
             />
             <StatTile
-              label="Sign-in problems"
-              value={stats.authIssues}
-              icon={<LuKeyRound />}
-              tone={stats.authIssues > 0 ? "bad" : "neutral"}
-              hint="Database or save-location credentials"
+              label="Failed sign-ins"
+              value={signIn.mine.failedCount}
+              icon={<LuLogIn />}
+              tone={signIn.mine.failedCount > 0 ? "warn" : "neutral"}
+              hint={`To your account, last ${signIn.days} days`}
             />
           </div>
 
@@ -262,6 +282,100 @@ export default async function DashboardPage() {
             ))}
           </ul>
         )}
+      </StandardSection>
+
+      <StandardSection>
+        <StandardSectionHeader
+          title="Sign-in activity"
+          icon={<LuLogIn />}
+          description={`Sign-ins to your account over the last ${signIn.days} days.`}
+          action={
+            <Link href="/account#sign-ins" className="text-sm font-medium text-primary hover:underline">
+              Full history
+            </Link>
+          }
+        />
+        <div className={`grid grid-cols-1 gap-6 ${signIn.server ? "lg:grid-cols-2" : ""}`}>
+          <div className="space-y-3">
+            <p className="text-sm text-ink">
+              {signIn.mine.previousSuccess ? (
+                <>
+                  Previous sign-in {timeAgo(signIn.mine.previousSuccess.createdAt)} ·{" "}
+                  {describeUserAgent(signIn.mine.previousSuccess.userAgent)}
+                  {signIn.mine.previousSuccess.ipAddress && (
+                    <span className="text-muted"> · {signIn.mine.previousSuccess.ipAddress}</span>
+                  )}
+                </>
+              ) : (
+                <span className="text-muted">No earlier sign-ins recorded.</span>
+              )}
+            </p>
+            {signIn.mine.recentFailures.length === 0 ? (
+              <div className="flex items-center gap-2 rounded-md border border-dashed border-line px-4 py-4 text-sm text-muted">
+                <LuCircleCheck size={16} className="text-primary" aria-hidden="true" />
+                No failed sign-ins to your account.
+              </div>
+            ) : (
+              <ul className="divide-y divide-line">
+                {signIn.mine.recentFailures.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                    <span className="min-w-0">
+                      <span className="block text-ink">{describeUserAgent(a.userAgent)}</span>
+                      <span className="block text-xs text-muted">
+                        {timeAgo(a.createdAt)}
+                        {a.ipAddress && <> · {a.ipAddress}</>}
+                      </span>
+                    </span>
+                    <StandardBadge tone={OUTCOME_LABEL[a.outcome].tone}>{OUTCOME_LABEL[a.outcome].text}</StandardBadge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {signIn.server && (
+            <div className="space-y-3 lg:border-l lg:border-line lg:pl-6">
+              <p className="text-sm font-semibold text-ink">Whole server (admin)</p>
+              <div className="flex flex-wrap gap-1.5">
+                <StandardBadge tone={signIn.server.failedCount > 0 ? "warn" : "neutral"}>
+                  {signIn.server.failedCount} failed sign-in{signIn.server.failedCount === 1 ? "" : "s"}
+                </StandardBadge>
+                <StandardBadge tone={signIn.server.unknownAccountCount > 0 ? "warn" : "neutral"}>
+                  {signIn.server.unknownAccountCount} for unknown accounts
+                </StandardBadge>
+                <StandardBadge tone={signIn.server.blockedCount > 0 ? "danger" : "neutral"}>
+                  {signIn.server.blockedCount} blocked by lockout
+                </StandardBadge>
+              </div>
+              {signIn.server.topIps.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted mb-1">Most failures from</p>
+                  <ul className="text-sm space-y-0.5">
+                    {signIn.server.topIps.map((r) => (
+                      <li key={r.ip} className="flex justify-between gap-3">
+                        <span className="font-mono text-xs text-ink">{r.ip}</span>
+                        <span className="text-muted tabular-nums">{r.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {signIn.server.topAccounts.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted mb-1">Accounts with most failures</p>
+                  <ul className="text-sm space-y-0.5">
+                    {signIn.server.topAccounts.map((r) => (
+                      <li key={r.email} className="flex justify-between gap-3">
+                        <span className="text-ink truncate">{r.email}</span>
+                        <span className="text-muted tabular-nums">{r.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </StandardSection>
     </div>
   );

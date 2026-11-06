@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth/session";
 import { updateOwnProfile } from "@/app/users/actions";
-import { getTotpStatus, listPasskeys } from "@/app/account/actions";
+import { getTotpStatus, listPasskeys, listMyLoginAttempts } from "@/app/account/actions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { TotpEnrollFlow } from "@/components/ui/auth/TotpEnrollFlow";
@@ -9,13 +9,16 @@ import { RegenerateRecoveryCodesButton } from "@/components/ui/auth/RegenerateRe
 import { PasskeyManager } from "@/components/ui/auth/PasskeyManager";
 import { StandardSectionHeader } from "@/components/ui/standard/StandardSectionHeader";
 import { StandardBadge } from "@/components/ui/standard/StandardBadge";
-import { LuFingerprint, LuShieldCheck, LuUser } from "react-icons/lu";
+import { LuFingerprint, LuLogIn, LuShieldCheck, LuUser } from "react-icons/lu";
+import { LocalTime } from "@/components/ui/common/LocalTime";
+import { StandardEntryCard, StandardEntryList } from "@/components/ui/standard/StandardEntryCard";
+import { METHOD_LABEL, OUTCOME_LABEL, describeUserAgent } from "@/components/ui/auth/loginAttemptLabels";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const me = await requireUser();
-  const [totpStatus, passkeys] = await Promise.all([getTotpStatus(), listPasskeys()]);
+  const [totpStatus, passkeys, attempts] = await Promise.all([getTotpStatus(), listPasskeys(), listMyLoginAttempts()]);
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -112,6 +115,38 @@ export default async function AccountPage() {
           description="Sign in with Touch ID, Face ID, Windows Hello, or a security key — no password needed, and it counts as your second factor on its own."
         />
         <PasskeyManager passkeys={passkeys} />
+      </StandardSection>
+
+      <StandardSection id="sign-ins">
+        <StandardSectionHeader
+          title="Recent sign-in activity"
+          icon={<LuLogIn />}
+          count={attempts.length}
+          description="The latest attempts to sign in to your account, successful or not. Kept for 90 days. If you don't recognise one, change your password."
+        />
+        {attempts.length === 0 ? (
+          <div className="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+            No sign-ins recorded yet.
+          </div>
+        ) : (
+          <StandardEntryList>
+            {attempts.map((a) => (
+              <StandardEntryCard
+                key={a.id}
+                title={describeUserAgent(a.userAgent)}
+                meta={
+                  <>
+                    <LocalTime value={a.createdAt} />
+                    {a.ipAddress && <> · {a.ipAddress}</>}
+                    {" · "}
+                    {METHOD_LABEL[a.method]}
+                  </>
+                }
+                badges={<StandardBadge tone={OUTCOME_LABEL[a.outcome].tone}>{OUTCOME_LABEL[a.outcome].text}</StandardBadge>}
+              />
+            ))}
+          </StandardEntryList>
+        )}
       </StandardSection>
     </div>
   );
