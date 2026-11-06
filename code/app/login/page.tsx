@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { hasAnyUsers } from "@/lib/auth/session";
 import { login } from "./actions";
-import { PasskeyLoginButton } from "@/components/ui/PasskeyLoginButton";
+import { PasskeyLoginButton } from "@/components/ui/auth/PasskeyLoginButton";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 
 export default async function LoginPage({

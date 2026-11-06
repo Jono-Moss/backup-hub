@@ -3,10 +3,10 @@ import { updateOwnProfile } from "@/app/users/actions";
 import { getTotpStatus, listPasskeys } from "@/app/account/actions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
-import { TotpEnrollFlow } from "@/components/ui/TotpEnrollFlow";
-import { DisableTotpForm } from "@/components/ui/DisableTotpForm";
-import { RegenerateRecoveryCodesButton } from "@/components/ui/RegenerateRecoveryCodesButton";
-import { PasskeyManager } from "@/components/ui/PasskeyManager";
+import { TotpEnrollFlow } from "@/components/ui/auth/TotpEnrollFlow";
+import { DisableTotpForm } from "@/components/ui/auth/DisableTotpForm";
+import { RegenerateRecoveryCodesButton } from "@/components/ui/auth/RegenerateRecoveryCodesButton";
+import { PasskeyManager } from "@/components/ui/auth/PasskeyManager";
 
 export const dynamic = "force-dynamic";
 

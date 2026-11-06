@@ -2,7 +2,7 @@ import Link from "next/link";
 import { listUsers } from "./actions";
 import { createUser } from "./actions";
 import { getCurrentUser } from "@/lib/auth/session";
-import { DeleteUserButton } from "@/components/ui/DeleteUserButton";
+import { DeleteUserButton } from "@/components/ui/users/DeleteUserButton";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { testRestoreAvailable } from "@/lib/backup/verify";
-import { VerifyBadge } from "@/components/ui/VerifyBadge";
-import { RefreshWhileChecking } from "@/components/ui/VerifyActions";
-import { BulkRunActions } from "@/components/ui/BulkRunActions";
+import { VerifyBadge } from "@/components/ui/runs/VerifyBadge";
+import { RefreshWhileChecking } from "@/components/ui/runs/VerifyActions";
+import { BulkRunActions } from "@/components/ui/runs/BulkRunActions";
 import {
   getTask,
   listRuns,
@@ -15,27 +15,27 @@ import {
   listAttachableDestinations,
   listAttachableChannels,
 } from "../actions";
-import { RunNowButton } from "@/components/ui/RunNowButton";
-import { ToggleEnabledButton } from "@/components/ui/ToggleEnabledButton";
-import { DeleteTaskButton } from "@/components/ui/DeleteTaskButton";
-import { RunActions } from "@/components/ui/RunActions";
-import { AddTaskRecipientForm } from "@/components/ui/AddTaskRecipientForm";
-import { RemoveTaskRecipientButton } from "@/components/ui/RemoveTaskRecipientButton";
-import { AddTaskDestinationForm } from "@/components/ui/AddTaskDestinationForm";
-import { AttachSavedDestinationForm } from "@/components/ui/AttachSavedDestinationForm";
-import { AttachSavedChannelForm } from "@/components/ui/AttachSavedChannelForm";
+import { RunNowButton } from "@/components/ui/tasks/RunNowButton";
+import { ToggleEnabledButton } from "@/components/ui/tasks/ToggleEnabledButton";
+import { DeleteTaskButton } from "@/components/ui/tasks/DeleteTaskButton";
+import { RunActions } from "@/components/ui/runs/RunActions";
+import { AddTaskRecipientForm } from "@/components/ui/notifications/AddTaskRecipientForm";
+import { RemoveTaskRecipientButton } from "@/components/ui/notifications/RemoveTaskRecipientButton";
+import { AddTaskDestinationForm } from "@/components/ui/locations/AddTaskDestinationForm";
+import { AttachSavedDestinationForm } from "@/components/ui/locations/AttachSavedDestinationForm";
+import { AttachSavedChannelForm } from "@/components/ui/notifications/AttachSavedChannelForm";
 import {
   ToggleTaskDestinationButton,
   RemoveTaskDestinationButton,
   TestTaskDestinationButton,
-} from "@/components/ui/TaskDestinationActions";
+} from "@/components/ui/locations/TaskDestinationActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
-import { LocalTime } from "@/components/ui/LocalTime";
-import { CronSchedulePicker } from "@/components/ui/CronSchedulePicker";
-import { ShareTaskForm } from "@/components/ui/ShareTaskForm";
-import { RevokeTaskShareButton } from "@/components/ui/RevokeTaskShareButton";
-import { scopeLabel } from "@/components/ui/scopeOptions";
+import { LocalTime } from "@/components/ui/common/LocalTime";
+import { CronSchedulePicker } from "@/components/ui/tasks/CronSchedulePicker";
+import { ShareTaskForm } from "@/components/ui/tasks/ShareTaskForm";
+import { RevokeTaskShareButton } from "@/components/ui/tasks/RevokeTaskShareButton";
+import { scopeLabel } from "@/components/ui/api-keys/scopeOptions";
 import { canDo } from "@/lib/auth/task-access";
 
 export const dynamic = "force-dynamic";

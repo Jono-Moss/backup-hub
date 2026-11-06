@@ -1,6 +1,6 @@
 import { listSystemRecipients } from "./actions";
-import { AddSystemRecipientForm } from "@/components/ui/AddSystemRecipientForm";
-import { RemoveSystemRecipientButton } from "@/components/ui/RemoveSystemRecipientButton";
+import { AddSystemRecipientForm } from "@/components/ui/notifications/AddSystemRecipientForm";
+import { RemoveSystemRecipientButton } from "@/components/ui/notifications/RemoveSystemRecipientButton";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 
 export const dynamic = "force-dynamic";

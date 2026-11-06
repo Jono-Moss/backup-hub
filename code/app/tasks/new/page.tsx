@@ -1,8 +1,8 @@
 import { StandardSubmitButton } from "@/components/ui/standard/StandardSubmitButton";
 import { createTask } from "../actions";
-import { TestConnectionButton } from "@/components/ui/TestConnectionButton";
-import { DryRunButton } from "@/components/ui/DryRunButton";
-import { CronSchedulePicker } from "@/components/ui/CronSchedulePicker";
+import { TestConnectionButton } from "@/components/ui/tasks/TestConnectionButton";
+import { DryRunButton } from "@/components/ui/tasks/DryRunButton";
+import { CronSchedulePicker } from "@/components/ui/tasks/CronSchedulePicker";
 
 export default function NewTaskPage() {
   return (

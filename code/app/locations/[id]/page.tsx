@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getLocationForEdit } from "../actions";
 import { listDestinationProviders } from "../../tasks/actions";
-import { EditLocationForm } from "@/components/ui/EditLocationForm";
+import { EditLocationForm } from "@/components/ui/locations/EditLocationForm";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 
 export const dynamic = "force-dynamic";

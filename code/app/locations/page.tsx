@@ -1,7 +1,7 @@
 import { listMyLocations } from "./actions";
 import { listDestinationProviders } from "../tasks/actions";
-import { AddTaskDestinationForm } from "@/components/ui/AddTaskDestinationForm";
-import { DeleteLocationButton, MakeReusableButton, TestLocationButton } from "@/components/ui/LocationActions";
+import { AddTaskDestinationForm } from "@/components/ui/locations/AddTaskDestinationForm";
+import { DeleteLocationButton, MakeReusableButton, TestLocationButton } from "@/components/ui/locations/LocationActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 

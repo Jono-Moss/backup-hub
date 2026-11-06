@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getChannelForEdit } from "../actions";
-import { EditChannelForm } from "@/components/ui/EditChannelForm";
+import { EditChannelForm } from "@/components/ui/notifications/EditChannelForm";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { NOTIFICATION_CHANNEL_DEFINITIONS } from "@/lib/notifications/channels/definitions";
 

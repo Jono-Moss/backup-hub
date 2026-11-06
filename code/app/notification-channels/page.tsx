@@ -1,6 +1,6 @@
 import { listMyChannels } from "./actions";
-import { AddAccountChannelForm } from "@/components/ui/AddAccountChannelForm";
-import { DeleteChannelButton, MakeChannelReusableButton, TestChannelButton } from "@/components/ui/ChannelActions";
+import { AddAccountChannelForm } from "@/components/ui/notifications/AddAccountChannelForm";
+import { DeleteChannelButton, MakeChannelReusableButton, TestChannelButton } from "@/components/ui/notifications/ChannelActions";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 import { StandardLinkButton } from "@/components/ui/standard/StandardLinkButton";
 

@@ -117,7 +117,7 @@ export interface BackupDestination {
   readonly type: string;
   /** Shown in the "add destination" provider dropdown. */
   readonly label: string;
-  /** Drives the generic config form — see components/ui/AddTaskDestinationForm.tsx. */
+  /** Drives the generic config form — see components/ui/locations/AddTaskDestinationForm.tsx. */
   readonly configFields: DestinationConfigField[];
   /**
    * Name of the config field holding a path-style folder/prefix (e.g.

@@ -1,6 +1,6 @@
 import { listApiKeys, listTasksForPicker } from "./actions";
-import { CreateApiKeyForm } from "@/components/ui/CreateApiKeyForm";
-import { RevokeApiKeyButton } from "@/components/ui/RevokeApiKeyButton";
+import { CreateApiKeyForm } from "@/components/ui/api-keys/CreateApiKeyForm";
+import { RevokeApiKeyButton } from "@/components/ui/api-keys/RevokeApiKeyButton";
 import { StandardSection } from "@/components/ui/standard/StandardSection";
 
 export const dynamic = "force-dynamic";
