@@ -20,7 +20,8 @@ import {
   type Scope,
   type DestinationType,
 } from "@/db/schema";
-import { eq, and, desc, inArray, isNull } from "drizzle-orm";
+import { eq, and, desc, gte, inArray, isNull, sql } from "drizzle-orm";
+import { classifyFailure, type FailureKind } from "@/lib/backup/failureKind";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v4 as uuid } from "uuid";
@@ -66,6 +67,152 @@ import { NOTIFICATION_CHANNEL_DEFINITIONS } from "@/lib/notifications/channels/d
 export async function listTasks() {
   const me = await requireUser();
   return listAccessibleTasks(me.id);
+}
+
+const STRIP_RUNS = 14;
+const SUMMARY_DAYS = 7;
+
+export type AttentionItem = {
+  taskId: string;
+  taskName: string;
+  kind: FailureKind | "verify" | "upload";
+  title: string;
+  /** Raw error — null when the viewer isn't allowed to see it. */
+  message: string | null;
+  at: Date;
+};
+
+// Everything the dashboard shows, for the tasks this user can see:
+//   - each task's latest STRIP_RUNS runs (oldest → newest) for the history strip;
+//   - counts over the last SUMMARY_DAYS days;
+//   - "needs attention": tasks whose latest run failed, whose latest backup
+//     failed to copy to a save location, or whose latest check failed;
+//   - the most recent runs across all tasks.
+// Upload error text is owner-only, matching listRunUploads.
+export async function getDashboardSummary() {
+  const me = await requireUser();
+  const tasks = await listAccessibleTasks(me.id);
+  const ids = tasks.map((t) => t.id);
+  const taskById = new Map(tasks.map((t) => [t.id, t]));
+  const since = new Date(Date.now() - SUMMARY_DAYS * 24 * 60 * 60 * 1000);
+
+  const empty = { completed: 0, failed: 0, uploadFailed: 0, authIssues: 0 };
+  if (ids.length === 0) return { tasks: [], stats: empty, attention: [] as AttentionItem[], recent: [], days: SUMMARY_DAYS };
+
+  const runColumns = {
+    id: backupRun.id,
+    taskId: backupRun.taskId,
+    status: backupRun.status,
+    errorMessage: backupRun.errorMessage,
+    startedAt: backupRun.startedAt,
+    sizeBytes: backupRun.sizeBytes,
+    triggeredBy: backupRun.triggeredBy,
+    verifyStatus: backupRun.verifyStatus,
+    verifyLevel: backupRun.verifyLevel,
+    verifyMessage: backupRun.verifyMessage,
+  };
+
+  const [perTask, counts, recentFailures, failedUploads] = await Promise.all([
+    Promise.all(
+      ids.map((id) =>
+        db.select(runColumns).from(backupRun).where(eq(backupRun.taskId, id)).orderBy(desc(backupRun.startedAt)).limit(STRIP_RUNS)
+      )
+    ),
+    db
+      .select({ status: backupRun.status, n: sql<number>`count(*)` })
+      .from(backupRun)
+      .where(and(inArray(backupRun.taskId, ids), gte(backupRun.startedAt, since)))
+      .groupBy(backupRun.status),
+    db
+      .select({ errorMessage: backupRun.errorMessage })
+      .from(backupRun)
+      .where(and(inArray(backupRun.taskId, ids), eq(backupRun.status, "failed"), gte(backupRun.startedAt, since))),
+    db
+      .select({
+        runId: backupRunUpload.runId,
+        taskId: backupRun.taskId,
+        label: backupRunUpload.destinationLabel,
+        errorMessage: backupRunUpload.errorMessage,
+        startedAt: backupRunUpload.startedAt,
+      })
+      .from(backupRunUpload)
+      .innerJoin(backupRun, eq(backupRun.id, backupRunUpload.runId))
+      .where(and(inArray(backupRun.taskId, ids), eq(backupRunUpload.status, "failed"), gte(backupRunUpload.startedAt, since))),
+  ]);
+
+  const ownerOnly = (taskId: string, message: string | null) => (taskById.get(taskId)?.isOwner ? message : null);
+  const countOf = (status: string) => Number(counts.find((c) => c.status === status)?.n ?? 0);
+
+  const stats = {
+    completed: countOf("completed"),
+    failed: countOf("failed"),
+    uploadFailed: failedUploads.length,
+    authIssues:
+      recentFailures.filter((r) => classifyFailure(r.errorMessage) === "auth").length +
+      failedUploads.filter((u) => taskById.get(u.taskId)?.isOwner && classifyFailure(u.errorMessage) === "auth").length,
+  };
+
+  const attention: AttentionItem[] = [];
+  const taskSummaries = tasks.map((task, i) => {
+    const runs = perTask[i];
+    const last = runs[0] ?? null;
+    const lastCompleted = runs.find((r) => r.status === "completed") ?? null;
+
+    if (last?.status === "failed") {
+      const kind = classifyFailure(last.errorMessage);
+      attention.push({
+        taskId: task.id,
+        taskName: task.name,
+        kind,
+        title:
+          kind === "auth"
+            ? "Last backup couldn't sign in to the database"
+            : kind === "connection"
+              ? "Last backup couldn't reach the database"
+              : "Last backup failed",
+        message: last.errorMessage,
+        at: last.startedAt,
+      });
+    }
+    if (lastCompleted) {
+      for (const u of failedUploads.filter((u) => u.runId === lastCompleted.id)) {
+        const message = ownerOnly(task.id, u.errorMessage);
+        const auth = message !== null && classifyFailure(message) === "auth";
+        attention.push({
+          taskId: task.id,
+          taskName: task.name,
+          kind: auth ? "auth" : "upload",
+          title: auth
+            ? `Couldn't sign in to "${u.label ?? "save location"}" — reconnect it`
+            : `Copy to "${u.label ?? "save location"}" failed`,
+          message,
+          at: u.startedAt,
+        });
+      }
+      if (lastCompleted.verifyStatus === "failed") {
+        attention.push({
+          taskId: task.id,
+          taskName: task.name,
+          kind: "verify",
+          title: lastCompleted.verifyLevel === "restore" ? "Latest backup failed its test restore" : "Latest backup failed its check",
+          message: lastCompleted.verifyMessage,
+          at: lastCompleted.startedAt,
+        });
+      }
+    }
+
+    return { ...task, lastRun: last, lastSuccessAt: lastCompleted?.startedAt ?? null, strip: [...runs].reverse() };
+  });
+
+  attention.sort((a, b) => b.at.getTime() - a.at.getTime());
+
+  const recent = perTask
+    .flat()
+    .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
+    .slice(0, 8)
+    .map((r) => ({ ...r, taskName: taskById.get(r.taskId)?.name ?? "Task", errorMessage: r.errorMessage }));
+
+  return { tasks: taskSummaries, stats, attention, recent, days: SUMMARY_DAYS };
 }
 
 // Returns null both for a missing task and for one the user can't see, so
